@@ -12,6 +12,7 @@ spec:
     targetPort: 8080
   selector:
     app: matmul-frontend
+  type: NodePort
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -31,7 +32,7 @@ spec:
     spec:
       containers:
       - image: gangmuk/matmul-frontend:latest
-        imagePullPolicy: IfnotPresent
+        imagePullPolicy: IfNotPresent
         name: matmul-frontend
         ports:
         - containerPort: 8080

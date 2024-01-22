@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
+
 import logging
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
 import numpy as np
+import time
 
 app = Flask(__name__)
 # logging.basicConfig(level=logging.DEBUG)
@@ -11,33 +13,50 @@ app = Flask(__name__)
 # werklog.setLevel(logging.DEBUG)
 # app.logger.setLevel(logging.INFO)
 
+# Configure logging
+app.logger.setLevel(logging.DEBUG)  # Set the desired logging level
+#handler = logging.StreamHandler()  # Log to stderr
+#formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+#handler.setFormatter(formatter)
+#app.logger.addHandler(handler)
 
-def generate_random_matrix(rows, cols):
-    return np.random.rand(rows, cols)
 
-@app.get('/compute') # from wasm
-def matmul():
+@app.get('/compute')
+def light_matmul():
     rows = request.headers.get('row')
     columns = request.headers.get('column')
-
     # Check if row and column are provided and are digits
     if not (rows and columns and rows.isdigit() and columns.isdigit()):
         return jsonify({"error": "Row and column headers must be provided and must be integers."}), 400
-
     rows, columns = int(rows), int(columns)
+    matmul_output, matmul_time = compute_matmul(rows, columns)
+    return jsonify({
+#        "Result": matmul_output.tolist(),
+        "matmul_time": matmul_time 
+    })
 
-    # Generate two random matrices
+@app.post('/compute')
+def heavy_matmul():
+    rows = request.headers.get('row')
+    columns = request.headers.get('column')
+    # Check if row and column are provided and are digits
+    if not (rows and columns and rows.isdigit() and columns.isdigit()):
+        return jsonify({"error": "Row and column headers must be provided and must be integers."}), 400
+    rows, columns = int(rows), int(columns)
+    matmul_output, matmul_time = compute_matmul(rows, columns)
+    return jsonify({
+#        "Result": matmul_output.tolist(),
+        "matmul_time": matmul_time 
+    })
+
+def compute_matmul(rows, columns):
+    ts = time.time()
     A = np.random.rand(rows, columns)
     B = np.random.rand(columns, rows)  # For matrix multiplication compatibility
-
-    # Perform matrix multiplication
     C = np.dot(A, B)
-    
-    return jsonify({
-        "Matrix A": A.tolist(),
-        "Matrix B": B.tolist(),
-        "Result": C.tolist()
-    })
+    matmul_time = (time.time() - ts)*1000
+    return C, matmul_time
+
 
 if __name__ == "__main__":
     # scheduler = BackgroundScheduler()
