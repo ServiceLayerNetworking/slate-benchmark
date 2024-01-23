@@ -1,0 +1,154 @@
+#########################################################################
+###
+# Gateway/VirtualService for HotelReservation frontend
+###
+#########################################################################
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: matmul-gateway
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: matmul
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - matmul-gateway
+  http:
+  - match:
+    - uri:
+        prefix: "/"
+    route:
+    - destination:
+        host: matmul-frontend
+        port:
+          number: 5000
+---          
+#########################################################################
+###
+# This config creates subsets based on clusters for the frontend,
+# and does header-based route matching to the correct subset
+# based on the x-slate-destination header
+###
+#########################################################################
+
+# DestinationRule for frontend, subsetting by label.
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: matmul-frontend-destination
+  namespace: default
+spec:
+  host: matmul-frontend
+  subsets:
+  - name: west
+    labels:
+      region: us-west-1
+  - name: east
+    labels:
+      region: us-east-1
+---
+# Subset routing: if x-slate-destination is east, route to us-east, if west, route to west, if not set, random.
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: matmul
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - matmul-gateway
+  http:
+  - match:
+    - headers:
+        x-slate-destination:
+          exact: east
+    route:
+    - destination:
+        host: frontend
+        subset: east
+        port:
+          number: 5000
+  - match:
+    - headers:
+        x-slate-destination:
+          exact: west
+    route:
+    - destination:
+        host: frontend
+        subset: west
+        port:
+          number: 5000
+  - match:
+    - uri:
+        prefix: "/"
+    route:
+    - destination:
+        host: frontend
+        port:
+          number: 5000
+---
+#########################################################################
+###
+# PROXYCONFIG for setting environment variables on proxies in different
+# nodes.
+###
+#########################################################################
+apiVersion: networking.istio.io/v1beta1
+kind: ProxyConfig
+metadata:
+  name: east-proxyconfig
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      region: us-east-1
+  environmentVariables:
+    ISTIO_META_REGION: "us-east-1"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: ProxyConfig
+metadata:
+  name: west-proxyconfig
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      region: us-west-1
+  environmentVariables:
+    ISTIO_META_REGION: "us-west-1"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shared-span-bootstrap-config
+  namespace: default
+data:
+  custom_bootstrap.json: |
+    "tracing": {
+      "http": {
+        "name": "envoy.tracers.zipkin",
+        "typed_config": {
+          "@type": "type.googleapis.com/envoy.config.trace.v3.ZipkinConfig",
+          "collector_cluster": "zipkin",
+          "collector_endpoint": "/api/v1/spans/custom",
+          "collector_endpoint_version": "HTTP_JSON",
+          "trace_id_128bit": true,
+          "shared_span_context": false
+        }
+      }
+    }
+
