@@ -18,25 +18,6 @@ spec:
     hosts:
     - "*"
 ---
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: matmul
-spec:
-  hosts:
-  - "*"
-  gateways:
-  - matmul-gateway
-  http:
-  - match:
-    - uri:
-        prefix: "/"
-    route:
-    - destination:
-        host: matmul-frontend
-        port:
-          number: 5000
----          
 #########################################################################
 ###
 # This config creates subsets based on clusters for the frontend,
@@ -65,7 +46,7 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: matmul
+  name: matmul-gw
 spec:
   hosts:
   - "*"
@@ -78,7 +59,7 @@ spec:
           exact: east
     route:
     - destination:
-        host: frontend
+        host: matmul-frontend
         subset: east
         port:
           number: 5000
@@ -88,16 +69,8 @@ spec:
           exact: west
     route:
     - destination:
-        host: frontend
+        host: matmul-frontend
         subset: west
-        port:
-          number: 5000
-  - match:
-    - uri:
-        prefix: "/"
-    route:
-    - destination:
-        host: frontend
         port:
           number: 5000
 ---
