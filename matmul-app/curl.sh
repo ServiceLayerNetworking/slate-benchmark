@@ -3,8 +3,8 @@ method=$2
 
 node1="node1.gangmuk-186812.istio-pg0.utah.cloudlab.us"
 node2="node2.gangmuk-186812.istio-pg0.utah.cloudlab.us"
-nodeport=30277
-#nodeport=31024
+#nodeport=30277
+nodeport=30669
 
 
 if [ $cluster == "west" ]; then

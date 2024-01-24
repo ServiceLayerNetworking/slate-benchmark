@@ -30,6 +30,7 @@ def light_matmul():
         return jsonify({"error": "Row and column headers must be provided and must be integers."}), 400
     rows, columns = int(rows), int(columns)
     matmul_output, matmul_time = compute_matmul(rows, columns)
+    app.logger.debug(f'matmul_compute, GET, light_matmul, row:{rows}, columns: {columns}')
     return jsonify({
 #        "Result": matmul_output.tolist(),
         "matmul_time": matmul_time 
@@ -44,6 +45,7 @@ def heavy_matmul():
         return jsonify({"error": "Row and column headers must be provided and must be integers."}), 400
     rows, columns = int(rows), int(columns)
     matmul_output, matmul_time = compute_matmul(rows, columns)
+    app.logger.debug(f'matmul_compute, POST, heavy_matmul, row:{rows}, columns: {columns}')
     return jsonify({
 #        "Result": matmul_output.tolist(),
         "matmul_time": matmul_time 

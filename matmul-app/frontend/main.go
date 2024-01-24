@@ -52,6 +52,9 @@ func LightCompute(c *gin.Context) {
 			if val, ok := c.Request.Header[v]; ok {
 				req.Header[v] = val
 			}
+			else {
+				fmt.Println("Header not found: ", v)
+			}
 		}
 
 		// Make the request
@@ -94,6 +97,9 @@ func HeavyCompute(c *gin.Context) {
 		for _, v := range propogate {
 			if val, ok := c.Request.Header[v]; ok {
 				req.Header[v] = val
+			}
+			else {
+				fmt.Println("Header not found: ", v)
 			}
 		}
 
