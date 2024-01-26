@@ -18,7 +18,7 @@ type processorReq struct {
 	Metrics []byte `json:"metrics"`
 }
 
-var propogate = []string{"x-request-id", "x-b3-traceid", "x-b3-spanid", "x-b3-parentspanid", "x-b3-sampled", "x-b3-flags", "x-ot-span-context"}
+var propogate = []string{"X-Request-Id", "X-B3-Traceid", "X-B3-Spanid", "X-B3-ParentSpanid", "X-B3-Sampled"}
 
 func main() {
 	r := gin.Default()

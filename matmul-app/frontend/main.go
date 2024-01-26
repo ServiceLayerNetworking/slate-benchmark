@@ -17,7 +17,7 @@ type MatrixResponse struct {
     matmul_time  float64 `json:"matmul_time"`
 }
 
-var propogate = []string{"x-request-id", "x-b3-traceid", "x-b3-spanid", "x-b3-parentspanid", "x-b3-sampled", "x-b3-flags", "x-ot-span-context"}
+var propogate = []string{"X-Request-Id", "X-B3-Traceid", "X-B3-Spanid", "X-B3-ParentSpanid", "X-B3-Sampled"}
 
 func main() {
 	r := gin.Default()
@@ -51,9 +51,6 @@ func LightCompute(c *gin.Context) {
 		for _, v := range propogate {
 			if val, ok := c.Request.Header[v]; ok {
 				req.Header[v] = val
-			}
-			else {
-				fmt.Println("Header not found: ", v)
 			}
 		}
 
@@ -97,9 +94,6 @@ func HeavyCompute(c *gin.Context) {
 		for _, v := range propogate {
 			if val, ok := c.Request.Header[v]; ok {
 				req.Header[v] = val
-			}
-			else {
-				fmt.Println("Header not found: ", v)
 			}
 		}
 
