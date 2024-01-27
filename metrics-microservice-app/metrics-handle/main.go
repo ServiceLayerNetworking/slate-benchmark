@@ -5,9 +5,10 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type processorResp struct {
@@ -45,6 +46,7 @@ func DetectAnomalies(c *gin.Context) {
 			req.Header[v] = val
 		}
 	}
+	req.Header.Set("Content-Length", fmt.Sprintf("%d", len(data)))
 	resp, err := client.Do(req)
 	if err != nil {
 		panic(err)
