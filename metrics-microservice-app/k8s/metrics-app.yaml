@@ -33,7 +33,7 @@ metadata:
   name: metrics-handler-destination
   namespace: default
 spec:
-  host: metrics-handler
+  host: metrics-fake-ingress-dr
   subsets:
   - name: west
     labels:
@@ -69,13 +69,13 @@ spec:
           exact: west
     route:
     - destination:
-        host: metrics-handler
+        host: metrics-fake-ingress
         subset: west
         port:
           number: 8000
   - route:
     - destination:
-        host: metrics-handler
+        host: metrics-fake-ingress
         port:
           number: 8000
 ---

@@ -4,19 +4,20 @@ method=$2
 node1="node1.gangmuk-186812.istio-pg0.utah.cloudlab.us"
 node2="node2.gangmuk-186812.istio-pg0.utah.cloudlab.us"
 #nodeport=30277
-nodeport=30669
+#nodeport=30669
+nodeport=32288
 
 
 if [ $cluster == "west" ]; then
-    if [ $method == "GET" ]; then
+    if [ $method == "get" ]; then
         curl -v -X ${method} -H "x-slate-destination: west" ${node1}:${nodeport}/compute\?row\=2\&column\=2
-    elif [ $method == "POST" ]; then
+    elif [ $method == "post" ]; then
         curl -v -X ${method} -H "x-slate-destination: west" ${node1}:${nodeport}/compute\?row\=1000\&column\=1000
     fi
 elif [ $cluster == "east" ]; then
-    if [ $method == "GET" ]; then
+    if [ $method == "get" ]; then
         curl -v -X ${method} -H "x-slate-destination: east" ${node2}:${nodeport}/compute\?row\=2\&column\=2
-    elif [ $method == "POST" ]; then
+    elif [ $method == "post" ]; then
         curl -v -X ${method} -H "x-slate-destination: east" ${node2}:${nodeport}/compute\?row\=1000\&column\=1000
     fi
 fi
