@@ -1,9 +1,10 @@
 cluster=$1
 method=$2
 
-node1="node1.gangmuk-186812.istio-pg0.utah.cloudlab.us"
-node2="node2.gangmuk-186812.istio-pg0.utah.cloudlab.us"
-nodeport=32288
-#nodeport=32675
+nodename=$(kubectl get nodes | grep "node1" | awk '{print $1}')
+ingressgw_http2_nodeport=$(kubectl get svc istio-ingressgateway -n istio-system -o=json | jq '.spec.ports[] | select(.name=="http2") | .nodePort')
+server_ip="http://${nodename}:${ingressgw_http2_nodeport}"
+echo $server_ip
 
-curl -v -H "x-slate-destination: ${cluster}" ${node1}:${nodeport}/start
+
+curl -v -H "x-slate-destination: ${cluster}" ${server_ip}/start

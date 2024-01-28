@@ -50,7 +50,7 @@ function wrk() {
     echo "RPS: ${RPS}" >> ${filename}
     echo "--------------------------------" >> ${filename}
 
-    ./wrk -D ${distribution} -t${thread} -c${connection} -d${duration} -L -S -s ./${cluster}_${req_type}.lua ${server_ip} -R${RPS} # >> ${filename} &&
+    ./wrk -D ${distribution} -t${thread} -c${connection} -d${duration} -L -S -s ./${cluster}_${req_type}.lua ${server_ip} -R${RPS} >> ${filename}
 
     echo "@@ FILENAME: ${filename} written"
 }
@@ -100,22 +100,21 @@ function scp_trace_string_file(){
 #}
 
 start_time=$(date +%s)
-cluster=west # west, east
+cluster=west # west or east
 req_type=get
-rps_list=(100)
+rps_list=(100 200 300 400 500)
 dir=${req_type}_test
-#restart_slate_controller
 for rps in "${rps_list[@]}"; do
 	per_wrk_st=$(date +%s)
 	wrk ${cluster} ${req_type} ${rps} ${dir}
     scp_trace_string_file ${dir} ${req_type} ${rps}
 	restart_wasm
-    restart_slate_controller
+    # restart_slate_controller
 	per_wrk_et=$(date +%s)
 	per_wk_duration=$((per_wrk_et - per_wrk_st))
 	echo "@@ per_wk_duration: ${per_wk_duration} seconds"
 done
-#restart_slate_controller
+restart_slate_controller
 
 end_time=$(date +%s)
 duration=$((end_time - start_time))

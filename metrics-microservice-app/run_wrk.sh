@@ -1,37 +1,34 @@
 
 function wrk() {
     distribution=exp
-    #distribution=norm
     thread=50
     connection=50
     duration=30
+    nodename=$(kubectl get nodes | grep "node1" | awk '{print $1}')
+    ingressgw_http2_nodeport=$(kubectl get svc istio-ingressgateway -n istio-system -o=json | jq '.spec.ports[] | select(.name=="http2") | .nodePort')
+    server_ip="http://${nodename}:${ingressgw_http2_nodeport}"
+    echo $server_ip
 
     cluster=$1
     req_type=$2
     RPS=$3
+    dir=$4
     if [ ${RPS} -lt ${connection} ]; then
         connection=${RPS}
     fi
     if [ ${connection} -lt ${thread} ]; then
         thread=${connection}
     fi
-
-    name_tag=$4
-
-    server_ip="http://node1.gangmuk-186812.istio-pg0.utah.cloudlab.us:32288"
-    
-    if [ ! -d "$name_tag" ]; then
-        mkdir -p "$name_tag"
+    if [ ! -d "$dir" ]; then
+        mkdir -p "$dir"
     fi
-
     name="${cluster}_${req_type}_${RPS}.wrklog"
-    filename="${name_tag}/${name}"
+    filename="${dir}/${name}"
 
-    python scrape_resource_config.py > ${name_tag}/deployment_resource_${name}.txt
+    python ~/projects/slate-benchmark/scrape_resource_config.py > ${dir}/deployment_resource_${name}.txt
+    echo "@@ python scrape_resource_config.py > ${dir}/deployment_resource_${name}.txt"
 
     echo "@@ Start ${req_type} RPS: ${RPS} to ${cluster} for ${duation} (filename: ${filename})"
-    echo "@@ python scrape_resource_config.py > ${name_tag}/deployment_resource_${name}.txt"
-
     echo "@@ +++++++++++++++++++++++++++++++++++++++++++++++++ " > ${filename}
     echo "--------------------------------"
     echo "distribution: ${distribution}"
@@ -66,12 +63,11 @@ function sleep_and_print(){
 
 function restart_wasm(){
     ## Restart WasmPlugin
-    kubectl delete -f wasmplugins.yaml
-    echo "@@ kubectl delete -f wasmplugins.yaml"
-    sleep_and_print 60
-
-    kubectl apply -f wasmplugins.yaml
-    echo "@@ kubectl apply -f wasmplugins.yaml"
+    kubectl delete -f ../wasmplugins.yaml
+    echo "@@ kubectl delete -f ../wasmplugins.yaml"
+    sleep_and_print 5
+    kubectl apply -f ../wasmplugins.yaml
+    echo "@@ kubectl apply -f ../wasmplugins.yaml"
     sleep_and_print 5
 }
 
@@ -83,42 +79,43 @@ function restart_slate_controller(){
 }
 
 function scp_trace_string_file(){
-    tg=$1
+    dir=$1
+    req_type=$2
+    rps=$3
     ## SCP trace_string.csv from slate-controller pod to the local filesystem
     slate_controller_pod=$(kubectl get pods -l app=slate-controller -o custom-columns=:metadata.name)
-    kubectl cp ${slate_controller_pod}:/app/trace_string.csv ${tg}/slate_trace_string_${tg}.slatelog
+    echo "scp_trace_string_file"
+    echo "source: ${slate_controller_pod}:/app/trace_string.csv"
+    echo "destination: ${dir}/slate_trace_string_${req_type}_${rps}.slatelog"
+    echo "kubectl cp ${slate_controller_pod}:/app/trace_string.csv ${dir}/slate_trace_string_${dir}.slatelog"
+    kubectl cp ${slate_controller_pod}:/app/trace_string.csv ${dir}/slate_trace_string_${dir}.slatelog
 }
 
 
-function full_reset(){
-    tg=$1
-
-    scp_trace_string_file $tg
-
-    restart_wasm
-
-    restart_slate_controller
-
-}
+#function full_reset(){
+#    tg=$1
+#    scp_trace_string_file $tg
+#    restart_wasm
+#    restart_slate_controller
+#}
 
 start_time=$(date +%s)
-cluster=west # west, east
+cluster=west # west or east
 req_type=get_metric
-rps_list=(100)
-tag=${req_type}_test
-# restart_slate_controller
+rps_list=(100 200 300 400 500)
+dir=${req_type}_test
 for rps in "${rps_list[@]}"; do
 	per_wrk_st=$(date +%s)
-	wrk ${cluster} ${req_type} ${rps} ${tag}
-	#restart_wasm
+	wrk ${cluster} ${req_type} ${rps} ${dir}
+    scp_trace_string_file ${dir} ${req_type} ${rps}
+	restart_wasm
+    # restart_slate_controller
 	per_wrk_et=$(date +%s)
 	per_wk_duration=$((per_wrk_et - per_wrk_st))
 	echo "@@ per_wk_duration: ${per_wk_duration} seconds"
 done
-#full_reset ${tag}
-scp_trace_string_file $tag
 restart_slate_controller
 
 end_time=$(date +%s)
 duration=$((end_time - start_time))
-echo "@@ Duration: ${duration} seconds"
+echo "@@ Total runtime: ${duration} seconds"
