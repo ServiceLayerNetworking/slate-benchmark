@@ -4,7 +4,10 @@ function wrk() {
     thread=50
     connection=50
     duration=30
-    server_ip="http://node1.gangmuk-187168.istio-pg0.utah.cloudlab.us:30738"
+    nodename=$(kubectl get nodes | grep "node1" | awk '{print $1}')
+    ingressgw_http2_nodeport=$(kubectl get svc istio-ingressgateway -n istio-system -o=json | jq '.spec.ports[] | select(.name=="http2") | .nodePort')
+    server_ip="http://${nodename}:${ingressgw_http2_nodeport}"
+    echo $server_ip
 
     cluster=$1
     req_type=$2
@@ -47,7 +50,7 @@ function wrk() {
     echo "RPS: ${RPS}" >> ${filename}
     echo "--------------------------------" >> ${filename}
 
-    ./wrk -D ${distribution} -t${thread} -c${connection} -d${duration} -L -S -s ./${cluster}_${req_type}.lua ${server_ip} -R${RPS} >> ${filename} &&
+    ./wrk -D ${distribution} -t${thread} -c${connection} -d${duration} -L -S -s ./${cluster}_${req_type}.lua ${server_ip} -R${RPS} # >> ${filename} &&
 
     echo "@@ FILENAME: ${filename} written"
 }
@@ -60,11 +63,11 @@ function sleep_and_print(){
 
 function restart_wasm(){
     ## Restart WasmPlugin
-    kubectl delete -f wasmplugins.yaml
-    echo "@@ kubectl delete -f wasmplugins.yaml"
+    kubectl delete -f ../wasmplugins.yaml
+    echo "@@ kubectl delete -f ../wasmplugins.yaml"
     sleep_and_print 5
-    kubectl apply -f wasmplugins.yaml
-    echo "@@ kubectl apply -f wasmplugins.yaml"
+    kubectl apply -f ../wasmplugins.yaml
+    echo "@@ kubectl apply -f ../wasmplugins.yaml"
     sleep_and_print 5
 }
 
@@ -84,6 +87,7 @@ function scp_trace_string_file(){
     echo "scp_trace_string_file"
     echo "source: ${slate_controller_pod}:/app/trace_string.csv"
     echo "destination: ${dir}/slate_trace_string_${req_type}_${rps}.slatelog"
+    echo "kubectl cp ${slate_controller_pod}:/app/trace_string.csv ${dir}/slate_trace_string_${dir}.slatelog"
     kubectl cp ${slate_controller_pod}:/app/trace_string.csv ${dir}/slate_trace_string_${dir}.slatelog
 }
 
@@ -104,9 +108,9 @@ dir=${req_type}_test
 for rps in "${rps_list[@]}"; do
 	per_wrk_st=$(date +%s)
 	wrk ${cluster} ${req_type} ${rps} ${dir}
+    scp_trace_string_file ${dir} ${req_type} ${rps}
 	restart_wasm
     restart_slate_controller
-    scp_trace_string_file ${dir} ${req_type} ${rps}
 	per_wrk_et=$(date +%s)
 	per_wk_duration=$((per_wrk_et - per_wrk_st))
 	echo "@@ per_wk_duration: ${per_wk_duration} seconds"
