@@ -69,8 +69,8 @@ spec:
         version: v1
     spec:
       containers:
-      - image: ghcr.io/adiprerepa/hotnets2023-metrics-processor:latest # todo change
-      #- image: gangmuk/metrics-processor:latest # todo change
+      #- image: ghcr.io/adiprerepa/hotnets2023-metrics-processor:latest # todo change
+      - image: gangmuk/metrics-processor:latest # todo change
         imagePullPolicy: Always
         name: metrics-processing
         ports:
@@ -110,52 +110,10 @@ spec:
         version: v1
     spec:
       containers:
-        - image: ghcr.io/adiprerepa/hotnets2023-metrics-handler:latest # todo change
-        #- image: gangmuk/metrics-handler:latest # todo change
+        #- image: ghcr.io/adiprerepa/hotnets2023-metrics-handler:latest # todo change
+        - image: gangmuk/metrics-handler:latest # todo change
           imagePullPolicy: Always
           name: metrics-handler
           ports:
             - containerPort: 8080
 ---
-
-apiVersion: v1                              
-kind: Service                                  
-metadata:                                         
-  name: metrics-fake-ingress
-  labels:                                                   
-    app: metrics-fake-ingress
-    service: metrics-fake-ingress
-spec:                                             
-  ports:                                           
-  - name: http                           
-    port: 8000                                  
-    targetPort: 8080
-  selector:
-    app: metrics-fake-ingress
----
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: metrics-fake-ingress
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: metrics-fake-ingress
-      version: v1
-  template:
-    metadata:
-      labels:
-        app: metrics-fake-ingress
-        version: v1
-    spec:
-      containers:
-      - image: ghcr.io/adiprerepa/hotnets2023-metrics-processor:latest # todo change
-      #- image: gangmuk/metrics-processor:latest # todo change
-        imagePullPolicy: Always
-        name: metrics-fake-ingress
-        ports:
-        - containerPort: 8080
----
-

@@ -41,6 +41,7 @@ func ForwardRequest(c *gin.Context) {
 		panic(err)
 	}
 	// propogate tracing headers
+	fmt.Printf("ForwardRequest is called")
 	for _, v := range propogate {
 		if val, ok := c.Request.Header[v]; ok {
 			req.Header[v] = val
