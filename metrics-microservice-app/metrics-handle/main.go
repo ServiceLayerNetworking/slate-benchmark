@@ -44,6 +44,7 @@ func DetectAnomalies(c *gin.Context) {
 	for _, v := range propogate {
 		if val, ok := c.Request.Header[v]; ok {
 			req.Header[v] = val
+			fmt.Printf("header: %v: %v\n", v, val)
 		}
 	}
 	req.Header.Set("Content-Length", fmt.Sprintf("%d", len(data)))

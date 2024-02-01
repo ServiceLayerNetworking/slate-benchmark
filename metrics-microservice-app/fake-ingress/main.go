@@ -5,9 +5,10 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type processorResp struct {
@@ -43,6 +44,7 @@ func ForwardRequest(c *gin.Context) {
 	for _, v := range propogate {
 		if val, ok := c.Request.Header[v]; ok {
 			req.Header[v] = val
+			fmt.Printf("header: %v: %v\n", v, val)
 		}
 	}
 	resp, err := client.Do(req)
