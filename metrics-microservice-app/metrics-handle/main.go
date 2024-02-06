@@ -48,6 +48,7 @@ func DetectAnomalies(c *gin.Context) {
 		}
 	}
 	req.Header.Set("Content-Length", fmt.Sprintf("%d", len(data)))
+	req.Header.Set("x-slate-routeto", "us-east-1")
 	resp, err := client.Do(req)
 	if err != nil {
 		panic(err)

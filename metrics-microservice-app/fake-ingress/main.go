@@ -60,7 +60,7 @@ func ForwardRequest(c *gin.Context) {
 	}
 	r := &processorResp{}
 	if err = json.Unmarshal(body, r); err != nil {
-		panic(err)
+		r.Anomalies = "error"
 	}
 	fmt.Printf("detected: %v\n", r.Anomalies)
 	c.JSON(200, gin.H{

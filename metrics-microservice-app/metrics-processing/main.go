@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/gin-gonic/gin"
-    "strings"
 )
 
 func main() {
@@ -33,9 +35,10 @@ func DetectAnomalies(c *gin.Context) {
 	//time.Sleep(1 * time.Second)
 
 	// we'll assume there are always no anomalies
-    var fiveThousandAs string = strings.Repeat("a", 10)
+	fmt.Printf("REQUEST HEADERS: %v", c.Request.Header)
+	var fiveThousandAs string = strings.Repeat("a", 10)
 	c.JSON(500, gin.H{
 		"anomaliesDetected": "false",
-        "data": fiveThousandAs,
+		"data":              fiveThousandAs,
 	})
 }
