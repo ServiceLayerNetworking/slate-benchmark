@@ -102,9 +102,9 @@ function scp_trace_string_file(){
 start_time=$(date +%s)
 cluster=west # west or east
 req_type=get_metric
-#rps_list=(100 200 300 400 500)
-rps_list=(100)
-dir=${req_type}_test
+rps_list=(100 200 300 400 500)
+#rps_list=(100)
+dir=${req_type}_0301
 for rps in "${rps_list[@]}"; do
 	per_wrk_st=$(date +%s)
 	wrk ${cluster} ${req_type} ${rps} ${dir}

@@ -8,4 +8,4 @@ istioctl install &&
 
 kubectl label namespace default istio-injection=enabled --overwrite &&
 
-kubectl rollout restart deploy
+#kubectl rollout restart deploy
