@@ -6,6 +6,6 @@ export PATH=$PWD/bin:$PATH &&
 
 istioctl install &&
 
-kubectl label namespace default istio-injection=enabled --overwrite &&
+kubectl label namespace default istio-injection=enabled --overwrite
 
 #kubectl rollout restart deploy
