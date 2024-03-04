@@ -1,11 +1,11 @@
-curl -L https://istio.io/downloadIstio | sh -
+curl -L https://istio.io/downloadIstio | sh - &&
 
-cd istio-1.20.2
+cd istio-1.20.3 &&
 
-export PATH=$PWD/bin:$PATH
+export PATH=$PWD/bin:$PATH &&
 
-istioctl install
+istioctl install &&
 
-kubectl label namespace default istio-injection=enabled --overwrite
+kubectl label namespace default istio-injection=enabled --overwrite &&
 
 kubectl rollout restart deploy

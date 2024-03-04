@@ -5,9 +5,9 @@ nodes_with_labels=$(kubectl get nodes --show-labels)
 node1=$(echo "$nodes_with_labels" | grep 'node1' | awk '{print $1}')
 node2=$(echo "$nodes_with_labels" | grep 'node2' | awk '{print $1}')
 kubectl label node $node2 topology.kubernetes.io/zone=us-west-1 --overwrite
-kubectl label node $node1 topology.kubernetes.io/zone=us-west-1 --overwrite
+kubectl label node $node1 topology.kubernetes.io/zone=us-east-1 --overwrite
 echo "kubectl label node $node1 topology.kubernetes.io/zone=us-west-1 --overwrite"
-echo "kubectl label node $node2 topology.kubernetes.io/zone=us-west-1 --overwrite"
+echo "kubectl label node $node2 topology.kubernetes.io/zone=us-east-1 --overwrite"
 exit
 
 ## Filter out master nodes and extract just the node names
