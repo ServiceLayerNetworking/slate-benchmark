@@ -6,7 +6,7 @@ echo "bash ../../label_node.sh"
 kubectl apply -f k8sconfig.yaml &&
 echo "kubectl apply -f k8sconfig.yaml"
 
-bahs ./duplicate.sh &&
+bash ./duplicate.sh &&
 echo "duplicate.sh"
 
 read -p "Do you want to install istio? Enter 'y', if yes: " inp
@@ -18,8 +18,8 @@ fi
 kubectl apply -f gw_vs_dr.yaml &&
 echo "kubectl apply -f gw_vs_dr.yaml"
 
-kubectl apply -f proxy_config.yaml &&
-echo "kubectl apply -f proxy_config.yaml"
+kubectl apply -f ../../proxy_config.yaml &&
+echo "kubectl apply -f ../../proxy_config.yaml"
 
 kubectl apply -f ../../wasmplugins.yaml &&
 echo "kubectl apply -f ../../wasmplugins.yaml"

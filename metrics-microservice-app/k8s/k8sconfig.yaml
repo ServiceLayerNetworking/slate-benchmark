@@ -35,6 +35,10 @@ spec:
         name: metrics-fake-ingress
         ports:
         - containerPort: 8080
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
 ---
 apiVersion: v1                              
 kind: Service                                  
@@ -74,6 +78,10 @@ spec:
         name: metrics-processing
         ports:
         - containerPort: 8080
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
 ---
 
 apiVersion: v1
@@ -109,9 +117,13 @@ spec:
         version: v1
     spec:
       containers:
-        - image: ghcr.io/adiprerepa/hotnets2023-metrics-handler:latest # todo change
-          imagePullPolicy: Always
-          name: metrics-handler
-          ports:
-            - containerPort: 8080
+      - image: ghcr.io/adiprerepa/hotnets2023-metrics-handler:latest # todo change
+        imagePullPolicy: Always
+        name: metrics-handler
+        ports:
+        - containerPort: 8080
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
 ---
