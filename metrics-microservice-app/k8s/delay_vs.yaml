@@ -1,0 +1,83 @@
+- apiVersion: networking.istio.io/v1beta1
+  kind: VirtualService
+  metadata:
+    creationTimestamp: "2024-03-04T07:46:48Z"
+    generation: 2
+    name: metrics-handler-vs
+    namespace: default
+    resourceVersion: "166515"
+    uid: 847a6435-da56-4b88-b317-3f3043cf98e3
+  spec:
+    hosts:
+    - metrics-handler
+    http:
+    - fault:
+        delay:
+          fixedDelay: 1ms
+          percentage:
+            value: 100
+      match:
+      - headers:
+          x-slate-routefrom:
+            exact: us-west-1
+          x-slate-routeto:
+            exact: us-west-1
+      route:
+      - destination:
+          host: metrics-handler
+          subset: us-west-1
+    - fault:
+        delay:
+          fixedDelay: 100ms
+          percentage:
+            value: 100
+      match:
+      - headers:
+          x-slate-routefrom:
+            exact: us-west-1
+          x-slate-routeto:
+            exact: us-east-1
+      route:
+      - destination:
+          host: metrics-handler
+          subset: us-east-1
+    - fault:
+        delay:
+          fixedDelay: 1ms
+          percentage:
+            value: 100
+      match:
+      - headers:
+          x-slate-routefrom:
+            exact: us-east-1
+          x-slate-routeto:
+            exact: us-east-1
+      route:
+      - destination:
+          host: metrics-handler
+          subset: us-east-1
+    - fault:
+        delay:
+          fixedDelay: 100ms
+          percentage:
+            value: 100
+      match:
+      - headers:
+          x-slate-routefrom:
+            exact: us-east-1
+          x-slate-routeto:
+            exact: us-west-1
+      route:
+      - destination:
+          host: metrics-handler
+          subset: us-west-1
+    - match:
+      - sourceLabels:
+          region: us-west-1
+      route:
+      - destination:
+          host: metrics-handler
+          subset: us-west-1
+    - match:
+      - sourceLabels:
+          region: us-east-1
