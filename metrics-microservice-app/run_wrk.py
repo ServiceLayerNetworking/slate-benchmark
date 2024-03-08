@@ -7,6 +7,8 @@ import time
 import concurrent.futures
 import sys
 import os
+import concurrent.futures
+from datetime import datetime
 
 sys.path.append('/users/gangmuk/projects/SLATE/global-controller')
 import config as cfg
@@ -16,7 +18,7 @@ CONFIG = {
     'distribution': 'exp',
     'thread': 50,
     'connection': 50,
-    'duration': 30
+    'duration': 60
 }
 
 
@@ -70,7 +72,7 @@ def scp_env_txt(output_path):
     src_path = "/app/env.txt"
     temp_file = "temp_env.txt"
     run_command(f"kubectl cp {slate_controller_pod}:{src_path} {temp_file}")
-    run_command(f"cat {temp_file} > {output_path}.wrklog")
+    run_command(f"cat {temp_file} > {output_path}")
     # run_command(f"rm {temp_file}")
     print(f"src_env_file: {slate_controller_pod}:{src_path}")
     print(f"update {output_path} with env.txt")
@@ -176,15 +178,13 @@ def run_wrk(cluster, req_type, rps, output_path, wasm_config, istio_config):
     nodename = run_command("kubectl get nodes | grep 'node1' | awk '{print $1}'")
     ingressgw_http2_nodeport = run_command("kubectl get svc istio-ingressgateway -n istio-system -o=json | jq '.spec.ports[] | select(.name==\"http2\") | .nodePort'")
     server_ip = f"http://{nodename}:{ingressgw_http2_nodeport}"
-    print(server_ip)
-    # name = f"{cluster}_{req_type}_{rps}.wrklog"
-    # output_fn = os.path.join(dir, name)
     if rps < CONFIG["connection"]:
         CONFIG["connection"] = rps
     if CONFIG["connection"] < CONFIG["thread"]:
         CONFIG["thread"] = CONFIG["connection"]
     
-    print(f'@@ Start {req_type} {rps}RPS to {cluster} for {CONFIG["duration"]} seconds (output_path: {output_path})')
+    # print(server_ip)
+    print(f'@@ Start {req_type} RPS {rps} to {cluster} cluster for {CONFIG["duration"]} seconds')
     with open(output_path, "a") as f:
         f.write("@@ +++++++++++++++++++++++++++++++++++++++++++++++++ \n")
         info = f"""
@@ -219,7 +219,7 @@ ISTIO: {istio_config}
     print("-"*50)
     print(f"{output_path}")
     print("-"*50)
-    return
+    return f"{cluster} {req_type} {rps}RPS is done"
 
 def sleep_and_print(sl):
     print(f"@@ sleep {sl} seconds")
@@ -251,34 +251,9 @@ def restart_wasm():
 
 def restart_deploy(exclude=[]):
     def are_all_pods_ready(namespace='default'):
-        # # Load kubeconfig
-        # config.load_kube_config()
-
-        # # Create a client for the CoreV1API
-        # v1 = client.CoreV1Api()
-
-        # # List all pods in the specified namespace
-        # pods = v1.list_namespaced_pod(namespace)
-
-        # # Check if all pods are ready
-        # for pod in pods.items:
-        #     if pod.status.conditions is None:
-        #         return False
-        #     for condition in pod.status.conditions:
-        #         if condition.type != 'Ready' or condition.status != 'True' or pod.status.phase != 'Running' or condition.status == 'None' or pod.metadata.deletion_timestamp is not None:
-        #             print(f"Pod {pod.metadata.name} is not ready")
-        #             return False
-        # return True
-        # Load kubeconfig
         config.load_kube_config()
-
-        # Create a client for the CoreV1API
         v1 = client.CoreV1Api()
-
-        # List all pods in the specified namespace
         pods = v1.list_namespaced_pod(namespace)
-
-        # Check if all pods are ready and no pods are in the process of terminating
         all_pods_ready = True
         for pod in pods.items:
             # Check if the pod is in the process of terminating
@@ -346,14 +321,14 @@ def scp_trace_string_file(output_path, cluster, req_type, rps):
 
 def main():
     start_time = datetime.now()
-    cluster = "west"
+    west_cluster = "west"
+    east_cluster = "east"
     istio_config = True
     with_wasm = [True]
     # if istio_config == False:
     #     disable_istio()
     # else:
     #     enable_istio()
-    
 
     ########################################################
     '''
@@ -363,18 +338,24 @@ def main():
     benchmark_name="metrics"
     total_num_services=3
     mode_and_routing_rule = {\
-        # "profile": ["LOCAL"],\
-        "runtime": ["REMOTE", "LOCAL", "SLATE", "MCLB"],\
-        # "runtime": ["SLATE", "REMOTE"],\
-        # "runtime": ["MCLB", "LOCAL", "SLATE", "REMOTE"],\
+        # "runtime": ["SLATE", "MCLB", "LOCAL"],\
+        # "runtime": ["REMOTE", "LOCAL", "SLATE", "MCLB"],\
+        "runtime": ["SLATE"],\
     }
     # oneway_latency = [0]
-    oneway_latency = [0, cfg.INTER_CLUSTER_NETWORK_LATENCY]
+    oneway_latency = [20]
     req_type_list = ["get_metric"] # It should match wrk2 lua script
-    rps_list = {
-                # "get_metric": [200], \
-                "get_metric": [50, 100, 300, 400, 500], \
-                # "get_metric": [50, 100, 150, 200, 250, 300, 350, 400, 450, 500], \
+    '''
+    west_rps_list["get_metrics][0], east_rps_list["get_metrics][0] are pair
+    
+    Similarly,
+    west_rps_list["get_metrics][1], east_rps_list["get_metrics][1] are pair
+    '''
+    west_rps_list = {
+                "get_metric": [200], \
+    }
+    east_rps_list = {
+                "get_metric": [100], \
     }
     ########################################################
     
@@ -399,7 +380,7 @@ def main():
             # restart_deploy(exclude=[])
             for mode in mode_and_routing_rule:
                 for routing_rule in mode_and_routing_rule[mode]:
-                    postfix = "Mar7th_morning"
+                    postfix = "Mar8th_morning"
                     print(f"* postfix for output file: {postfix}")
                     for req_type in req_type_list:
                         if istio_config:
@@ -409,24 +390,50 @@ def main():
                                 output_dir = f"{req_type}-wow-{postfix}"
                         else:
                             output_dir = f"{req_type}-woi-{postfix}"
-                        for RPS in rps_list[req_type]:
-                            print(f"* mode: {mode}, routing_rule: {routing_rule}")
-                            output_fn = f"{mode}-L{lat}-{routing_rule}-R{RPS}"
-                            output_path = output_dir + f"/{output_fn}"
+                        for west_RPS, east_RPS in zip(west_rps_list[req_type], east_rps_list[req_type]):
                             per_wrk_st = datetime.now()
                             
                             assert output_dir != ""
                             if not os.path.isdir(output_dir):
                                 os.makedirs(output_dir)
                             
-                            update_env(mode, benchmark_name, total_num_services, routing_rule, RPS, lat)
+                            update_env(mode, benchmark_name, total_num_services, routing_rule, [west_RPS, east_RPS], lat)
                             time.sleep(1)
                             
-                            scp_env_txt(output_path)
+                            print(f"* mode: {mode}, routing_rule: {routing_rule}")
+                            
+                            formatted_datetime = datetime.now().strftime("%m-%d-%H:%M")
+
+                            west_output_fn = f"{mode}-L{lat}-{routing_rule}-R{west_RPS}-west-{formatted_datetime}"
+                            east_output_fn = f"{mode}-L{lat}-{routing_rule}-R{east_RPS}-east-{formatted_datetime}"
+                            
+                            west_output_path = f"{output_dir}/{west_output_fn}"
+                            east_output_path = f"{output_dir}/{east_output_fn}"
+                            
+                            west_wrk_log_path = f"{west_output_path}.wrklog"
+                            east_wrk_log_path = f"{east_output_path}.wrklog"
+                            
+                            
+                            scp_env_txt(west_wrk_log_path)
+                            scp_env_txt(east_wrk_log_path)
                             time.sleep(1)
                             
-                            run_wrk(cluster, req_type, RPS, output_path+".wrklog", wasm_config, istio_config)
-                            scp_trace_string_file(output_path+".slatelog", cluster, req_type, RPS)
+                            with concurrent.futures.ThreadPoolExecutor() as executor:
+                                print(f"cluster: {west_cluster}, req_type: {req_type}, west_RPS: {west_RPS}, west_wrk_log_path: {west_wrk_log_path}")
+                                print(f"cluster: {east_cluster}, req_type: {req_type}, east_RPS: {east_RPS}, east_wrk_log_path: {east_wrk_log_path}")
+                                
+                                future1 = executor.submit(run_wrk, west_cluster, req_type, west_RPS, f"{west_wrk_log_path}", wasm_config, istio_config)
+                                future2 = executor.submit(run_wrk, east_cluster, req_type, east_RPS, f"{east_wrk_log_path}", wasm_config, istio_config)
+                                
+                                for future in concurrent.futures.as_completed([future1, future2]):
+                                    print(future.result())
+                            print("Both functions have completed.")
+                            
+                            # west_slate_log_path = f"{west_output_path}.slatelog"
+                            # east_slate_log_path = f"{east_output_path}.slatelog"
+                            # scp_trace_string_file(west_slate_log_path, west_cluster, req_type, west_RPS)
+                            # scp_trace_string_file(east_slate_log_path, east_cluster, req_type, east_RPS)
+                            
                             restart_deploy(exclude=[])
                             
                             per_wrk_et = datetime.now()
