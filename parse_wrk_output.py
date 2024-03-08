@@ -89,17 +89,18 @@ def parse_log_file(file_path, columns, rps_thr):
         new_latency["rps"].append(rps_value)
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python script.py '<pattern>'")
+    if len(sys.argv) < 3:
+        print("Usage: python script.py <rps_threshold> <input_files> ")
         sys.exit(1)
 
-    rps_threshold = 240
+    rps_threshold = int(sys.argv[1])
+    output_file = sys.argv[2]
     print(f"NOTE: rps_threshold: {rps_threshold}")
     # columns = ['avg', '50%', '99%', '99.9%', '99.99%']
     columns = ['avg', '50%', '99%']
     # columns = ['avg']
     # columns = ['avg', '50%']
-    for pattern in sys.argv[1:]:
+    for pattern in sys.argv[2:]:
         for file_path in glob.glob(pattern):
             parse_log_file(file_path, columns, rps_threshold)
 
@@ -119,14 +120,14 @@ if __name__ == "__main__":
     for column in columns:
         plt.plot(df['rps'], df[column], label=column, marker='o')
 
-    plt.title(f'hotel reservatoin - {req_type}', fontsize=20)
+    plt.title(f'{req_type}', fontsize=20)
     plt.xlabel('Requests per Second (RPS)', fontsize=20)
     plt.ylabel('Latency (ms)', fontsize=20)
     plt.xticks(fontsize=14)  # Set x-tick label fontsize
     plt.yticks(fontsize=14)  # Set y-tick label fontsize
     plt.legend(fontsize=14)
     # plt.ylim((0,100))
-    plt.savefig(f'latency_{req_type}.png')
+    plt.savefig(f'latency-{req_type}-{output_file}.png')
     plt.show()
 
     df.to_csv(f'latency_{req_type}.csv', index=False)
