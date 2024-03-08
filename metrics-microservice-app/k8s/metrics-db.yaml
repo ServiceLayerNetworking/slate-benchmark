@@ -1,0 +1,41 @@
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: metrics-db
+  labels:
+    app: metrics-db
+    service: metrics-db
+spec:
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: metrics-db
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: metrics-db
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: metrics-db
+        version: v1
+    spec:
+      containers:
+        - image: ghcr.io/adiprerepa/metrics-db:latest # todo change
+          #        - image: gangmuk/metrics-handler:latest # todo change
+          imagePullPolicy: Always
+          name: metrics-db
+          ports:
+            - containerPort: 8080
+---
