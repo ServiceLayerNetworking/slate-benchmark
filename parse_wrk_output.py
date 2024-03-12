@@ -13,7 +13,8 @@ def parse_wrk_config(log_content):
         'distribution': r"distribution:\s+(\w+)",
         'duration': r"duration:\s+(\d+)",
         'req_type': r"req_type:\s+(\w+)",
-        'RPS': r"RPS:\s+(\d+)"
+        'RPS': r"RPS:\s+(\d+)",
+        'cluster': r"cluster:\s+(\d+)",
     }
 
     wrk_config = {}
@@ -23,7 +24,6 @@ def parse_wrk_config(log_content):
             wrk_config[key] = match.group(1)
         else:
             wrk_config[key] = "Value not found"
-
     return wrk_config
 
 def find_latency_value(pattern, log_content):
@@ -117,11 +117,13 @@ def parse_log_file(file_path, columns, rps_thr):
             latency_dict["mode"] = []
             latency_dict["routing_rule"] = []
             latency_dict["inter_cluster_latency"] = []
+            latency_dict["cluster"] = []
             
         latency_dict["rps"].append(rps_value)
         latency_dict["mode"].append(experiment_config["mode"])
         latency_dict["routing_rule"].append(experiment_config["routing_rule"])
         latency_dict["inter_cluster_latency"].append(int(experiment_config["inter_cluster_latency"]))
+        latency_dict["cluster"].append(wrk_config["cluster"])
         
 
 if __name__ == "__main__":
@@ -156,9 +158,10 @@ if __name__ == "__main__":
     for mode in df['mode'].unique():
         for rule in df['routing_rule'].unique():
             for inter_cluster_latency in df['inter_cluster_latency'].unique():
-                if inter_cluster_latency == 20:
-                    df_filtered = df[(df['mode'] == mode) & (df['routing_rule'] == rule) & (df['inter_cluster_latency'] == inter_cluster_latency)]
-                    plt.plot(df_filtered['rps'], df_filtered['avg'], label=f"{mode}-{rule}-{inter_cluster_latency}", marker='o')
+                for cluster in df['cluster'].unique():
+                    if inter_cluster_latency == 20:
+                        df_filtered = df[(df['mode'] == mode) & (df['routing_rule'] == rule) & (df['inter_cluster_latency'] == inter_cluster_latency) & (df['cluster'] == cluster)]
+                        plt.plot(df_filtered['rps'], df_filtered['avg'], label=f"{mode}-{rule}-{inter_cluster_latency}-{cluster}", marker='o')
                 
     # for column in columns:
     #     plt.plot(df['rps'], df[column], label=column, marker='o')
