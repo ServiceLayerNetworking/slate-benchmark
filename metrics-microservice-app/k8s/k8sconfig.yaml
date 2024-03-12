@@ -162,9 +162,12 @@ spec:
     spec:
       containers:
         - image: ghcr.io/adiprerepa/metrics-db:latest # todo change
-#        - image: gangmuk/metrics-handler:latest # todo change
-          imagePullPolicy: Always
-          name: metrics-db
-          ports:
+        imagePullPolicy: Always
+        name: metrics-db
+        ports:
             - containerPort: 8080
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
 ---
