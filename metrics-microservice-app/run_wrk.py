@@ -19,7 +19,7 @@ CONFIG = {
     'distribution': 'exp',
     'thread': 50,
     'connection': 50,
-    'duration': 30
+    'duration': 60
 }
 
 def get_pod_name_from_deploy(deployment_name, namespace='default'):
@@ -418,10 +418,10 @@ def main():
     '''
     all_RPS_list = [ \
                     # {"west": 50, "east": 0}, \
-                    {"west": 100, "east": 0}, \
+                    # {"west": 100, "east": 0}, \
                     # {"west": 150, "east": 0}, \
                     # {"west": 200, "east": 0}, \
-                    # {"west": 250, "east": 0}, \
+                    {"west": 250, "east": 10}, \
                     # {"west": 300, "east": 0}, \
                     ]
     ########################################################
@@ -518,6 +518,13 @@ def main():
                                 slate_log_path = f"{output_dir}/trace.slatelog"
                                 kubectl_cp_from_slate_controller_to_host("/app/trace_string.csv",{slate_log_path})
                             elif mode == "runtime":
+                                if routing_rule == "WATERFALL" or routing_rule == "SLATE":
+                                    file_list = ["constraint.csv", "variable.csv", "network_df.csv", "compute_df.csv", "gurobi_model.ilp"]
+                                    for file in file_list:
+                                        src_in_pod = f"/app/{file}"
+                                        dst_in_host = file
+                                        kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host)
+                                        
                                 src_in_pod = "/app/sim_percentage_df_most_recent.csv"
                                 dst_in_host = f'{output_dir}/{src_in_pod.split("/")[-1]}'
                                 kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host)
@@ -525,13 +532,12 @@ def main():
                                 src_in_pod = "/app/sim_percentage_df_history.csv"
                                 dst_in_host = f'{output_dir}/{src_in_pod.split("/")[-1]}'
                                 kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host)
-                                
                             else:
                                 print("???")
                                 print(f"mode: {mode} is not supported")
                                 exit()
                             '''end of one set of experiment'''
-                            # restart_deploy(exclude=[])
+                            restart_deploy(exclude=[])
                             
                             per_wrk_et = datetime.now()
                             per_wk_duration = (per_wrk_et - per_wrk_st).seconds
