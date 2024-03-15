@@ -30,7 +30,7 @@ func main() {
 func DetectAnomalies(c *gin.Context) {
 	// call metrics processing service
 	// return whether anomaly was detected
-	data := make([]byte, 5*1024*1024)
+	data := make([]byte, 1*1024*1024)
 	rand.Read(data)
 	//r := &processorReq{
 	//	Metrics: data,
