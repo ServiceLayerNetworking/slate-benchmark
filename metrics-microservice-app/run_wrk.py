@@ -439,13 +439,13 @@ def main():
                     # {"west": 50, "east": 0}, \
                     {"west": 100, "east": 0}, \
                     # {"west": 150, "east": 0}, \
-                    # {"west": 200, "east": 0}, \
+                    {"west": 200, "east": 0}, \
                     # {"west": 250, "east": 0}, \
-                    # {"west": 300, "east": 0}, \
+                    {"west": 300, "east": 0}, \
                     # {"west": 350, "east": 0}, \
-                    # {"west": 400, "east": 0}, \
+                    {"west": 400, "east": 0}, \
                     # {"west": 450, "east": 0}, \
-                    # {"west": 500, "east": 0}, \
+                    {"west": 500, "east": 0}, \
                     ]
     ########################################################
     
@@ -468,7 +468,11 @@ def main():
                 exit()
                 
             # restart_deploy(exclude=[])
-            print("restart deploy is done")
+            while True:
+                if are_all_pods_ready():
+                    break
+                time.sleep(1)
+            print("All pods are ready")
             for mode in mode_and_routing_rule:
                 for routing_rule in mode_and_routing_rule[mode]:
                     date_ = datetime.now().strftime("%b%d")
