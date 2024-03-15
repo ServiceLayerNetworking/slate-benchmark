@@ -31,12 +31,20 @@ def get_pod_name_from_deploy(deployment_name, namespace='default'):
     except client.ApiException as e:
         print(f"Error fetching the pod name for deployment {deployment_name}: {e}")
         assert False
+        
+def check_file_exists_in_pod(pod_name, namespace, file_path):
+    command = f"kubectl exec {pod_name} --namespace {namespace} -- sh -c '[ -f {file_path} ] && echo Exists || echo Does not exist'"
+    success = run_command(command, required=False)
+    return success
 
 def kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host):
     slate_controller_pod = get_pod_name_from_deploy("slate-controller")
     print(f"Try kubectl_cp_from_slate_controller_to_host")
     print(f"src_in_pod: {slate_controller_pod}:{src_in_pod}")
     print(f"dst_in_host: {dst_in_host}")
+    if check_file_exists_in_pod(slate_controller_pod, "default", src_in_pod) == False:
+        print(f"Skip scp. {src_in_pod} does not exist in the slate-controller pod")
+        return
     # slate_controller_pod = run_command("kubectl get pods -l app=slate-controller -o custom-columns=:metadata.name")
     temp_file = "temp_file.txt"
     run_command(f"kubectl cp {slate_controller_pod}:{src_in_pod} {temp_file}")
@@ -63,6 +71,10 @@ def update_env_txt(mode, benchmark_name, total_num_services, routing_rule, rps_d
         CONFIG[f"{cluster}_RPS"] = rps
     CONFIG["inter_cluster_latency"] = inter_cluster_latency
     CONFIG["benchmark_name"] = benchmark_name
+    if benchmark_name == "metrics":
+        CONFIG["capacity"] = 150
+    else:
+        CONFIG["capacity"] = 9999999999
     CONFIG["total_num_services"] = total_num_services
    # File to update
     local_env_file = "local_env.txt"
@@ -225,16 +237,17 @@ def record_pod_resource_usage(wrk_log_path, target_cluster_rps):
         f.write("-- end of resource usage --\n\n")
         
 
-def run_command(command):
+def run_command(command, required=True):
     """Run shell command and return its output"""
     try:
         output = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT)
         return output.decode('utf-8').strip()
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e.output.decode('utf-8')}")
-        print("Assertion! Exit...")
-        exit()
-    
+        if required:
+            print("Exit...")
+            exit()
+        return False
 
 def run_wrk(copy_config, target_cluster, req_type, target_cluster_rps, wrk_log_path):
     assert target_cluster_rps >= 0
@@ -305,37 +318,37 @@ def restart_wasm():
     delete_wasm()
     apply_wasm()
 
+def are_all_pods_ready(namespace='default'):
+    config.load_kube_config()
+    v1 = client.CoreV1Api()
+    pods = v1.list_namespaced_pod(namespace)
+    all_pods_ready = True
+    for pod in pods.items:
+        # Check if the pod is in the process of terminating
+        if pod.metadata.deletion_timestamp is not None:
+            all_pods_ready = False
+            break  # Pod is terminating, so not all pods are ready
+        # Check for pods that are not in the 'Running' phase
+        if pod.status.phase != 'Running':
+            all_pods_ready = False
+            break
+        if pod.status.conditions is None:
+            all_pods_ready = False
+            break
+        ready_condition_found = False
+        for condition in pod.status.conditions:
+            if condition.type == 'Ready':
+                ready_condition_found = True
+                if condition.status != 'True':
+                    all_pods_ready = False
+                    break  # Break out of the inner loop
+        if not ready_condition_found:
+            # If no Ready condition is found, consider the pod not ready
+            all_pods_ready = False
+            break
+    return all_pods_ready
+
 def restart_deploy(exclude=[]):
-    def are_all_pods_ready(namespace='default'):
-        config.load_kube_config()
-        v1 = client.CoreV1Api()
-        pods = v1.list_namespaced_pod(namespace)
-        all_pods_ready = True
-        for pod in pods.items:
-            # Check if the pod is in the process of terminating
-            if pod.metadata.deletion_timestamp is not None:
-                all_pods_ready = False
-                break  # Pod is terminating, so not all pods are ready
-            # Check for pods that are not in the 'Running' phase
-            if pod.status.phase != 'Running':
-                all_pods_ready = False
-                break
-            if pod.status.conditions is None:
-                all_pods_ready = False
-                break
-            ready_condition_found = False
-            for condition in pod.status.conditions:
-                if condition.type == 'Ready':
-                    ready_condition_found = True
-                    if condition.status != 'True':
-                        all_pods_ready = False
-                        break  # Break out of the inner loop
-            if not ready_condition_found:
-                # If no Ready condition is found, consider the pod not ready
-                all_pods_ready = False
-                break
-        return all_pods_ready
-    
     print("start restart deploy")
     config.load_kube_config()
     api_instance = client.AppsV1Api()
@@ -377,6 +390,12 @@ slate_controller/app/trace_string.csv -> local file
     
 
 def main():
+    
+    dir_postfix = sys.argv[1]
+    if len(sys.argv) != 2:
+        print("Usage: python run_wrk.py <dir_postfix>\nexit...")
+        exit()
+    
     start_time = datetime.now()
     istio_config = True
     with_wasm = [True]
@@ -392,18 +411,18 @@ def main():
     '''
     benchmark_name="metrics"
     total_num_services=4
+    
     '''
     profile: collecting traces, routing rule is always local
     runtime: training latency functions with the given trace data (trace_string.csv)
     '''
+    mode_set = ["profile", "runtime"]
     mode_and_routing_rule = {\
-        # "profile": ["LOCAL"],\
-        "runtime": ["WATERFALL"],\
+        "profile": ["LOCAL"],\
+        # "runtime": ["WATERFALL"],\
         # "runtime": ["LOCAL", "SLATE", "MCLB",  "WATERFALL"],\
         # "runtime": ["LOCAL", "SLATE", "MCLB",  "WATERFALL", "REMOTE"],\
     }
-    
-    mode_set = ["profile", "runtime"]
     for mode in mode_and_routing_rule:
         assert mode in mode_set
         
@@ -418,11 +437,15 @@ def main():
     '''
     all_RPS_list = [ \
                     # {"west": 50, "east": 0}, \
-                    # {"west": 100, "east": 0}, \
+                    {"west": 100, "east": 0}, \
                     # {"west": 150, "east": 0}, \
                     # {"west": 200, "east": 0}, \
-                    {"west": 250, "east": 10}, \
+                    # {"west": 250, "east": 0}, \
                     # {"west": 300, "east": 0}, \
+                    # {"west": 350, "east": 0}, \
+                    # {"west": 400, "east": 0}, \
+                    # {"west": 450, "east": 0}, \
+                    # {"west": 500, "east": 0}, \
                     ]
     ########################################################
     
@@ -445,10 +468,11 @@ def main():
                 exit()
                 
             # restart_deploy(exclude=[])
+            print("restart deploy is done")
             for mode in mode_and_routing_rule:
                 for routing_rule in mode_and_routing_rule[mode]:
                     date_ = datetime.now().strftime("%b%d")
-                    postfix = f"{date_}_testing"
+                    postfix = f"{date_}_{dir_postfix}"
                     print(f"* postfix for output file: {postfix}")
                     for req_type in req_type_list:
                         for rps_dict in all_RPS_list:
@@ -515,8 +539,9 @@ def main():
                             print("Both wrk2 have completed.")
                             
                             if mode == "profile":
-                                slate_log_path = f"{output_dir}/trace.slatelog"
-                                kubectl_cp_from_slate_controller_to_host("/app/trace_string.csv",{slate_log_path})
+                                src_in_pod = "/app/trace_string.csv"
+                                dst_in_host = f"{output_dir}/trace.slatelog"
+                                kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host)
                             elif mode == "runtime":
                                 if routing_rule == "WATERFALL" or routing_rule == "SLATE":
                                     file_list = ["constraint.csv", "variable.csv", "network_df.csv", "compute_df.csv", "gurobi_model.ilp"]
