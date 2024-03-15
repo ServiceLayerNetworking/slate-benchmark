@@ -4,6 +4,7 @@ import glob
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import subprocess
 
 latency_dict = dict()
 req_type = ""
@@ -59,6 +60,11 @@ def plot_cdf(data, parse_wrk_config):
     # plt.savefig('cdf.png')
     # plt.show()
 
+def find_and_process_wrklog_files(base_directory):
+    wrklog_files = glob.glob(f'{base_directory}/**/*.wrklog', recursive=True)
+    for file in wrklog_files:
+        print(file)
+    return wrklog_files
 
 
 if __name__ == "__main__":
@@ -67,11 +73,17 @@ if __name__ == "__main__":
         sys.exit(1)
     columns = ['avg', '50%', '99%']
     wrk_config_list = list()
-    for pattern in sys.argv[1:]:
-        for wrklog_path in glob.glob(pattern):
-            config = parse_wrk_config(wrklog_path)
-            config["percentile_data"] = extract_cdf_data(wrklog_path)
-            wrk_config_list.append(config)
+    # for pattern in sys.argv[1:]:
+    #     for wrklog_path in glob.glob(pattern):
+    #         config = parse_wrk_config(wrklog_path)
+    #         config["percentile_data"] = extract_cdf_data(wrklog_path)
+    #         wrk_config_list.append(config)
+    base_directory = sys.argv[1]
+    wrklog_files = find_and_process_wrklog_files(base_directory)
+    for wrklog_path in wrklog_files:
+        config = parse_wrk_config(wrklog_path)
+        config["percentile_data"] = extract_cdf_data(wrklog_path)
+        wrk_config_list.append(config)
             
     fig, axs = plt.subplots(1, 2, figsize=(10, 5))
     fig.suptitle('Latency CDF', fontsize=20)
