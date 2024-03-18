@@ -30,5 +30,5 @@ echo "kubectl apply -f ../../slate-controller.yaml"
 bash ./vs_match.sh &&
 echo "vs_match.sh"
 
-kubectl rollout restart deploy &&
-echo "kubectl rollout restart deploy"
+update_grace_period
+echo "update_grace_period"
