@@ -9,6 +9,8 @@ import subprocess
 latency_dict = dict()
 req_type = ""
 
+color_dict = {"SLATE": "blue", "WATERFALL": "red", "REMOTE": "green", "LOCAL": "orange"}
+
 def parse_wrk_config(wrklog_path):
     wrk_config = dict()
     
@@ -52,13 +54,6 @@ def extract_cdf_data(wrklog_path):
                     cdf_data.append((float(value), float(percentile)))
     return cdf_data
 
-def plot_cdf(data, parse_wrk_config):
-    '''
-    data = [(value, percentile), ...]
-    '''
-    
-    # plt.savefig('cdf.png')
-    # plt.show()
 
 def find_and_process_wrklog_files(base_directory):
     wrklog_files = glob.glob(f'{base_directory}/**/*.wrklog', recursive=True)
@@ -93,10 +88,10 @@ if __name__ == "__main__":
         if config['routing_rule'] != "REMOTE":
             title = f"{config['cluster']}, {config['RPS']} RPS"
             if config['cluster'] == 'west':
-                axs[0].plot(df['Value'], df['Percentile'], linestyle='-', label=f"{config['routing_rule']}, {config['cluster']}")
+                axs[0].plot(df['Value'], df['Percentile'], linestyle='-', label=f"{config['RPS']}, {config['routing_rule']}, {config['cluster']}", color=color_dict[config['routing_rule']])
                 axs[0].set_title(title, fontsize=20)
             else:
-                axs[1].plot(df['Value'], df['Percentile'], linestyle='-', label=f"{config['routing_rule']}, {config['cluster']}")
+                axs[1].plot(df['Value'], df['Percentile'], linestyle='-', label=f"{config['RPS']}, {config['routing_rule']}, {config['cluster']}", color=color_dict[config['routing_rule']])
                 axs[1].set_title(title, fontsize=20)
         
             for ax in axs:
@@ -106,7 +101,7 @@ if __name__ == "__main__":
                 ax.tick_params(axis='y', labelsize=15)
                 # ax.set_xticks(fontsize=15)  # Set x-tick label fontsize
                 ax.set_yticks(np.arange(0,101,25))  # Set y-tick label fontsize
-                ax.legend(fontsize=15)
+                ax.legend(fontsize=12)
                 ax.axhline(y=50, color='r', linestyle='--', linewidth=0.5, alpha=0.5)
                 ax.axhline(y=90, color='r', linestyle='--', linewidth=0.5, alpha=0.5)
                 ax.axhline(y=99, color='r', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -114,7 +109,7 @@ if __name__ == "__main__":
     plt.tight_layout()
     app_name = sys.argv[1].split('/')[0]
     experiment_tag = sys.argv[1].split('/')[-2]
-    figure_file_name = f'{app_name}-{experiment_tag}.pdf'
-    plt.savefig(figure_file_name)
-    print(f"Figure saved as {figure_file_name}")
+    figure_file_path = f'{base_directory}/cdf.pdf'
+    plt.savefig(figure_file_path)
+    print(f"Figure saved as {figure_file_path}")
     plt.show()
