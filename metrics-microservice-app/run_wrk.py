@@ -88,17 +88,29 @@ def kubectl_cp_from_host_to_slate_controller_pod(src_in_host, dst_in_pod):
     print(f"- src_in_host: {src_in_host}")
     print(f"- dst_in_pod: {slate_controller_pod}:{dst_in_pod}")
     run_command(f"kubectl cp {src_in_host} {slate_controller_pod}:{dst_in_pod}")
-    # print(f"finish kubectl_cp_from_host_to_slate_controller_pod")
+    print(f"finish scp from {src_in_host} to {slate_controller_pod}:{dst_in_pod}")
     
 
-def update_env_txt(mode, benchmark_name, total_num_services, routing_rule, rps_dict, inter_cluster_latency, capacity, degree):
+def update_env_txt(mode, benchmark_name, total_num_services, routing_rule, rps_dict, inter_cluster_latency, node_to_region, capacity, degree):
     global CONFIG
     print("update_env_txt")
     CONFIG["mode"] = mode
     CONFIG["routing_rule"] = routing_rule
     for cluster, rps in rps_dict.items():
         CONFIG[f"{cluster}_RPS"] = rps
-    CONFIG["inter_cluster_latency"] = inter_cluster_latency
+    '''
+    inter_cluster_latency["node1"]["node2"] = 40
+    inter_cluster_latency["node2"]["node3"] = 20
+    inter_cluster_latency["node3"]["node1"] = 20
+    '''
+    for src_node in inter_cluster_latency:
+        for dst_node in inter_cluster_latency[src_node]:
+            # NOTE: it is divided by 2 for oneway.
+            src_region = node_to_region[src_node]
+            dst_region = node_to_region[dst_node]
+            CONFIG[f"inter_cluster_latency,{src_region},{dst_region}"] = int(inter_cluster_latency[src_node][dst_node]/2)
+            CONFIG[f"inter_cluster_latency,{dst_region},{src_region}"] = int(inter_cluster_latency[src_node][dst_node]/2)
+            CONFIG[f"inter_cluster_latency,{src_region},{src_region}"] = 0
     CONFIG["benchmark_name"] = benchmark_name
     CONFIG["total_num_services"] = total_num_services
     CONFIG["capacity"] = capacity
@@ -231,6 +243,7 @@ def run_command(command, required=True):
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e.output.decode('utf-8')}")
         if required:
+            print(command)
             print("Exit...")
             exit()
         return False
@@ -375,14 +388,33 @@ def restart_slate_controller():
     run_command("kubectl rollout restart deploy slate-controller")
     print("@@ kubectl rollout restart deploy slate-controller")
     sleep_and_print(10)
+    # 
+# def add_latency(src_hostname, dst_node_ip, latency, class_id, handle_id):
+def add_latency(src_hostname, dst_node_ip, latency):
+    run_command(f"ssh {src_hostname} sudo tc qdisc del dev eno1 root", required=False)
+    run_command(f"ssh {src_hostname} sudo tc qdisc add dev eno1 root handle 1: prio")
+    run_command(f"ssh {src_hostname} sudo tc filter add dev eno1 parent 1:0 protocol ip prio 1 u32 match ip dst {dst_node_ip} flowid 2:1")
+    run_command(f"ssh {src_hostname} sudo tc qdisc add dev eno1 parent 1:1 handle 2: netem delay {latency}ms")
     
-def add_latency(src_node, dst_node_ip, latency):
-    print(f"Trying to add latency from {src_node} to {dst_node_ip}")
-    run_command(f"ssh {src_node} sudo tc qdisc del dev eno1 root", required=False)
-    run_command(f"ssh {src_node} sudo tc qdisc add dev eno1 root handle 1: prio")
-    run_command(f"ssh {src_node} sudo tc filter add dev eno1 parent 1:0 protocol ip prio 1 u32 match ip dst {dst_node_ip} flowid 2:1")
-    run_command(f"ssh {src_node} sudo tc qdisc add dev eno1 parent 1:1 handle 2: netem delay {latency}ms")
-    print(f"add latency from {src_node} to {dst_node_ip}")
+    # '''
+    # sudo tc qdisc del dev eno1 root &>/dev/null
+    # sudo tc qdisc add dev eno1 root handle 1: htb
+    # sudo tc qdisc add dev eno1 parent 1:1 handle 10: netem delay 10ms
+    # sudo tc qdisc add dev eno1 parent 1:2 handle 20: netem delay 20ms
+    # sudo tc filter add dev eno1 protocol ip parent 1: prio 1 u32 match ip dst $NODE2_IP flowid 1:1
+    # sudo tc filter add dev eno1 protocol ip parent 1: prio 1 u32 match ip dst $NODE3_IP flowid 1:2
+    # '''
+    # class_handle = f"1:{class_id[src_hostname]}"
+    # netem_handle = f"{handle_id[src_hostname]}:"  # Netem qdisc handle
+    # print(f"class_handle: {class_handle}, netem_handle: {netem_handle}, latnecy: {latency}")
+    # # run_command(f"ssh {src_hostname} sudo tc qdisc add dev eno1 root handle 1: htb") ##
+    # # run_command(f"ssh {src_hostname} sudo tc qdisc add dev eno1 root handle 1: prio bands 3")
+    # run_command(f"ssh {src_hostname} sudo tc class add dev eno1 parent 1: classid {class_handle} htb rate 1000Mbps") ##
+    # run_command(f"ssh {src_hostname} sudo tc qdisc add dev eno1 parent {class_handle} handle {netem_handle} netem delay {latency}ms")
+    # run_command(f"ssh {src_hostname} sudo tc filter add dev eno1 protocol ip parent 1: prio 1 u32 match ip dst {dst_node_ip} flowid {class_handle}")
+    # class_id[src_hostname] += 1
+    # handle_id[src_hostname] += 10
+    # print(f"add latency from {src_hostname} to {dst_node_ip}")
     
 
 '''
@@ -433,7 +465,8 @@ def main():
     mode_set = ["profile", "runtime"]
     mode_and_routing_rule = {\
         "profile": ["LOCAL"],\
-        # "runtime": ["SLATE", "WATERFALL"],\
+        # "runtime": ["MCLB"],\
+        # "runtime": ["SLATE"],\
         # "runtime": ["SLATE", "WATERFALL"],\
         # "runtime": ["LOCAL", "SLATE", "MCLB",  "WATERFALL"],\
         # "runtime": ["LOCAL", "SLATE", "MCLB",  "WATERFALL", "REMOTE"],\
@@ -441,185 +474,247 @@ def main():
     
     ## for experiment
     all_RPS_list = [ \
-                    ## runtime
+                    ## runtime, two clusters
                     # {"west": 100, "east": 10}, \
-                    # {"west": 150, "east": 10}, \
                     # {"west": 200, "east": 10}, \
-                    # {"west": 250, "east": 10}, \
                     # {"west": 300, "east": 10}, \
-                    # {"west": 350, "east": 10}, \
                     # {"west": 400, "east": 10}, \
-                    # {"west": 450, "east": 10}, \
                     # {"west": 500, "east": 10}, \
-                    # {"west": 550, "east": 10}, \
+                    
+                    ## runtime, two clusters
+                    # {"west": 100, "east": 10, "central": 10}, \
+                    # {"west": 200, "east": 10, "central": 10}, \
+                    # {"west": 300, "east": 10, "central": 10}, \
+                    # {"west": 400, "east": 10, "central": 10}, \
+                    # {"west": 500, "east": 10, "central": 10}, \
                     
                     ## profile
-                    # {"west": 100, "east": 0}, \
-                    # {"west": 200, "east": 0}, \
-                    # {"west": 300, "east": 0}, \
-                    # {"west": 400, "east": 0}, \
-                    {"west": 500, "east": 0}, \
-                    # {"west": 600, "east": 0}, \
+                    # {"west": 20}, \
+                    # {"west": 40}, \
+                    # {"west": 60}, \
+                    # {"west": 80}, \
+                    # {"west": 100}, \
+                    {"west": 120}, \
+                    {"west": 140}, \
+                    {"west": 160}, \
+                    {"west": 180}, \
+                    {"west": 200}, \
                     ]
     
     for mode in mode_and_routing_rule:
         assert mode in mode_set
     
-    # oneway_latency = [0]
-    oneway_latency = [20]
-    req_type_list = ["get_metric"] # It should match wrk2 lua script
+
+    '''
+    node1: west
+    node2: east
+    node3: central
     
+    node_dict[node] = {"hostname": hostname, "ipaddr": ipaddr}
+    '''
     node_dict = get_nodename_and_ipaddr("/users/gangmuk/projects/cloudlab_script/config.xml")
     for node in node_dict:
         print(f"node: {node}, hostname: {node_dict[node]['hostname']}, ipaddr: {node_dict[node]['ipaddr']}")
         
-    for lat in oneway_latency:
-        add_latency(node_dict['node1']['hostname'], node_dict['node2']['ipaddr'], lat)
-        add_latency(node_dict['node2']['hostname'], node_dict['node1']['ipaddr'], lat)
-        for wasm_config in with_wasm:
-            if istio_config == True:
-                print(f"wasm config: {wasm_config}")
-                if wasm_config:
-                    # apply_wasm()
-                    a=1
-                else:
-                    # delete_wasm()
-                    a=1
+    node_to_region = {"node1":"us-west-1", "node2":"us-east-1", "node3":"us-central-1"}
+    
+    '''
+    inter_cluster_latency["node1"]["node2"] = 40
+    inter_cluster_latency["node2"]["node3"] = 20
+    inter_cluster_latency["node3"]["node1"] = 20
+    NOTE: tc rule is enforced in only source node and they are two way network latency.
+    This is because of duplicate tc rule problem.
+    '''
+    inter_cluster_latency = dict()
+    for src_node, src_node_label in node_to_region.items():
+        for dst_node, dst_node_label in node_to_region.items():
+            inter_cluster_latency[src_node] = dict()
+    for src_node, src_node_label in node_to_region.items():
+        for dst_node, dst_node_label in node_to_region.items():
+            if src_node_label == "us-west-1" and dst_node_label == "us-east-1" or src_node_label == "us-east-1" and dst_node_label == "us-west-1":
+                inter_cluster_latency[src_node][dst_node] = 40 # east, west
+            elif src_node_label == "us-west-1" and dst_node_label == "us-central-1" or src_node_label == "us-central-1" and dst_node_label == "us-west-1":
+                inter_cluster_latency[src_node][dst_node] = 20 # west, central
+            elif src_node_label == "us-east-1" and dst_node_label == "us-central-1" or src_node_label == "us-central-1" and dst_node_label == "us-east-1":
+                inter_cluster_latency[src_node][dst_node] = 40 # east, central
+            elif src_node_label == dst_node_label:
+                inter_cluster_latency[src_node][dst_node] = 0
             else:
-                print("istio config is false. exit... (disabling istio is not there yet.)")
-                exit()
-                
-            # restart_deploy(exclude=[])
-            while True:
-                if are_all_pods_ready():
-                    break
-                print("Waiting for all pods to be ready")
-                time.sleep(1)
-            print("All pods are ready")
-            for mode in mode_and_routing_rule:
-                for routing_rule in mode_and_routing_rule[mode]:
-                    date_ = datetime.now().strftime("%b%d")
-                    postfix = f"{date_}_{dir_postfix}"
-                    print(f"* postfix for output file: {postfix}")
-                    for req_type in req_type_list:
-                        for rps_dict in all_RPS_list:
-                            per_wrk_st = datetime.now()
-                            
-                            ''' Initialize the output path for different logs'''
-                            if istio_config:
-                                if wasm_config:
-                                    # output_dir = f"{req_type}-ww-{postfix}"
-                                    output_dir = f"{mode}-{postfix}"
-                                else:
-                                    output_dir = f"wow-{postfix}"
+                print(f"Invalid node pair. src_node: {src_node}, src_node_label: {src_node_label}, dst_node: {dst_node}, dst_node_label: {dst_node_label}")
+                assert False
+    print(inter_cluster_latency)
+    class_id = {}
+    handle_id = {}
+    for node in node_dict:
+        hostname = node_dict[node]['hostname']
+        class_id[hostname] = 1
+        handle_id[hostname] = 10
+        
+    # node1 <-> node2
+    src_host = node_dict['node1']['hostname']
+    dst_ip = node_dict['node2']['ipaddr']
+    add_latency(src_host, dst_ip, 40)
+    print(f"node1 to node 2({dst_ip}), latency: 40")
+    
+    # node2 <-> node3
+    src_host = node_dict['node2']['hostname']
+    dst_ip = node_dict['node3']['ipaddr']
+    add_latency(src_host, dst_ip, 20)
+    print(f"node2 to node 3({dst_ip}), latency: 20")
+    
+    # node3 <-> node1
+    src_host = node_dict['node3']['hostname']
+    dst_ip = node_dict['node1']['ipaddr']
+    add_latency(src_host, dst_ip, 20)
+    print(f"node3 to node 1({dst_ip}), latency: 20")
+    
+
+    req_type_list = ["get_metric"] # It should match wrk2 lua script
+    for wasm_config in with_wasm:
+        if istio_config == True:
+            print(f"wasm config: {wasm_config}")
+            if wasm_config:
+                # apply_wasm()
+                a=1
+            else:
+                # delete_wasm()
+                a=1
+        else:
+            print("istio config is false. exit... (disabling istio is not there yet.)")
+            exit()
+            
+        # restart_deploy(exclude=[])
+        while True:
+            if are_all_pods_ready():
+                break
+            print("Waiting for all pods to be ready")
+            time.sleep(1)
+        print("All pods are ready")
+        for mode in mode_and_routing_rule:
+            for routing_rule in mode_and_routing_rule[mode]:
+                date_ = datetime.now().strftime("%b%d")
+                postfix = f"{date_}_{dir_postfix}"
+                print(f"* postfix for output file: {postfix}")
+                for req_type in req_type_list:
+                    for rps_dict in all_RPS_list:
+                        per_wrk_st = datetime.now()
+                        
+                        ''' Initialize the output path for different logs'''
+                        if istio_config:
+                            if wasm_config:
+                                # output_dir = f"{req_type}-ww-{postfix}"
+                                output_dir = f"{mode}-{postfix}"
                             else:
-                                output_dir = f"woi-{postfix}"
-                            output_dir += "/"
-                            for cluster in rps_dict:
-                                # cluster[0]: either 'w' or 'e'
-                                output_dir += f"{cluster[0]}{rps_dict[cluster]}"
-                            # e.g., output_dir: get_metric-ww-Mar13_testing/w200e100
-                            assert output_dir != ""
-                            if not os.path.isdir(output_dir):
-                                os.makedirs(output_dir)
-                            if not os.path.isdir(f"{output_dir}/latency_function"):
-                                os.makedirs(f"{output_dir}/latency_function")
-                            formatted_datetime = datetime.now().strftime("%m-%d-%H:%M")
-                            wrk_log_path_dict = dict()
-                            for cluster in rps_dict:
-                                wrk_log_path_dict[cluster] = f"{output_dir}/{routing_rule}-{mode}-L{lat}-R{rps_dict[cluster]}-{cluster}.wrklog"
+                                output_dir = f"wow-{postfix}"
+                        else:
+                            output_dir = f"woi-{postfix}"
+                        output_dir += "/"
+                        for cluster in rps_dict:
+                            # cluster[0]: either 'w' or 'e' or 'c'
+                            output_dir += f"{cluster[0]}{rps_dict[cluster]}"
+                        # e.g., output_dir: get_metric-ww-Mar13_testing/w200e100
+                        assert output_dir != ""
+                        if not os.path.isdir(output_dir):
+                            os.makedirs(output_dir)
+                        if not os.path.isdir(f"{output_dir}/latency_function"):
+                            os.makedirs(f"{output_dir}/latency_function")
+                        formatted_datetime = datetime.now().strftime("%m-%d-%H:%M")
+                        wrk_log_path_dict = dict()
+                        for cluster in rps_dict:
+                            wrk_log_path_dict[cluster] = f"{output_dir}/{routing_rule}-{mode}-R{rps_dict[cluster]}-{cluster}.wrklog"
+                        
+                        ''' update env.txt and scp to slate-controller pod '''
+                        local_env_file = update_env_txt(mode, benchmark_name, total_num_services, routing_rule, rps_dict, inter_cluster_latency, node_to_region, capacity, degree)
+                        kubectl_cp_from_host_to_slate_controller_pod(local_env_file, "/app/env.txt")
+                        if mode == "runtime":
+                            slatelog = f"{benchmark_name}-trace.slatelog"
+                            kubectl_cp_from_host_to_slate_controller_pod(slatelog, "/app/trace.slatelog")
+                        time.sleep(1)
+                        
+                        # This is only for debugging to confirm that env.txt is transferred to the slate-controller pod correctly by copying back from slate-controller pod to the host                            
+                        # for cluster in wrk_log_path_dict:
+                        #     kubectl_cp_from_slate_controller_to_host("/app/env.txt", f"temp-env-{cluster}.txt")
+                        # time.sleep(1)
+                        
+                        ''' start to send load concurrently to all clusters'''
+                        with concurrent.futures.ThreadPoolExecutor() as executor:
+                            for cluster in wrk_log_path_dict:
+                                print(f"cluster: {cluster}, req_type: {req_type}, RPS: {rps_dict[cluster]}")
+                                # print(f"wrk_log_path: {wrk_log_path_dict[cluster]}")
+                            copied_config = dict()
+                            for cluster in wrk_log_path_dict:
+                                copied_config[cluster] = copy.deepcopy(CONFIG)
+                            future_list = list()
+                            for cluster in wrk_log_path_dict:
+                                future_list.append(executor.submit(run_wrk, copied_config[cluster], cluster, req_type, rps_dict[cluster], wrk_log_path_dict[cluster]))
                             
-                            ''' update env.txt and scp to slate-controller pod '''
-                            local_env_file = update_env_txt(mode, benchmark_name, total_num_services, routing_rule, rps_dict, lat, capacity, degree)
-                            kubectl_cp_from_host_to_slate_controller_pod(local_env_file, "/app/env.txt")
-                            if mode == "runtime":
-                                slatelog = f"{benchmark_name}-trace.slatelog"
-                                kubectl_cp_from_host_to_slate_controller_pod(slatelog, "trace.slatelog")
+                            ''' record resource allocation '''
                             time.sleep(1)
-                            
-                            # This is only for debugging to confirm that env.txt is transferred to the slate-controller pod correctly by copying back from slate-controller pod to the host                            
-                            # for cluster in wrk_log_path_dict:
-                            #     kubectl_cp_from_slate_controller_to_host("/app/env.txt", f"temp-env-{cluster}.txt")
-                            # time.sleep(1)
-                            
-                            ''' start to send load concurrently to all clusters'''
-                            with concurrent.futures.ThreadPoolExecutor() as executor:
-                                for cluster in wrk_log_path_dict:
-                                    print(f"cluster: {cluster}, req_type: {req_type}, RPS: {rps_dict[cluster]}")
-                                    # print(f"wrk_log_path: {wrk_log_path_dict[cluster]}")
-                                copied_config = dict()
-                                for cluster in wrk_log_path_dict:
-                                    copied_config[cluster] = copy.deepcopy(CONFIG)
-                                future_list = list()
-                                for cluster in wrk_log_path_dict:
-                                    future_list.append(executor.submit(run_wrk, copied_config[cluster], cluster, req_type, rps_dict[cluster], wrk_log_path_dict[cluster]))
+                            for cluster in wrk_log_path_dict:
+                                record_pod_resource_allocation(wrk_log_path_dict[cluster], rps_dict[cluster])
                                 
-                                ''' record resource allocation '''
-                                time.sleep(1)
-                                for cluster in wrk_log_path_dict:
-                                    record_pod_resource_allocation(wrk_log_path_dict[cluster], rps_dict[cluster])
+                            ''' record resource usage 20 before the end of the experiment '''
+                            sleep_before_resource_usage_recording = CONFIG['duration'] - 20
+                            time.sleep(sleep_before_resource_usage_recording)
+                            print(f"sleep for {sleep_before_resource_usage_recording} seconds before resource resource usage")
+                            for cluster in wrk_log_path_dict:
+                                record_pod_resource_usage(wrk_log_path_dict[cluster], rps_dict[cluster])
+                                
+                            ''' Join all threads '''
+                            for future in concurrent.futures.as_completed(future_list):
+                                print(future.result())
+                                
+                        print("Both wrk2 have completed.")
+                        
+                        if mode == "profile":
+                            src_in_pod = "/app/trace_string.csv"
+                            dst_in_host = f"{output_dir}/trace.slatelog"
+                            kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host)
+                        elif mode == "runtime":
+                            src_in_pod = "/app/error.log"
+                            dst_in_host = f'{output_dir}/{routing_rule}-{src_in_pod.split("/")[-1]}'
+                            kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host)
+                            
+                            # src_in_pod = "/app/last_percentage_df.csv"
+                            # dst_in_host = f'{output_dir}/{routing_rule}-{src_in_pod.split("/")[-1]}'
+                            # kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host)
+                            
+                            src_in_pod = "/app/routing_history.csv"
+                            dst_in_host = f'{output_dir}/{routing_rule}-{src_in_pod.split("/")[-1]}'
+                            kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host)
+                            
+                            if routing_rule == "WATERFALL" or routing_rule == "SLATE":
+                                # file_list = ["coefficient.csv", "constraint.csv", "variable.csv", "network_df.csv", "compute_df.csv", "env.txt"]
+                                file_list = ["coefficient.csv", "env.txt"]
+                                for svc in ["metrics-fake-ingress", "metrics-processing", "metrics-db", "metrics-handler"]:
+                                    file_list.append(f"latency-{svc}.pdf")
+                                for file in file_list:
+                                    src_in_pod = f"/app/{file}"
+                                    dst_in_host = f"{output_dir}/latency_function/{routing_rule}-{file}"
+                                    kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host)
                                     
-                                ''' record resource usage 20 before the end of the experiment '''
-                                sleep_before_resource_usage_recording = CONFIG['duration'] - 20
-                                time.sleep(sleep_before_resource_usage_recording)
-                                print(f"sleep for {sleep_before_resource_usage_recording} seconds before resource resource usage")
-                                for cluster in wrk_log_path_dict:
-                                    record_pod_resource_usage(wrk_log_path_dict[cluster], rps_dict[cluster])
-                                    
-                                ''' Join all threads '''
-                                for future in concurrent.futures.as_completed(future_list):
-                                    print(future.result())
-                                    
-                            print("Both wrk2 have completed.")
-                            
-                            if mode == "profile":
-                                src_in_pod = "/app/trace_string.csv"
-                                dst_in_host = f"{output_dir}/trace.slatelog"
-                                kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host)
-                            elif mode == "runtime":
-                                src_in_pod = "/app/error.log"
-                                dst_in_host = f'{output_dir}/{routing_rule}-{src_in_pod.split("/")[-1]}'
-                                kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host)
-                                
-                                # src_in_pod = "/app/last_percentage_df.csv"
-                                # dst_in_host = f'{output_dir}/{routing_rule}-{src_in_pod.split("/")[-1]}'
-                                # kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host)
-                                
-                                src_in_pod = "/app/routing_history.csv"
-                                dst_in_host = f'{output_dir}/{routing_rule}-{src_in_pod.split("/")[-1]}'
-                                kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host)
-                                
-                                if routing_rule == "WATERFALL" or routing_rule == "SLATE":
-                                    # file_list = ["coefficient.csv", "constraint.csv", "variable.csv", "network_df.csv", "compute_df.csv", "env.txt"]
-                                    file_list = ["coefficient.csv", "env.txt"]
-                                    for svc in ["metrics-fake-ingress", "metrics-processing", "metrics-db", "metrics-handler"]:
-                                        file_list.append(f"latency-{svc}.pdf")
-                                    for file in file_list:
-                                        src_in_pod = f"/app/{file}"
-                                        dst_in_host = f"{output_dir}/latency_function/{routing_rule}-{file}"
-                                        kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host)
-                                        
-                            else:
-                                print("???")
-                                print(f"mode: {mode} is not supported")
-                                exit()
-                            '''end of one set of experiment'''
-                            restart_deploy(exclude=[])
-                            
-                            per_wrk_et = datetime.now()
-                            per_wk_duration = (per_wrk_et - per_wrk_st).seconds
-                            print(f"@@ per_wk_duration: {per_wk_duration} seconds")
-                    end_time = datetime.now()
-                    duration = (end_time - start_time).seconds
-                    print(f"@@ Total runtime: {duration} seconds")
-        # run_command("bash ../delete_node_level_tc_qdisc.sh")
-        for node in node_dict:
-            print(f"Trying delete tc qdisc on {node_dict[node]['hostname']}")
-            ret = run_command(f"ssh {node_dict[node]['hostname']} 'sudo tc qdisc del dev eno1 root'", required=False)
-            if ret:
-                print(f"Successfully delete tc qdisc on {node_dict[node]['hostname']}")
-            else:
-                print(f"Failed to delete tc qdisc on {node_dict[node]['hostname']}")
+                        else:
+                            print("???")
+                            print(f"mode: {mode} is not supported")
+                            exit()
+                        '''end of one set of experiment'''
+                        # restart_deploy(exclude=[])
+                        restart_deploy(exclude=['slate-controller'])
+                        
+                        per_wrk_et = datetime.now()
+                        per_wk_duration = (per_wrk_et - per_wrk_st).seconds
+                        print(f"@@ per_wk_duration: {per_wk_duration} seconds")
+                end_time = datetime.now()
+                duration = (end_time - start_time).seconds
+                print(f"@@ Total runtime: {duration} seconds")
+    # run_command("bash ../delete_node_level_tc_qdisc.sh")
+    for node in node_dict:
+        print(f"Trying delete tc qdisc on {node_dict[node]['hostname']}")
+        ret = run_command(f"ssh {node_dict[node]['hostname']} 'sudo tc qdisc del dev eno1 root'", required=False)
+        if ret:
+            print(f"Successfully delete tc qdisc on {node_dict[node]['hostname']}")
+        else:
+            print(f"Failed to delete tc qdisc on {node_dict[node]['hostname']}")
             
 if __name__ == "__main__":
     main()
