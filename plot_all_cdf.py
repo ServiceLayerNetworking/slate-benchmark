@@ -9,7 +9,6 @@ import subprocess
 latency_dict = dict()
 req_type = ""
 
-color_dict = {"SLATE": "blue", "WATERFALL": "red", "REMOTE": "green", "LOCAL": "orange"}
 
 def parse_wrk_config(wrklog_path):
     wrk_config = dict()
@@ -75,36 +74,48 @@ if __name__ == "__main__":
     #         wrk_config_list.append(config)
     base_directory = sys.argv[1]
     wrklog_files = find_and_process_wrklog_files(base_directory)
+    cluster_map = dict()
+    cluster_idx = 0
     for wrklog_path in wrklog_files:
         config = parse_wrk_config(wrklog_path)
+        # cluster_map[config['cluster']] = cluster_idx
+        if config['cluster'] not in cluster_map:
+            # cluster_map[cluster_idx] = config['cluster']
+            # print("add cluster", cluster_map[cluster_idx])
+            cluster_map[config['cluster']] = cluster_idx
+            print(f"add cluster {config['cluster']} : {cluster_map[config['cluster']]}")
+            cluster_idx += 1
         config["percentile_data"] = extract_cdf_data(wrklog_path)
         wrk_config_list.append(config)
             
-    fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+    color_dict = {"SLATE": "blue", "WATERFALL": "red", "REMOTE": "green", "LOCAL": "orange"}
+    fig, axs = plt.subplots(1, len(cluster_map), figsize=(5*len(cluster_map), 5))
     fig.suptitle('Latency CDF', fontsize=20)
     for config in wrk_config_list:
         df = pd.DataFrame(config["percentile_data"], columns=['Value', 'Percentile'])
         df['Percentile'] *= 100
-        if config['routing_rule'] != "REMOTE":
-            title = f"{config['cluster']}, {config['RPS']} RPS"
-            if config['cluster'] == 'west':
-                axs[0].plot(df['Value'], df['Percentile'], linestyle='-', label=f"{config['RPS']}, {config['routing_rule']}, {config['cluster']}", color=color_dict[config['routing_rule']])
-                axs[0].set_title(title, fontsize=20)
-            else:
-                axs[1].plot(df['Value'], df['Percentile'], linestyle='-', label=f"{config['RPS']}, {config['routing_rule']}, {config['cluster']}", color=color_dict[config['routing_rule']])
-                axs[1].set_title(title, fontsize=20)
         
-            for ax in axs:
-                ax.set_xlabel('Latency (ms)', fontsize=20)
-                ax.set_ylabel('Percentile (%)', fontsize=20)
-                ax.tick_params(axis='x', labelsize=15)
-                ax.tick_params(axis='y', labelsize=15)
-                # ax.set_xticks(fontsize=15)  # Set x-tick label fontsize
-                ax.set_yticks(np.arange(0,101,25))  # Set y-tick label fontsize
-                ax.legend(fontsize=12)
-                ax.axhline(y=50, color='r', linestyle='--', linewidth=0.5, alpha=0.5)
-                ax.axhline(y=90, color='r', linestyle='--', linewidth=0.5, alpha=0.5)
-                ax.axhline(y=99, color='r', linestyle='--', linewidth=0.5, alpha=0.5)
+        # if config['routing_rule'] != "REMOTE":
+        title = f"{config['cluster']}, {config['RPS']} RPS"
+        # if config['cluster'] == 'west':
+        axs[cluster_map[config['cluster']]].plot(df['Value'], df['Percentile'], linestyle='-', label=f"{config['RPS']}, {config['routing_rule']}, {config['cluster']}", color=color_dict[config['routing_rule']])
+        axs[cluster_map[config['cluster']]].set_title(title, fontsize=20)
+        # else:
+        #     axs[1].plot(df['Value'], df['Percentile'], linestyle='-', label=f"{config['RPS']}, {config['routing_rule']}, {config['cluster']}", color=color_dict[config['routing_rule']])
+        #     axs[1].set_title(title, fontsize=20)
+    
+        for ax in axs:
+            ax.set_xlabel('Latency (ms)', fontsize=20)
+            ax.set_ylabel('Percentile (%)', fontsize=20)
+            ax.tick_params(axis='x', labelsize=15)
+            ax.tick_params(axis='y', labelsize=15)
+            # ax.set_xticks(fontsize=15)  # Set x-tick label fontsize
+            ax.set_yticks(np.arange(0,101,25))  # Set y-tick label fontsize
+            ax.legend(fontsize=12)
+            ax.axhline(y=50, color='r', linestyle='--', linewidth=0.5, alpha=0.5)
+            ax.axhline(y=90, color='r', linestyle='--', linewidth=0.5, alpha=0.5)
+            ax.axhline(y=99, color='r', linestyle='--', linewidth=0.5, alpha=0.5)
+            
     # plt.xlim((0,1000))
     plt.tight_layout()
     app_name = sys.argv[1].split('/')[0]
