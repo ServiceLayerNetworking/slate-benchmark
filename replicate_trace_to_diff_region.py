@@ -18,12 +18,19 @@ def create_merged_file(original, merged):
     try:
         with open(original, 'r') as orig_file:
             original_content = orig_file.read()
-            # Perform replacements
+            print(original_content[-1])
+            if original_content[-1] != '\n':
+                original_content += '\n'
+                print("add newline")
+            print(original_content[-1])
+            with open('copy.txt', 'w') as copy_file:
+                copy_file.write(original_content)
             east_content = original_content.replace('west', 'east')
             central_content = original_content.replace('west', 'central')
+            south_content = original_content.replace('west', 'south')
             
             # Concatenate all versions: original, east, and central
-            final_content = original_content + east_content + central_content
+            final_content = original_content + east_content + central_content + south_content
             
         with open(merged, 'w') as merged_file:
             merged_file.write(final_content)
