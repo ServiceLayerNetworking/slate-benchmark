@@ -157,7 +157,7 @@ if __name__ == "__main__":
     plt.ylabel('Latency (ms)', fontsize=20)
     plt.xticks(fontsize=14)  # Set x-tick label fontsize
     plt.yticks(fontsize=14)  # Set y-tick label fontsize
-    plt.legend(fontsize=14)
+    # plt.legend(fontsize=14)
     # plt.ylim((0,1000))
     svc_name = base_directory.split('/')[0]
     merged_string = ''.join(latency_metrics)

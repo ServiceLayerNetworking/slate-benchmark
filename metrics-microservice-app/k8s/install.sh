@@ -7,8 +7,10 @@ if [ $num_regions -eq 2 ]; then
     regions="us-west-1,us-east-1"
 elif [ $num_regions -eq 3 ]; then
     regions="us-west-1,us-east-1,us-central-1"
+elif [ $num_regions -eq 4 ]; then
+    regions="us-west-1,us-east-1,us-central-1,us-south-1"
 else
-    echo "Invalid number of regions. Please enter 2, or 3"
+    echo "Invalid number of regions. Please enter 2, 3, or 4"
     exit 1
 fi
 
@@ -28,10 +30,16 @@ kubectl label node $node1 topology.kubernetes.io/zone=us-west-1 --overwrite
 kubectl label node $node2 topology.kubernetes.io/zone=us-east-1 --overwrite
 echo "kubectl label node $node1 topology.kubernetes.io/zone=us-west-1 --overwrite"
 echo "kubectl label node $node2 topology.kubernetes.io/zone=us-east-1 --overwrite"
-if [ $num_regions -eq 3 ]; then
+if [ $num_regions -ge 3 ]; then
     node3=$(echo "$nodes_with_labels" | grep 'node3' | awk '{print $1}')
     kubectl label node $node3 topology.kubernetes.io/zone=us-central-1 --overwrite
     echo "kubectl label node $node3 topology.kubernetes.io/zone=us-central-1 --overwrite"
+fi
+
+if [ $num_regions -ge 4 ]; then
+    node4=$(echo "$nodes_with_labels" | grep 'node4' | awk '{print $1}')
+    kubectl label node $node4 topology.kubernetes.io/zone=us-south-1 --overwrite
+    echo "kubectl label node $node4 topology.kubernetes.io/zone=us-south-1 --overwrite"
 fi
 
 kubectl apply -f k8sconfig.yaml &&
