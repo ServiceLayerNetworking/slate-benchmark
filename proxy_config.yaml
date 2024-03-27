@@ -28,6 +28,30 @@ spec:
   environmentVariables:
     ISTIO_META_REGION: "us-west-1"
 ---
+apiVersion: networking.istio.io/v1beta1
+kind: ProxyConfig
+metadata:
+  name: central-proxyconfig
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      region: us-central-1
+  environmentVariables:
+    ISTIO_META_REGION: "us-central-1"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: ProxyConfig
+metadata:
+  name: south-proxyconfig
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      region: us-south-1
+  environmentVariables:
+    ISTIO_META_REGION: "us-south-1"
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:

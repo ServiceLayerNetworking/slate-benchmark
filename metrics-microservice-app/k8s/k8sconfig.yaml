@@ -1,14 +1,14 @@
-apiVersion: v1                              
-kind: Service                                  
+apiVersion: v1
+kind: Service
 metadata:
   name: metrics-fake-ingress
   labels:
     app: metrics-fake-ingress
     service: metrics-fake-ingress
-spec:                                             
-  ports:                                           
-  - name: http                           
-    port: 8000                                  
+spec:
+  ports:
+  - name: http
+    port: 8000
     targetPort: 8080
   selector:
     app: metrics-fake-ingress
@@ -28,6 +28,11 @@ spec:
       labels:
         app: metrics-fake-ingress
         version: v1
+      annotations:
+        sidecar.istio.io/proxyCPU: 100m
+        sidecar.istio.io/proxyCPULimit: 4000m
+        sidecar.istio.io/proxyMemory: 128Mi
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
     spec:
       containers:
       - image: ghcr.io/adiprerepa/hotnets2023-metrics-fake-ingress:latest # todo change
@@ -40,17 +45,17 @@ spec:
             add:
             - NET_ADMIN
 ---
-apiVersion: v1                              
-kind: Service                                  
-metadata:                                         
+apiVersion: v1
+kind: Service
+metadata:
   name: metrics-processing
-  labels:                                                   
+  labels:
     app: metrics-processing
     service: metrics-processing
-spec:                                             
-  ports:                                           
-  - name: http                           
-    port: 8000                                  
+spec:
+  ports:
+  - name: http
+    port: 8000
     targetPort: 8080
   selector:
     app: metrics-processing
@@ -71,6 +76,11 @@ spec:
       labels:
         app: metrics-processing
         version: v1
+      annotations:
+        sidecar.istio.io/proxyCPU: 100m
+        sidecar.istio.io/proxyCPULimit: 4000m
+        sidecar.istio.io/proxyMemory: 128Mi
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
     spec:
       containers:
       - image: ghcr.io/adiprerepa/hotnets2023-metrics-processor:latest # todo change
@@ -93,9 +103,9 @@ metadata:
     service: metrics-handler
 spec:
   ports:
-    - name: http
-      port: 8000
-      targetPort: 8080
+  - name: http
+    port: 8000
+    targetPort: 8080
   selector:
     app: metrics-handler
 ---
@@ -115,6 +125,11 @@ spec:
       labels:
         app: metrics-handler
         version: v1
+      annotations:
+        sidecar.istio.io/proxyCPU: 100m
+        sidecar.istio.io/proxyCPULimit: 4000m
+        sidecar.istio.io/proxyMemory: 128Mi
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
     spec:
       containers:
       - image: ghcr.io/adiprerepa/hotnets2023-metrics-handler:latest # todo change
@@ -137,9 +152,9 @@ metadata:
     service: metrics-db
 spec:
   ports:
-    - name: http
-      port: 8080
-      targetPort: 8080
+  - name: http
+    port: 8080
+    targetPort: 8080
   selector:
     app: metrics-db
 ---
@@ -161,10 +176,13 @@ spec:
         version: v1
     spec:
       containers:
-        - image: ghcr.io/adiprerepa/metrics-db:latest # todo change
-#        - image: gangmuk/metrics-handler:latest # todo change
-          imagePullPolicy: Always
-          name: metrics-db
-          ports:
-            - containerPort: 8080
+      - image: ghcr.io/adiprerepa/metrics-db:latest # todo change
+        imagePullPolicy: Always
+        name: metrics-db
+        ports:
+        - containerPort: 8080
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
 ---
