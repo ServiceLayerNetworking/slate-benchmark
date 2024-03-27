@@ -1,0 +1,62 @@
+apiVersion: v1
+items:
+- apiVersion: networking.istio.io/v1beta1
+  kind: DestinationRule
+  metadata:
+    creationTimestamp: "2024-01-26T20:09:08Z"
+    generation: 1
+    name: metrics-fake-ingress-dr
+    namespace: default
+    resourceVersion: "1354143"
+    uid: 6f2a93f9-5dd4-4682-9078-ba3025d87234
+  spec:
+    host: metrics-fake-ingress
+    subsets:
+    - labels:
+        region: us-west-1
+      name: us-west-1
+    - labels:
+        region: us-east-1
+      name: us-east-1
+- apiVersion: networking.istio.io/v1beta1
+  kind: DestinationRule
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"networking.istio.io/v1beta1","kind":"DestinationRule","metadata":{"annotations":{},"name":"metrics-handler-destination","namespace":"default"},"spec":{"host":"metrics-handler","subsets":[{"labels":{"region":"us-west-1"},"name":"west"},{"labels":{"region":"us-east-1"},"name":"east"}]}}
+    creationTimestamp: "2024-01-26T01:22:51Z"
+    generation: 1
+    name: metrics-handler-destination
+    namespace: default
+    resourceVersion: "1208600"
+    uid: 69eb4a89-4544-459c-86bf-33a09ba21860
+  spec:
+    host: metrics-handler
+    subsets:
+    - labels:
+        region: us-west-1
+      name: west
+    - labels:
+        region: us-east-1
+      name: east
+- apiVersion: networking.istio.io/v1beta1
+  kind: DestinationRule
+  metadata:
+    creationTimestamp: "2024-01-26T01:00:12Z"
+    generation: 1
+    name: metrics-processing-dr
+    namespace: default
+    resourceVersion: "1205725"
+    uid: 2455417c-a153-4edb-854a-aba9bb46aa8d
+  spec:
+    host: metrics-processing
+    subsets:
+    - labels:
+        region: us-west-1
+      name: us-west-1
+    - labels:
+        region: us-east-1
+      name: us-east-1
+kind: List
+metadata:
+  resourceVersion: ""

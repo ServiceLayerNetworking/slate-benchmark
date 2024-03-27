@@ -1,0 +1,170 @@
+apiVersion: v1                              
+kind: Service                                  
+metadata:
+  name: metrics-fake-ingress
+  labels:
+    app: metrics-fake-ingress
+    service: metrics-fake-ingress
+spec:                                             
+  ports:                                           
+  - name: http                           
+    port: 8000                                  
+    targetPort: 8080
+  selector:
+    app: metrics-fake-ingress
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics-fake-ingress
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: metrics-fake-ingress
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: metrics-fake-ingress
+        version: v1
+    spec:
+      containers:
+      - image: ghcr.io/adiprerepa/hotnets2023-metrics-fake-ingress:latest # todo change
+        imagePullPolicy: Always
+        name: metrics-fake-ingress
+        ports:
+        - containerPort: 8080
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+---
+apiVersion: v1                              
+kind: Service                                  
+metadata:                                         
+  name: metrics-processing
+  labels:                                                   
+    app: metrics-processing
+    service: metrics-processing
+spec:                                             
+  ports:                                           
+  - name: http                           
+    port: 8000                                  
+    targetPort: 8080
+  selector:
+    app: metrics-processing
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics-processing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: metrics-processing
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: metrics-processing
+        version: v1
+    spec:
+      containers:
+      - image: ghcr.io/adiprerepa/hotnets2023-metrics-processor:latest # todo change
+        imagePullPolicy: Always
+        name: metrics-processing
+        ports:
+        - containerPort: 8080
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: metrics-handler
+  labels:
+    app: metrics-handler
+    service: metrics-handler
+spec:
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8080
+  selector:
+    app: metrics-handler
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics-handler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: metrics-handler
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: metrics-handler
+        version: v1
+    spec:
+      containers:
+      - image: ghcr.io/adiprerepa/hotnets2023-metrics-handler:latest # todo change
+        imagePullPolicy: Always
+        name: metrics-handler
+        ports:
+        - containerPort: 8080
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: metrics-db
+  labels:
+    app: metrics-db
+    service: metrics-db
+spec:
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: metrics-db
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: metrics-db
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: metrics-db
+        version: v1
+    spec:
+      containers:
+        - image: ghcr.io/adiprerepa/metrics-db:latest # todo change
+#        - image: gangmuk/metrics-handler:latest # todo change
+          imagePullPolicy: Always
+          name: metrics-db
+          ports:
+            - containerPort: 8080
+---
