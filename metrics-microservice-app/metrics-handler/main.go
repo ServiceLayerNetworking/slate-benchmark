@@ -32,7 +32,7 @@ func main() {
 func DetectAnomalies(c *gin.Context) {
 	// call metrics processing service
 	// return whether anomaly was detected
-	data := make([]byte, 1*1024*1024)
+	data := make([]byte, 4*1024*1024)
 	rand.Read(data)
 
 	client := &http.Client{}
@@ -48,7 +48,18 @@ func DetectAnomalies(c *gin.Context) {
 		}
 	}
 	req.Header.Set("Content-Length", fmt.Sprintf("%d", len(data)))
+	// <<<<<<< Updated upstream
 	_, err = client.Do(req)
+	// =======
+	// req.Header.Set("x-slate-routeto", "us-east-1")
+	// resp, err := client.Do(req)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// defer resp.Body.Close()
+	// // save body to string
+	// body, err := ioutil.ReadAll(resp.Body)
+	// >>>>>>> Stashed changes
 	if err != nil {
 		panic(err)
 	}

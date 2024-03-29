@@ -67,6 +67,11 @@ echo "kubectl apply -f ${repo_dir}/wasmplugins.yaml"
 kubectl apply -f ${repo_dir}/slate-controller.yaml &&
 echo "kubectl apply -f ${repo_dir}/slate-controller.yaml"
 
+
+bash ${repo_dir}/install_metric_server.sh &&
+echo "bash ${repo_dir}/install_metric_server.sh"
+
+
 # exclude the frontend service. In this app, fake-ingress
 vs_match_services="metrics-handler,metrics-processing,metrics-db"
 /users/gangmuk/projects/SLATE/kube-scripts/virtualservice-headermatch/vs-headermatch -services=${vs_match_services} -regions=${regions} &&

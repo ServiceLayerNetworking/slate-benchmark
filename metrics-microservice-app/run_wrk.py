@@ -108,9 +108,8 @@ def update_env_txt(mode, benchmark_name, total_num_services, routing_rule, rps_d
             # NOTE: it is divided by 2 for oneway.
             src_region = node_to_region[src_node]
             dst_region = node_to_region[dst_node]
-            CONFIG[f"inter_cluster_latency,{src_region},{dst_region}"] = int(inter_cluster_latency[src_node][dst_node]/2)
-            CONFIG[f"inter_cluster_latency,{dst_region},{src_region}"] = int(inter_cluster_latency[src_node][dst_node]/2)
-            CONFIG[f"inter_cluster_latency,{src_region},{src_region}"] = 0
+            CONFIG[f"inter_cluster_latency,{src_region},{dst_region}"] = inter_cluster_latency[src_node][dst_node]
+            CONFIG[f"inter_cluster_latency,{dst_region},{src_region}"] = inter_cluster_latency[src_node][dst_node]
     CONFIG["benchmark_name"] = benchmark_name
     CONFIG["total_num_services"] = total_num_services
     CONFIG["capacity"] = capacity
@@ -462,7 +461,7 @@ def main():
         capacity = 200
     else:
         capacity = 9999999999
-    degree = 1
+    degree = 4
     '''
     profile: collecting traces, routing rule is always local
     runtime: training latency functions with the given trace data (trace_string.csv)
@@ -470,23 +469,30 @@ def main():
     mode_set = ["profile", "runtime"]
     mode_and_routing_rule = {\
         # "profile": ["LOCAL"],\
-        # "runtime": ["MCLB"],\
+        "runtime": ["WATERFALL"],\
         # "runtime": ["SLATE"],\
-        "runtime": ["WATERFALL", "SLATE"],\
+        # "runtime": ["WATERFALL", "SLATE"],\
         # "runtime": ["LOCAL", "SLATE", "MCLB",  "WATERFALL"],\
         # "runtime": ["LOCAL", "SLATE", "MCLB",  "WATERFALL", "REMOTE"],\
     }
     
     ## for experiment
     all_RPS_list = [ \
-                    ## runtime, two clusters
+                    ## profile
+                    # {"west": 100}, \
+                    # {"west": 200}, \
+                    # {"west": 300}, \
+                    # {"west": 400}, \
+                    # {"west": 500}, \
+                        
+                    ## two clusters
                     # {"west": 100, "east": 10}, \
                     # {"west": 200, "east": 10}, \
                     # {"west": 300, "east": 10}, \
                     # {"west": 400, "east": 10}, \
                     # {"west": 500, "east": 10}, \
                     
-                    ## runtime, three clusters
+                    ## three clusters
                     # {"west": 300, "east": 50, "central": 50}, \
                     # {"west": 350, "east": 50, "central": 50}, \
                     # {"west": 400, "east": 50, "central": 50}, \
@@ -496,17 +502,14 @@ def main():
                     # {"west": 400, "east": 10, "central": 10}, \
                     # {"west": 500, "east": 10, "central": 10}, \
                         
-                    ## runtime, three clusters
-                    {"west": 300, "central": 50, "south": 300, "east": 50}, \
-                    
-                    ## profile
-                    # {"west": 10}, \
-                    # {"west": 50}, \
-                    # {"west": 100}, \
-                    # {"west": 150}, \
-                    # {"west": 200}, \
-                    # {"west": 250}, \
-                    # {"west": 300}, \
+                    ## four clusters
+                    # {"west": 200, "central": 50, "south": 200, "east": 50}, \
+                    # {"west": 250, "central": 50, "south": 250, "east": 50}, \
+                    # {"west": 300, "central": 50, "south": 300, "east": 50}, \
+                    {"west": 350, "central": 50, "south": 350, "east": 50}, \
+                    # {"west": 450, "central": 50, "south": 450, "east": 50}, \
+                    # {"west": 500, "central": 50, "south": 500, "east": 50}, \
+                    # {"west": 550, "central": 50, "south": 550, "east": 50}, \
                     ]
     
     for mode in mode_and_routing_rule:
@@ -522,12 +525,36 @@ def main():
     inter_cluster_latency = dict()
     for src_node in node_to_region:
         inter_cluster_latency[src_node] = dict()
-    inter_cluster_latency["node1"]["node2"] = 20 # west, east
-    inter_cluster_latency["node1"]["node3"] = 20 # west, central
-    inter_cluster_latency["node1"]["node4"] = 20 # west, south
-    inter_cluster_latency["node2"]["node3"] = 10 # east, central
-    inter_cluster_latency["node2"]["node4"] = 10 # east, south
-    inter_cluster_latency["node3"]["node4"] = 10 # central, south
+        
+    # inter_cluster_latency["node1"]["node2"] = 20 # west, east
+    # inter_cluster_latency["node1"]["node3"] = 10 # west, central
+    # inter_cluster_latency["node1"]["node4"] = 10 # west, south
+    # inter_cluster_latency["node2"]["node3"] = 20 # east, central
+    # inter_cluster_latency["node2"]["node4"] = 20 # east, south
+    # inter_cluster_latency["node3"]["node4"] = 10 # central, south
+    
+    # ''' west, 10, central, 10, south, 20, east '''
+    # inter_cluster_latency["node1"]["node2"] = 40 # west, east
+    # inter_cluster_latency["node1"]["node3"] = 10 # west, central
+    # inter_cluster_latency["node1"]["node4"] = 20 # west, south
+    # inter_cluster_latency["node2"]["node3"] = 30 # east, central
+    # inter_cluster_latency["node2"]["node4"] = 20 # east, south
+    # inter_cluster_latency["node3"]["node4"] = 10 # central, south
+    
+    ''' west, 10, central, 40, south, 10, east'''
+    inter_cluster_latency["node1"]["node2"] = 50 # west, east
+    inter_cluster_latency["node1"]["node3"] = 10 # west, central
+    inter_cluster_latency["node1"]["node4"] = 100 # west, south ** there must be no routing between west and south
+    inter_cluster_latency["node2"]["node3"] = 100 # east, central ** there must be no routing between west and south
+    inter_cluster_latency["node2"]["node4"] = 25 # east, south
+    inter_cluster_latency["node3"]["node4"] = 20 # central, south
+    
+    
+    inter_cluster_latency["node1"]["node1"] = 0 # west, west
+    inter_cluster_latency["node2"]["node2"] = 0 # central, central
+    inter_cluster_latency["node3"]["node3"] = 0 # south, south
+    inter_cluster_latency["node4"]["node4"] = 0 # east, east
+    
     for src_node in inter_cluster_latency:
         for dst_node in inter_cluster_latency[src_node]:
             if src_node == dst_node:
@@ -606,14 +633,28 @@ def main():
                         for cluster in rps_dict:
                             wrk_log_path_dict[cluster] = f"{output_dir}/{routing_rule}-{mode}-R{rps_dict[cluster]}-{cluster}.wrklog"
                         
+                        def recalculate_capacity(capacity, rps_dict):
+                            total_capacity = capacity * len(rps_dict)
+                            total_demand = sum(rps_dict.values())
+                            if total_demand > total_capacity:
+                                return total_demand // len(rps_dict)
+                            else:
+                                return capacity
+                        recalculated_capacity = recalculate_capacity(capacity, rps_dict)
+                        print(f"recalculated_capacity: {recalculated_capacity}")
                         ''' update env.txt and scp to slate-controller pod '''
-                        local_env_file = update_env_txt(mode, benchmark_name, total_num_services, routing_rule, rps_dict, inter_cluster_latency, node_to_region, capacity, degree)
+                        local_env_file = update_env_txt(mode, benchmark_name, total_num_services, routing_rule, rps_dict, inter_cluster_latency, node_to_region, recalculated_capacity, degree)
                         kubectl_cp_from_host_to_slate_controller_pod(local_env_file, "/app/env.txt")
                         if mode == "runtime":
                             slatelog = f"{benchmark_name}-trace.csv"
-                            kubectl_cp_from_host_to_slate_controller_pod(slatelog, "/app/trace.slatelog")
-                        print("sleep for 60 seconds to wait for the training to be done in global controller")
-                        time.sleep(60)
+                            kubectl_cp_from_host_to_slate_controller_pod(slatelog, "/app/trace.csv")
+                            print("sleep for 60 seconds to wait for the training to be done in global controller")
+                            t=20
+                            for i in range(t):
+                                time.sleep(1)
+                                print(f"start in {t-i} seconds")
+                        
+                        
                         # while True:
                         #     training_done = kubectl_cp_from_slate_controller_to_host("/app/train_done.txt", f"{output_dir}/train_done.txt")
                         #     if training_done:
@@ -637,6 +678,7 @@ def main():
                             future_list = list()
                             for cluster in wrk_log_path_dict:
                                 future_list.append(executor.submit(run_wrk, copied_config[cluster], cluster, req_type, rps_dict[cluster], wrk_log_path_dict[cluster]))
+                                time.sleep(0.1)
                             
                             ''' record resource allocation '''
                             time.sleep(1)
@@ -656,6 +698,11 @@ def main():
                                 
                         print("Both wrk2 have completed.")
                         
+                        flist = ["/app/endpoint_rps_history.csv"]
+                        for src_in_pod in flist:
+                            dst_in_host = f'{output_dir}/{routing_rule}-{src_in_pod.split("/")[-1]}'
+                            kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host)
+                            # run_command(f"python plot_rps.py {dst_in_host}")
                         if mode == "profile":
                             src_in_pod = "/app/trace_string.csv"
                             dst_in_host = f"{output_dir}/trace.slatelog"
@@ -665,10 +712,6 @@ def main():
                             dst_in_host = f'{output_dir}/{routing_rule}-{src_in_pod.split("/")[-1]}'
                             kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host)
                             
-                            # src_in_pod = "/app/last_percentage_df.csv"
-                            # dst_in_host = f'{output_dir}/{routing_rule}-{src_in_pod.split("/")[-1]}'
-                            # kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host)
-                            
                             flist = ["/app/routing_history.csv", "/app/endpoint_rps_history.csv"]
                             for src_in_pod in flist:
                                 dst_in_host = f'{output_dir}/{routing_rule}-{src_in_pod.split("/")[-1]}'
@@ -676,16 +719,27 @@ def main():
                             
                             if routing_rule == "WATERFALL" or routing_rule == "SLATE":
                                 ## copy latency function pdf files for debugging purpose
-                                # for svc in ["metrics-fake-ingress", "metrics-processing", "metrics-db", "metrics-handler"]:
-                                #     file_list.append(f"latency-{svc}.pdf")
-                                
-                                # file_list = ["coefficient.csv", "constraint.csv", "variable.csv", "network_df.csv", "compute_df.csv", "env.txt"]
-                                file_list = ["coefficient.csv", "env.txt"]
-                                for file in file_list:
+                                plt_file_list = list()
+                                for svc in ["metrics-fake-ingress", "metrics-processing", "metrics-db", "metrics-handler"]:
+                                    plt_file_list.append(f"latency-{svc}.pdf")
+                                for file in plt_file_list:
                                     src_in_pod = f"/app/{file}"
                                     dst_in_host = f"{output_dir}/latency_function/{routing_rule}-{file}"
                                     kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host)
                                     
+                                pct_flist = list()                                    
+                                for svc in ["metrics-fake-ingress", "metrics-processing", "metrics-handler"]:
+                                    pct_flist.append(f"percentage_df-{svc}.csv")
+                                for file in pct_flist:
+                                    src_in_pod = f"/app/{file}"
+                                    dst_in_host = f"{output_dir}/{routing_rule}-{file}"
+                                    kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host)
+                                    
+                                other_file_list = ["coefficient.csv", "env.txt"] # "constraint.csv", "variable.csv", "network_df.csv", "compute_df.csv"
+                                for file in other_file_list:
+                                    src_in_pod = f"/app/{file}"
+                                    dst_in_host = f"{output_dir}/{routing_rule}-{file}"
+                                    kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host)
                         else:
                             print("???")
                             print(f"mode: {mode} is not supported")

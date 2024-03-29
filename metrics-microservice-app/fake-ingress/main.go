@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -30,13 +28,15 @@ func main() {
 func ForwardRequest(c *gin.Context) {
 	// call metrics processing service
 	// return whether anomaly was detected
-	data := make([]byte, 5*1024)
-	rand.Read(data)
+	// data := make([]byte, 5*1024)
+	// data := make([]byte, 5)
+	// rand.Read(data)
 	//r := &processorReq{
 	//	Metrics: data,
 	//}
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "http://metrics-handler:8000/detectAnomalies", bytes.NewBuffer(data))
+	// req, err := http.NewRequest("GET", "http://metrics-handler:8000/detectAnomalies", bytes.NewBuffer(data))
+	req, err := http.NewRequest("GET", "http://metrics-handler:8000/detectAnomalies", nil)
 	if err != nil {
 		panic(err)
 	}

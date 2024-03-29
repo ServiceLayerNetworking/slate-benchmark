@@ -119,9 +119,7 @@ if __name__ == "__main__":
     if len(sys.argv) != 3:
         print("Usage: python script.py <rps_threshold> <input_directory>")
         sys.exit(1)
-    latency_metrics = ['avg', '50%']
-    # latency_metrics = ['avg', '50%']
-    # latency_metrics = ['avg', '50%']
+    latency_metrics = ['avg', '50%'] #, '99%']
     rps_threshold = int(sys.argv[1])
     base_directory = sys.argv[2]
     wrklog_files = find_and_process_wrklog_files(base_directory)
@@ -147,9 +145,10 @@ if __name__ == "__main__":
             for cluster in df['cluster'].unique():
                 # df_filtered = df[(df['mode'] == mode) & (df['routing_rule'] == routing_rule) & (df['inter_cluster_latency'] == inter_cluster_latency) & (df['cluster'] == cluster)]
                 df_filtered = df[(df['mode'] == mode) & (df['routing_rule'] == routing_rule) & (df['cluster'] == cluster)]
+                df_filtered.to_csv("asdf.csv")
                 for metric in latency_metrics:
                     plt.plot(df_filtered['rps'], df_filtered[metric], label=f"rps-{routing_rule}-{cluster}-{metric}", marker='o')
-                    plt.plot(df_filtered['rps'], df_filtered['tput'], label=f"tput-{routing_rule}-{cluster}-{metric}", marker='x', linestyle='--', alpha=0.5)
+                    plt.plot(df_filtered['rps'], df_filtered['tput'], marker='x', linestyle='--', alpha=0.5)
     
     
     plt.title(f'Latency', fontsize=20)
@@ -157,7 +156,8 @@ if __name__ == "__main__":
     plt.ylabel('Latency (ms)', fontsize=20)
     plt.xticks(fontsize=14)  # Set x-tick label fontsize
     plt.yticks(fontsize=14)  # Set y-tick label fontsize
-    # plt.legend(fontsize=14)
+    plt.legend(fontsize=14)
+    plt.grid(True)
     # plt.ylim((0,1000))
     svc_name = base_directory.split('/')[0]
     merged_string = ''.join(latency_metrics)
