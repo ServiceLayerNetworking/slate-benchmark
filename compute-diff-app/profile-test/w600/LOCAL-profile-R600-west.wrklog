@@ -1,0 +1,74 @@
+-- start of config --
+distribution,exp
+thread,600
+connection,600
+duration,60
+mode,profile
+routing_rule,LOCAL
+west_RPS,600
+inter_cluster_latency,us-west-1,us-east-1,50
+inter_cluster_latency,us-east-1,us-west-1,50
+inter_cluster_latency,us-west-1,us-central-1,10
+inter_cluster_latency,us-central-1,us-west-1,10
+inter_cluster_latency,us-west-1,us-west-1,0
+inter_cluster_latency,us-east-1,us-central-1,100
+inter_cluster_latency,us-central-1,us-east-1,100
+inter_cluster_latency,us-east-1,us-east-1,0
+inter_cluster_latency,us-central-1,us-central-1,0
+benchmark_name,metrics
+total_num_services,4
+capacity,600
+degree,4
+cluster,west
+RPS,600
+-- end of config --
+
+
+-- start of resource allocation --
+Namespace,Resource Type,Pod Name,Container Name,CPU Limit,CPU Request,Memory Limit,Memory Request
+default,Pod,compute-node-us-east-1-b7c4d4f8-g8nq9,compute-node,N/A,N/A,N/A,N/A
+default,Pod,compute-node-us-east-1-b7c4d4f8-g8nq9,istio-proxy,2,100m,1Gi,128Mi
+default,Pod,compute-node-us-west-1-96f9b6c99-8kjz9,compute-node,N/A,N/A,N/A,N/A
+default,Pod,compute-node-us-west-1-96f9b6c99-8kjz9,istio-proxy,2,100m,1Gi,128Mi
+default,Pod,frontend-us-east-1-7b4865c5cf-6hk9t,frontend,N/A,N/A,N/A,N/A
+default,Pod,frontend-us-east-1-7b4865c5cf-6hk9t,istio-proxy,2,100m,1Gi,128Mi
+default,Pod,frontend-us-west-1-5c8464fff9-zhjtf,frontend,N/A,N/A,N/A,N/A
+default,Pod,frontend-us-west-1-5c8464fff9-zhjtf,istio-proxy,2,100m,1Gi,128Mi
+default,Pod,kube-state-metrics-6bb8fff846-2l92p,kube-state-metrics,N/A,N/A,N/A,N/A
+default,Pod,kube-state-metrics-6bb8fff846-2l92p,istio-proxy,2,100m,1Gi,128Mi
+default,Pod,slate-controller-5cbff6cb97-4v8r9,slate-controller,N/A,N/A,N/A,N/A
+default,Pod,slate-controller-5cbff6cb97-4v8r9,istio-proxy,2,100m,1Gi,128Mi
+istio-system,Pod,grafana-59fd8f47c7-dl964,grafana,N/A,N/A,N/A,N/A
+istio-system,Pod,istio-ingressgateway-585cd588df-44rsh,istio-proxy,2,100m,1Gi,128Mi
+istio-system,Pod,istio-ingressgateway-585cd588df-j84sf,istio-proxy,2,100m,1Gi,128Mi
+istio-system,Pod,istio-ingressgateway-585cd588df-jdrvs,istio-proxy,2,100m,1Gi,128Mi
+istio-system,Pod,istiod-7874d78498-glq68,discovery,N/A,500m,N/A,2Gi
+istio-system,Pod,jaeger-cc8b9b547-sxgfk,jaeger,N/A,10m,N/A,N/A
+istio-system,Pod,prometheus-7b57d45fdd-t8bsq,prometheus-server-configmap-reload,N/A,N/A,N/A,N/A
+istio-system,Pod,prometheus-7b57d45fdd-t8bsq,prometheus-server,N/A,N/A,N/A,N/A
+-- end of resource allocation --
+
+-- start of resource usage --
+Namespace,Pod Name,Container Name,CPU Usage,Memory Usage
+default,compute-node-us-east-1-b7c4d4f8-g8nq9,compute-node,0,5
+default,compute-node-us-east-1-b7c4d4f8-g8nq9,istio-proxy,2,80
+default,compute-node-us-west-1-96f9b6c99-8kjz9,compute-node,0,6
+default,compute-node-us-west-1-96f9b6c99-8kjz9,istio-proxy,2,79
+default,frontend-us-east-1-7b4865c5cf-6hk9t,frontend,0,4
+default,frontend-us-east-1-7b4865c5cf-6hk9t,istio-proxy,2,78
+default,frontend-us-west-1-5c8464fff9-zhjtf,frontend,0,9
+default,frontend-us-west-1-5c8464fff9-zhjtf,istio-proxy,3,82
+default,kube-state-metrics-6bb8fff846-2l92p,kube-state-metrics,1,14
+default,kube-state-metrics-6bb8fff846-2l92p,istio-proxy,2,79
+default,slate-controller-5cbff6cb97-4v8r9,slate-controller,12,127
+default,slate-controller-5cbff6cb97-4v8r9,istio-proxy,6,80
+istio-system,grafana-59fd8f47c7-dl964,grafana,13,116
+istio-system,istio-ingressgateway-585cd588df-44rsh,istio-proxy,10,157
+istio-system,istio-ingressgateway-585cd588df-j84sf,istio-proxy,10,158
+istio-system,istio-ingressgateway-585cd588df-jdrvs,istio-proxy,10,165
+istio-system,istiod-7874d78498-glq68,discovery,1,80
+istio-system,jaeger-cc8b9b547-sxgfk,jaeger,7,85
+istio-system,prometheus-7b57d45fdd-t8bsq,prometheus-server-configmap-reload,0,11
+istio-system,prometheus-7b57d45fdd-t8bsq,prometheus-server,19,780
+-- end of resource usage --
+

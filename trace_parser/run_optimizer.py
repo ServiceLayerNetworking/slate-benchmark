@@ -419,7 +419,7 @@ def trace_string_file_to_trace_data_structure(trace_string_file_path, sample_rat
         avg_num_svc = tot_num_svc / len(all_traces[cid])
         
         required_num_svc = math.ceil(avg_num_svc)
-        required_num_svc = 4
+        required_num_svc = 2
         
         
     print(f"avg_num_svc in {cid}: {avg_num_svc}")
