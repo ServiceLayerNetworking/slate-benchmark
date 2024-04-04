@@ -1,0 +1,198 @@
+-- start of config --
+distribution,exp
+thread,333
+connection,333
+duration,180
+mode,profile
+routing_rule,LOCAL
+west_RPS,1000
+inter_cluster_latency,us-west-1,us-east-1,50
+inter_cluster_latency,us-east-1,us-west-1,50
+inter_cluster_latency,us-west-1,us-central-1,10
+inter_cluster_latency,us-central-1,us-west-1,10
+inter_cluster_latency,us-west-1,us-west-1,0
+inter_cluster_latency,us-east-1,us-central-1,100
+inter_cluster_latency,us-central-1,us-east-1,100
+inter_cluster_latency,us-east-1,us-east-1,0
+inter_cluster_latency,us-central-1,us-central-1,0
+benchmark_name,metrics
+total_num_services,4
+capacity,1000
+degree,4
+cluster,west
+RPS,1000
+-- end of config --
+
+
+-- start of resource allocation --
+Namespace,Resource Type,Pod Name,Container Name,CPU Limit,CPU Request,Memory Limit,Memory Request
+default,Pod,compute-node-us-east-1-8575c9f46d-sd46v,compute-node,N/A,N/A,N/A,N/A
+default,Pod,compute-node-us-east-1-8575c9f46d-sd46v,istio-proxy,2,100m,1Gi,128Mi
+default,Pod,compute-node-us-west-1-df47bfc76-crssw,compute-node,N/A,N/A,N/A,N/A
+default,Pod,compute-node-us-west-1-df47bfc76-crssw,istio-proxy,2,100m,1Gi,128Mi
+default,Pod,frontend-us-east-1-57c6df8568-h6h92,frontend,N/A,N/A,N/A,N/A
+default,Pod,frontend-us-east-1-57c6df8568-h6h92,istio-proxy,2,100m,1Gi,128Mi
+default,Pod,frontend-us-west-1-57cdfd4848-ncb95,frontend,N/A,N/A,N/A,N/A
+default,Pod,frontend-us-west-1-57cdfd4848-ncb95,istio-proxy,2,100m,1Gi,128Mi
+default,Pod,kube-state-metrics-6c97888ffb-t4jvw,kube-state-metrics,N/A,N/A,N/A,N/A
+default,Pod,kube-state-metrics-6c97888ffb-t4jvw,istio-proxy,2,100m,1Gi,128Mi
+default,Pod,slate-controller-757b4797c5-b2r56,slate-controller,N/A,N/A,N/A,N/A
+default,Pod,slate-controller-757b4797c5-b2r56,istio-proxy,2,100m,1Gi,128Mi
+istio-system,Pod,grafana-59fd8f47c7-dl964,grafana,N/A,N/A,N/A,N/A
+istio-system,Pod,istio-ingressgateway-585cd588df-2vgmp,istio-proxy,2,100m,1Gi,128Mi
+istio-system,Pod,istio-ingressgateway-585cd588df-4vnh7,istio-proxy,2,100m,1Gi,128Mi
+istio-system,Pod,istio-ingressgateway-585cd588df-bdj6p,istio-proxy,2,100m,1Gi,128Mi
+istio-system,Pod,istio-ingressgateway-585cd588df-jdrvs,istio-proxy,2,100m,1Gi,128Mi
+istio-system,Pod,istio-ingressgateway-585cd588df-tmvhx,istio-proxy,2,100m,1Gi,128Mi
+istio-system,Pod,istiod-7874d78498-glq68,discovery,N/A,500m,N/A,2Gi
+istio-system,Pod,jaeger-cc8b9b547-sxgfk,jaeger,N/A,10m,N/A,N/A
+istio-system,Pod,prometheus-7b57d45fdd-t8bsq,prometheus-server-configmap-reload,N/A,N/A,N/A,N/A
+istio-system,Pod,prometheus-7b57d45fdd-t8bsq,prometheus-server,N/A,N/A,N/A,N/A
+-- end of resource allocation --
+
+-- start of resource usage --
+Namespace,Pod Name,Container Name,CPU Usage,Memory Usage
+default,compute-node-us-east-1-8575c9f46d-sd46v,compute-node,0,5
+default,compute-node-us-east-1-8575c9f46d-sd46v,istio-proxy,2,82
+default,compute-node-us-west-1-df47bfc76-crssw,compute-node,11091,40
+default,compute-node-us-west-1-df47bfc76-crssw,istio-proxy,390,151
+default,frontend-us-east-1-57c6df8568-h6h92,frontend,0,5
+default,frontend-us-east-1-57c6df8568-h6h92,istio-proxy,2,80
+default,frontend-us-west-1-57cdfd4848-ncb95,frontend,9991,78
+default,frontend-us-west-1-57cdfd4848-ncb95,istio-proxy,714,197
+default,kube-state-metrics-6c97888ffb-t4jvw,kube-state-metrics,0,14
+default,kube-state-metrics-6c97888ffb-t4jvw,istio-proxy,2,81
+default,slate-controller-757b4797c5-b2r56,slate-controller,31,174
+default,slate-controller-757b4797c5-b2r56,istio-proxy,7,84
+istio-system,grafana-59fd8f47c7-dl964,grafana,5,126
+istio-system,istio-ingressgateway-585cd588df-2vgmp,istio-proxy,77,161
+istio-system,istio-ingressgateway-585cd588df-4vnh7,istio-proxy,85,163
+istio-system,istio-ingressgateway-585cd588df-bdj6p,istio-proxy,84,165
+istio-system,istio-ingressgateway-585cd588df-jdrvs,istio-proxy,78,179
+istio-system,istio-ingressgateway-585cd588df-tmvhx,istio-proxy,75,163
+istio-system,istiod-7874d78498-glq68,discovery,1,83
+istio-system,jaeger-cc8b9b547-sxgfk,jaeger,14,255
+istio-system,prometheus-7b57d45fdd-t8bsq,prometheus-server-configmap-reload,0,11
+istio-system,prometheus-7b57d45fdd-t8bsq,prometheus-server,15,887
+-- end of resource usage --
+
+Running 3m test @ http://node1.prajwal.istio-pg0.utah.cloudlab.us:30002
+  333 threads and 333 connections
+
+
+-----------------------------------------------------------------------
+Test Results @ http://node1.prajwal.istio-pg0.utah.cloudlab.us:30002 
+  Thread Stats   Avg      Stdev     99%   +/- Stdev
+    Latency     4.68s     4.42s   18.37s    64.58%
+    Req/Sec     2.52      2.48    10.00     87.91%
+  Latency Distribution (HdrHistogram - Recorded Latency)
+ 50.000%    3.77s 
+ 75.000%    7.23s 
+ 90.000%   10.72s 
+ 99.000%   18.37s 
+ 99.900%   24.43s 
+ 99.990%   28.25s 
+ 99.999%   28.92s 
+100.000%   29.07s 
+
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+      31.343     0.000000            1         1.00
+      94.399     0.100000        16054         1.11
+     266.495     0.200000        32088         1.25
+    1312.767     0.300000        48132         1.43
+    2510.847     0.400000        64179         1.67
+    3774.463     0.500000        80215         2.00
+    4403.199     0.550000        88243         2.22
+    5074.943     0.600000        96279         2.50
+    5722.111     0.650000       104291         2.86
+    6443.007     0.700000       112335         3.33
+    7225.343     0.750000       120326         4.00
+    7663.615     0.775000       124330         4.44
+    8175.615     0.800000       128375         5.00
+    8691.711     0.825000       132388         5.71
+    9265.151     0.850000       136411         6.67
+    9920.511     0.875000       140387         8.00
+   10297.343     0.887500       142401         8.89
+   10715.135     0.900000       144390        10.00
+   11157.503     0.912500       146416        11.43
+   11689.983     0.925000       148421        13.33
+   12345.343     0.937500       150412        16.00
+   12722.175     0.943750       151420        17.78
+   13148.159     0.950000       152405        20.00
+   13598.719     0.956250       153410        22.86
+   14131.199     0.962500       154418        26.67
+   14729.215     0.968750       155414        32.00
+   15114.239     0.971875       155915        35.56
+   15491.071     0.975000       156420        40.00
+   15933.439     0.978125       156916        45.71
+   16400.383     0.981250       157419        53.33
+   17006.591     0.984375       157931        64.00
+   17367.039     0.985938       158179        71.11
+   17743.871     0.987500       158426        80.00
+   18137.087     0.989062       158678        91.43
+   18579.455     0.990625       158929       106.67
+   19185.663     0.992188       159175       128.00
+   19464.191     0.992969       159300       142.22
+   19742.719     0.993750       159429       160.00
+   20152.319     0.994531       159549       182.86
+   20561.919     0.995313       159676       213.33
+   21102.591     0.996094       159801       256.00
+   21479.423     0.996484       159866       284.44
+   21823.487     0.996875       159926       320.00
+   22167.551     0.997266       159988       365.71
+   22577.151     0.997656       160051       426.67
+   23085.055     0.998047       160112       512.00
+   23298.047     0.998242       160145       568.89
+   23560.191     0.998437       160175       640.00
+   23855.103     0.998633       160206       731.43
+   24150.015     0.998828       160239       853.33
+   24477.695     0.999023       160269      1024.00
+   24756.223     0.999121       160286      1137.78
+   25018.367     0.999219       160300      1280.00
+   25395.199     0.999316       160316      1462.86
+   25690.111     0.999414       160332      1706.67
+   26001.407     0.999512       160347      2048.00
+   26148.863     0.999561       160356      2275.56
+   26329.087     0.999609       160364      2560.00
+   26574.847     0.999658       160371      2925.71
+   26951.679     0.999707       160379      3413.33
+   27688.959     0.999756       160387      4096.00
+   27705.343     0.999780       160390      4551.11
+   27869.183     0.999805       160394      5120.00
+   27951.103     0.999829       160398      5851.43
+   28049.407     0.999854       160402      6826.67
+   28114.943     0.999878       160407      8192.00
+   28213.247     0.999890       160408      9102.22
+   28246.015     0.999902       160411     10240.00
+   28262.399     0.999915       160412     11702.86
+   28311.551     0.999927       160414     13653.33
+   28344.319     0.999939       160416     16384.00
+   28426.239     0.999945       160417     18204.44
+   28459.007     0.999951       160418     20480.00
+   28508.159     0.999957       160419     23405.71
+   28704.767     0.999963       160420     27306.67
+   28721.151     0.999969       160421     32768.00
+   28721.151     0.999973       160421     36408.89
+   28819.455     0.999976       160422     40960.00
+   28819.455     0.999979       160422     46811.43
+   28917.759     0.999982       160423     54613.33
+   28917.759     0.999985       160423     65536.00
+   28917.759     0.999986       160423     72817.78
+   29032.447     0.999988       160424     81920.00
+   29032.447     0.999989       160424     93622.86
+   29032.447     0.999991       160424    109226.67
+   29032.447     0.999992       160424    131072.00
+   29032.447     0.999993       160424    145635.56
+   29065.215     0.999994       160425    163840.00
+   29065.215     1.000000       160425          inf
+#[Mean    =     4676.589, StdDeviation   =     4422.022]
+#[Max     =    29048.832, Total count    =       160425]
+#[Buckets =           27, SubBuckets     =         2048]
+-----------------------------------------------------------------------
+  170324 requests in 3.00m, 27.64MB read
+  Socket errors: connect 0, read 0, write 0, timeout 65
+  Non-2xx or 3xx responses: 13294
+Requests/sec:    946.15  
+Transfer/sec:    157.22KB

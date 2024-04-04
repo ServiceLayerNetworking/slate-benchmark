@@ -37,6 +37,7 @@ trace_str = list()
 x_feature = "rps_dict"
 target_y = "xt"
 required_num_svc = 3 # metrics
+req_type = "req"
 
 '''
 cluster_to_cid and cid_to_cluster should be deprecated
@@ -186,7 +187,7 @@ def fit_polynomial_regression(data, y_col_name, svc_name, ep_str, cid, degree):
     plt.ylabel(y_col_name +" ms")
     plt.title(f'{ep_str} in {cid}')
     plt.legend()
-    # plt.savefig(f"poly{degree}-latency-{x_feature}-{svc_name}.pdf")
+    plt.savefig(f"{req_type}-poly{degree}-latency-{x_feature}-{svc_name}.pdf")
     plt.show()
     return coefficients.to_dict()
 
@@ -554,8 +555,12 @@ if __name__ == "__main__":
     trace_file_name = sys.argv[1]
     degree = int(sys.argv[2])
     if len(sys.argv) < 3:
-        print("Usage: python run_optimizer.py <trace_file_name> <degree>")
+        print("Usage: python run_optimizer.py <trace_file_name> <degree> <req_type>")
         exit()
+    if len(sys.argv) == 3:
+        req_type = "req"
+    else:
+        req_type = sys.argv[3]
     training_phase(trace_file_name, degree)
     # exit()
     optimizer_entrypoint()

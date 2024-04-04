@@ -16,11 +16,12 @@ from pprint import pprint
 # sys.path.append('/users/gangmuk/projects/SLATE/global-controller')
 # import config as cfg
 
+
 CONFIG = {
     'distribution': 'exp',
     'thread': 100, # min(thread, connection, rps-50)
     'connection': 200, # min(connection, rps-50)
-    'duration': 60
+    'duration': 180
 }
 
 def parse_xml(file_path):
@@ -271,9 +272,9 @@ def run_wrk(copy_config, target_cluster, req_type, target_cluster_rps, wrk_log_p
         # copy_config["thread"] = copy_config["connection"] - 100
     copy_config["thread"] = copy_config["connection"]
     
-    # if target_cluster_rps == 400:
-    #     copy_config["thread"] = 200
-    #     copy_config["connection"] = 300
+    if target_cluster_rps > 400:
+        copy_config["thread"] = int(max(target_cluster_rps/3, 300))
+        copy_config["connection"] = int(max(target_cluster_rps/3, 300))
     # if target_cluster_rps == 500:
     #     copy_config["thread"] = 300
     #     copy_config["connection"] = 400
@@ -490,6 +491,13 @@ def main():
                     {"west": 800}, \
                     {"west": 900}, \
                     {"west": 1000}, \
+                    {"west": 1100}, \
+                    {"west": 1200}, \
+
+                    # {"west": 1700}, \
+                    # {"west": 1800}, \
+                    # {"west": 1900}, \
+                    # {"west": 2000}, \
                         
                     ## two clusters
                     # {"west": 100, "east": 10}, \
@@ -523,7 +531,7 @@ def main():
         assert mode in mode_set
     
 
-    node_dict = get_nodename_and_ipaddr("/home/adiprerepa/college/slate/slate-benchmark/compute-diff-app/config.xml")
+    node_dict = get_nodename_and_ipaddr("/users/gangmuk/projects/slate-benchmark/compute-diff-app/config.xml")
     for node in node_dict:
         print(f"node: {node}, hostname: {node_dict[node]['hostname']}, ipaddr: {node_dict[node]['ipaddr']}")
         
@@ -591,7 +599,7 @@ def main():
             add_latency_rules(src_host, interface, dst_node_ip, delay)
             print(f"Added {delay}ms from {src_host}({src_node}) to {dst_node_ip}({dst_node})")
 
-    req_type_list = ["heavy_compute"] # It should match wrk2 lua script
+    req_type_list = ["lightSameLatency", "heavySameLatency", "lightSameCompute", "heavySameCompute", "write1kb", "write10kb", "write100kb", "write1mb"] # It should match wrk2 lua script
     for wasm_config in with_wasm:
         if istio_config == True:
             print(f"wasm config: {wasm_config}")
@@ -624,7 +632,7 @@ def main():
                         if istio_config:
                             if wasm_config:
                                 # output_dir = f"{req_type}-ww-{postfix}"
-                                output_dir = f"{mode}-{postfix}"
+                                output_dir = f"{mode}-{req_type}-{postfix}"
                             else:
                                 output_dir = f"wow-{postfix}"
                         else:

@@ -1,0 +1,323 @@
+-- start of config --
+distribution,exp
+thread,200
+connection,200
+duration,180
+mode,profile
+routing_rule,LOCAL
+west_RPS,200
+inter_cluster_latency,us-west-1,us-east-1,50
+inter_cluster_latency,us-east-1,us-west-1,50
+inter_cluster_latency,us-west-1,us-central-1,10
+inter_cluster_latency,us-central-1,us-west-1,10
+inter_cluster_latency,us-west-1,us-west-1,0
+inter_cluster_latency,us-east-1,us-central-1,100
+inter_cluster_latency,us-central-1,us-east-1,100
+inter_cluster_latency,us-east-1,us-east-1,0
+inter_cluster_latency,us-central-1,us-central-1,0
+benchmark_name,metrics
+total_num_services,4
+capacity,200
+degree,4
+cluster,west
+RPS,200
+-- end of config --
+
+
+-- start of resource allocation --
+Namespace,Resource Type,Pod Name,Container Name,CPU Limit,CPU Request,Memory Limit,Memory Request
+default,Pod,compute-node-us-east-1-6678df8fc5-47k8z,compute-node,N/A,N/A,N/A,N/A
+default,Pod,compute-node-us-east-1-6678df8fc5-47k8z,istio-proxy,2,100m,1Gi,128Mi
+default,Pod,compute-node-us-west-1-6484dbc4ff-cgckz,compute-node,N/A,N/A,N/A,N/A
+default,Pod,compute-node-us-west-1-6484dbc4ff-cgckz,istio-proxy,2,100m,1Gi,128Mi
+default,Pod,frontend-us-east-1-54b8d9cd4-bqgbp,frontend,N/A,N/A,N/A,N/A
+default,Pod,frontend-us-east-1-54b8d9cd4-bqgbp,istio-proxy,2,100m,1Gi,128Mi
+default,Pod,frontend-us-west-1-d6d584f76-cdt8g,frontend,N/A,N/A,N/A,N/A
+default,Pod,frontend-us-west-1-d6d584f76-cdt8g,istio-proxy,2,100m,1Gi,128Mi
+default,Pod,kube-state-metrics-654fc68ff6-65nf4,kube-state-metrics,N/A,N/A,N/A,N/A
+default,Pod,kube-state-metrics-654fc68ff6-65nf4,istio-proxy,2,100m,1Gi,128Mi
+default,Pod,slate-controller-7dcbb5d995-4kxqm,slate-controller,N/A,N/A,N/A,N/A
+default,Pod,slate-controller-7dcbb5d995-4kxqm,istio-proxy,2,100m,1Gi,128Mi
+istio-system,Pod,grafana-59fd8f47c7-dl964,grafana,N/A,N/A,N/A,N/A
+istio-system,Pod,istio-ingressgateway-585cd588df-2vgmp,istio-proxy,2,100m,1Gi,128Mi
+istio-system,Pod,istio-ingressgateway-585cd588df-4vnh7,istio-proxy,2,100m,1Gi,128Mi
+istio-system,Pod,istio-ingressgateway-585cd588df-bdj6p,istio-proxy,2,100m,1Gi,128Mi
+istio-system,Pod,istio-ingressgateway-585cd588df-jdrvs,istio-proxy,2,100m,1Gi,128Mi
+istio-system,Pod,istio-ingressgateway-585cd588df-tmvhx,istio-proxy,2,100m,1Gi,128Mi
+istio-system,Pod,istiod-7874d78498-glq68,discovery,N/A,500m,N/A,2Gi
+istio-system,Pod,jaeger-cc8b9b547-sxgfk,jaeger,N/A,10m,N/A,N/A
+istio-system,Pod,prometheus-7b57d45fdd-t8bsq,prometheus-server-configmap-reload,N/A,N/A,N/A,N/A
+istio-system,Pod,prometheus-7b57d45fdd-t8bsq,prometheus-server,N/A,N/A,N/A,N/A
+-- end of resource allocation --
+
+-- start of resource usage --
+Namespace,Pod Name,Container Name,CPU Usage,Memory Usage
+default,compute-node-us-east-1-6678df8fc5-47k8z,compute-node,0,4
+default,compute-node-us-east-1-6678df8fc5-47k8z,istio-proxy,2,80
+default,compute-node-us-west-1-6484dbc4ff-cgckz,compute-node,41,10
+default,compute-node-us-west-1-6484dbc4ff-cgckz,istio-proxy,62,85
+default,frontend-us-east-1-54b8d9cd4-bqgbp,frontend,0,5
+default,frontend-us-east-1-54b8d9cd4-bqgbp,istio-proxy,2,78
+default,frontend-us-west-1-d6d584f76-cdt8g,frontend,53,12
+default,frontend-us-west-1-d6d584f76-cdt8g,istio-proxy,121,87
+default,kube-state-metrics-654fc68ff6-65nf4,kube-state-metrics,0,14
+default,kube-state-metrics-654fc68ff6-65nf4,istio-proxy,1,80
+default,slate-controller-7dcbb5d995-4kxqm,slate-controller,14,138
+default,slate-controller-7dcbb5d995-4kxqm,istio-proxy,4,80
+istio-system,grafana-59fd8f47c7-dl964,grafana,4,119
+istio-system,istio-ingressgateway-585cd588df-4vnh7,istio-proxy,42,163
+istio-system,istio-ingressgateway-585cd588df-jdrvs,istio-proxy,40,180
+istio-system,istiod-7874d78498-glq68,discovery,1,87
+istio-system,jaeger-cc8b9b547-sxgfk,jaeger,9,236
+istio-system,prometheus-7b57d45fdd-t8bsq,prometheus-server-configmap-reload,0,11
+istio-system,prometheus-7b57d45fdd-t8bsq,prometheus-server,9,928
+-- end of resource usage --
+
+Running 3m test @ http://node1.prajwal.istio-pg0.utah.cloudlab.us:30002
+  200 threads and 200 connections
+
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+
+-----------------------------------------------------------------------
+Test Results @ http://node1.prajwal.istio-pg0.utah.cloudlab.us:30002 
+  Thread Stats   Avg      Stdev     99%   +/- Stdev
+    Latency     1.80ms  274.90us   2.71ms   82.54%
+    Req/Sec     1.06     10.58    22.00     98.97%
+  Latency Distribution (HdrHistogram - Recorded Latency)
+ 50.000%    1.74ms
+ 75.000%    1.90ms
+ 90.000%    2.10ms
+ 99.000%    2.71ms
+ 99.900%    4.09ms
+ 99.990%    7.12ms
+ 99.999%    8.56ms
+100.000%    8.56ms
+
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+       1.314     0.000000            1         1.00
+       1.550     0.100000         3415         1.11
+       1.605     0.200000         6790         1.25
+       1.652     0.300000        10138         1.43
+       1.695     0.400000        13533         1.67
+       1.743     0.500000        16977         2.00
+       1.767     0.550000        18603         2.22
+       1.795     0.600000        20317         2.50
+       1.824     0.650000        21983         2.86
+       1.858     0.700000        23693         3.33
+       1.896     0.750000        25360         4.00
+       1.919     0.775000        26216         4.44
+       1.943     0.800000        27079         5.00
+       1.973     0.825000        27910         5.71
+       2.005     0.850000        28734         6.67
+       2.045     0.875000        29570         8.00
+       2.069     0.887500        30015         8.89
+       2.097     0.900000        30421        10.00
+       2.129     0.912500        30845        11.43
+       2.167     0.925000        31261        13.33
+       2.207     0.937500        31701        16.00
+       2.231     0.943750        31913        17.78
+       2.257     0.950000        32111        20.00
+       2.293     0.956250        32320        22.86
+       2.337     0.962500        32533        26.67
+       2.385     0.968750        32743        32.00
+       2.413     0.971875        32845        35.56
+       2.443     0.975000        32952        40.00
+       2.479     0.978125        33056        45.71
+       2.519     0.981250        33159        53.33
+       2.579     0.984375        33264        64.00
+       2.607     0.985938        33317        71.11
+       2.645     0.987500        33371        80.00
+       2.683     0.989062        33426        91.43
+       2.733     0.990625        33476       106.67
+       2.793     0.992188        33528       128.00
+       2.841     0.992969        33557       142.22
+       2.881     0.993750        33582       160.00
+       2.927     0.994531        33609       182.86
+       2.991     0.995313        33634       213.33
+       3.061     0.996094        33660       256.00
+       3.107     0.996484        33674       284.44
+       3.173     0.996875        33687       320.00
+       3.221     0.997266        33700       365.71
+       3.297     0.997656        33713       426.67
+       3.373     0.998047        33726       512.00
+       3.439     0.998242        33733       568.89
+       3.543     0.998437        33740       640.00
+       3.685     0.998633        33746       731.43
+       3.969     0.998828        33753       853.33
+       4.111     0.999023        33759      1024.00
+       4.311     0.999121        33763      1137.78
+       4.455     0.999219        33766      1280.00
+       4.555     0.999316        33769      1462.86
+       4.831     0.999414        33773      1706.67
+       4.939     0.999512        33776      2048.00
+       4.987     0.999561        33778      2275.56
+       5.107     0.999609        33779      2560.00
+       5.451     0.999658        33781      2925.71
+       5.615     0.999707        33783      3413.33
+       5.823     0.999756        33784      4096.00
+       5.931     0.999780        33785      4551.11
+       5.939     0.999805        33786      5120.00
+       6.207     0.999829        33787      5851.43
+       6.675     0.999854        33788      6826.67
+       6.675     0.999878        33788      8192.00
+       7.119     0.999890        33789      9102.22
+       7.119     0.999902        33789     10240.00
+       7.131     0.999915        33790     11702.86
+       7.131     0.999927        33790     13653.33
+       7.131     0.999939        33790     16384.00
+       7.731     0.999945        33791     18204.44
+       7.731     0.999951        33791     20480.00
+       7.731     0.999957        33791     23405.71
+       7.731     0.999963        33791     27306.67
+       7.731     0.999969        33791     32768.00
+       8.559     0.999973        33792     36408.89
+       8.559     1.000000        33792          inf
+#[Mean    =        1.798, StdDeviation   =        0.275]
+#[Max     =        8.552, Total count    =        33792]
+#[Buckets =           27, SubBuckets     =         2048]
+-----------------------------------------------------------------------
+  35807 requests in 3.00m, 5.81MB read
+  Socket errors: connect 0, read 0, write 0, timeout 2368
+Requests/sec:    198.91  
+Transfer/sec:     33.04KB
