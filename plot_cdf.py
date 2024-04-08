@@ -177,22 +177,30 @@ if __name__ == "__main__":
     # stat_dict[routing_rule][cluster][rps][percentile] = latency_value
     color_dict = {"SLATE": "blue", "WATERFALL": "red", "WATERFALL2": "red", "REMOTE": "green", "LOCAL": "orange"}
     
-    cluster_map = dict()
-    cid = 0
-    for wrk_config in wrk_config_list:
-        if wrk_config['cluster'] not in cluster_map:
-            cluster_map[wrk_config['cluster']] = cid
-            cid += 1
-    # cluster_map = {"west":0, "central":1, "south":2, "east":3}
+    # 1
+    # cluster_map = dict()
+    # cid = 0
+    # for wrk_config in wrk_config_list:
+    #     if wrk_config['cluster'] not in cluster_map:
+    #         cluster_map[wrk_config['cluster']] = cid
+    #         cid += 1
+    
+    # 2
+    cluster_map = {"west":0, "central":1, "south":2, "east":3}
     print("cluster_map", cluster_map)
     
     for wrk_config in wrk_config_list:
         wrk_config['cluster_id'] = cluster_map[wrk_config['cluster']]
-    wrk_config_list = sorted(wrk_config_list, key=lambda d: d['cluster'])
+        
+    # sorted_wrk_config_list = sorted(wrk_config_list, key=lambda d: d['cluster'])
+    sorted_wrk_config_list = sorted(wrk_config_list, key=lambda d: d['cluster_id'])
+    for wrk_config in sorted_wrk_config_list:
+        print(f"sorted_wrk_config_list: , {wrk_config['cluster']}, {wrk_config['cluster_id']}")
+        
     fig, axs = plt.subplots(1, len(cluster_map), figsize=(5*len(cluster_map), 5))
     fig.suptitle(' ', fontsize=30)
     # fig.suptitle('Latency CDF', fontsize=20)
-    for wrk_config in wrk_config_list:
+    for wrk_config in sorted_wrk_config_list:
         df = pd.DataFrame(wrk_config["percentile_data"], columns=['Value', 'Percentile'])
         df['Percentile'] *= 100
         title = f"{wrk_config['cluster']}, {wrk_config['RPS']} RPS"
@@ -222,7 +230,12 @@ if __name__ == "__main__":
             ax.axhline(y=90, color='r', linestyle='--', linewidth=0.5, alpha=0.5)
             ax.axhline(y=99, color='r', linestyle='--', linewidth=0.5, alpha=0.5)
     
-    handles, labels = axs[0].get_legend_handles_labels()  # Assuming all subplots share the same legend
+    for i in range(len(axs)):
+        # Assuming all subplots share the same legend
+        handles, labels = axs[i].get_legend_handles_labels()
+        if len(labels) > 0:
+            break
+    assert len(labels) > 0
     print(labels)
     # plt.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=3, fontsize=12)
     fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5,1.0), ncol=3, fontsize=16)
