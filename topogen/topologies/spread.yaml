@@ -1,0 +1,32 @@
+services:
+  - name: frontend
+    methods:
+      - method: GET
+        path: /start
+        calls:
+          - name: a
+            method: POST
+            path: /spreada
+  - name: a
+    methods:
+      - method: POST
+        path: /spreada
+        writeFileSize: 2097152
+        calls:
+          - name: b
+            method: POST
+            path: /spreadb
+  - name: b
+    methods:
+      - method: POST
+        path: /spreadb
+        writeFileSize: 2097152
+        calls:
+          - name: c
+            method: POST
+            path: /spreadc
+  - name: c
+    methods:
+      - method: POST
+        path: /spreadc
+        writeFileSize: 2097152

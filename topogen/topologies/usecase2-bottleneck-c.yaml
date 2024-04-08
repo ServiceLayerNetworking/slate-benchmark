@@ -1,0 +1,40 @@
+services:
+  - name: slate-ingress
+    methods:
+      - method: GET
+        path: /start
+        calls:
+          - name: frontend
+            method: GET
+            path: /callfrontend
+  - name: frontend
+    methods:
+      - method: GET
+        path: /callfrontend
+        calls:
+          - name: A
+            method: GET
+            path: /calla
+  - name: A
+    methods:
+      - method: GET
+        path: /calla
+        writeFileSize: 1048576
+        calls:
+          - name: B
+            method: GET
+            path: /callb
+  - name: B
+    methods:
+      - method: GET
+        path: /callb
+        writeFileSize: 1048576
+        calls:
+          - name: C
+            method: GET
+            path: /callc
+  - name: C
+    methods:
+      - method: GET
+        path: /callc
+        writeFileSize: 2097152

@@ -1,0 +1,34 @@
+services:
+  - name: frontend
+    methods:
+      - method: POST
+        path: /light
+        calls:
+          - name: compute-node
+            method: POST
+            path: /light
+      - method: POST
+        path: /heavy
+        calls:
+          - name:  compute-node
+            method: POST
+            path: /heavy
+      - method: POST
+        path: /nothing
+        calls:
+          - name: compute-node
+            method: POST
+            path: /nothing
+  - name: compute-node
+    methods:
+      - method: POST
+        path: /light
+        computeAmount: 10
+        computeDuration: 20
+        writeFileSize: 10240
+      - method: POST
+        path: /heavy
+        computeAmount: 1000
+        computeDuration: 30
+      - method: POST
+        path: /nothing

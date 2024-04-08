@@ -1,0 +1,210 @@
+
+apiVersion: v1                              
+kind: Service                                  
+metadata:                                         
+  name: frontend
+  labels:                                                   
+    app: frontend
+    service: frontend
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: frontend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - image: ghcr.io/gangmuk/bottleneckc-frontend:latest
+        imagePullPolicy: Always
+        name: frontend
+        ports:
+        - containerPort: 8080
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+---
+
+
+apiVersion: v1                              
+kind: Service                                  
+metadata:                                         
+  name: a
+  labels:                                                   
+    app: a
+    service: a
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: a
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: a
+  template:
+    metadata:
+      labels:
+        app: a
+    spec:
+      containers:
+      - image: ghcr.io/gangmuk/bottleneckc-a:latest
+        imagePullPolicy: Always
+        name: a
+        ports:
+        - containerPort: 8080
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+---
+
+
+apiVersion: v1                              
+kind: Service                                  
+metadata:                                         
+  name: b
+  labels:                                                   
+    app: b
+    service: b
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: b
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: b
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: b
+  template:
+    metadata:
+      labels:
+        app: b
+    spec:
+      containers:
+      - image: ghcr.io/gangmuk/bottleneckc-b:latest
+        imagePullPolicy: Always
+        name: b
+        ports:
+        - containerPort: 8080
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+---
+
+
+apiVersion: v1                              
+kind: Service                                  
+metadata:                                         
+  name: c
+  labels:                                                   
+    app: c
+    service: c
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: c
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: c
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: c
+  template:
+    metadata:
+      labels:
+        app: c
+    spec:
+      containers:
+      - image: ghcr.io/gangmuk/bottleneckc-c:latest
+        imagePullPolicy: Always
+        name: c
+        ports:
+        - containerPort: 8080
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+---
+
+
+apiVersion: v1                              
+kind: Service                                  
+metadata:                                         
+  name: d
+  labels:                                                   
+    app: d
+    service: d
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: d
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: d
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: d
+  template:
+    metadata:
+      labels:
+        app: d
+    spec:
+      containers:
+      - image: ghcr.io/gangmuk/bottleneckc-d:latest
+        imagePullPolicy: Always
+        name: d
+        ports:
+        - containerPort: 8080
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+---
+
