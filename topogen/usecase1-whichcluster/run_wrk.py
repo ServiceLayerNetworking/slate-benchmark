@@ -327,9 +327,9 @@ def run_wrk(copy_config, target_cluster, req_type, target_cluster_rps, wrk_log_p
     # if target_cluster_rps == 600:
     #     copy_config["thread"] = 400
     #     copy_config["connection"] = 500
-    # if target_cluster_rps > 500:
+    # if target_cluster_rps >= 500:
     #     copy_config["thread"] = 500
-    #     copy_config["connection"] = 500
+    #     copy_config["connection"] = 800
     
     
     # safety check
@@ -464,7 +464,7 @@ def add_latency_rules(src_host, interface, dst_node_ip, delay):
 
 def start_background_noise(node_dict, cpu_noise=30):
     for node in node_dict:
-        if node == "node0":
+        if node == "node0" or node == "node5":
             print("skip start_background_noise in node0. node0 is control plane node")
             continue
         # print(f"Try to run background-noise -cpu={cpu_noise} in {node_dict[node]['hostname']}")
@@ -486,6 +486,7 @@ def main():
         'thread': 100, # min(thread, connection, rps-50)
         'connection': 200, # min(connection, rps-50)
         'duration': 60,
+        # 'cpu_noise': 50
         'cpu_noise': 70
     }
     benchmark_name="usecase1-whichcluster" # a,b, 1MB and c 2MB file write
@@ -494,8 +495,9 @@ def main():
     # capacity = 365 # 50ms, 400RPS
     # capacity = 310 # 5ms, 500RPS
     # capacity = 380 # 50ms, 500RPS 
-    capacity = 400
-    degree = 4
+    # capacity = 400
+    capacity = 300
+    degree = 2
     mode_set = ["profile", "runtime"]
     mode_and_routing_rule = {\
         # "profile": ["LOCAL"],\
@@ -517,7 +519,8 @@ def main():
                     # {"west": 400}, \
                     # {"west": 500}, \
                     
-                    {"west":500, "central":200, "east": 500, "south":50}, \
+                    # {"west":500, "central":200, "east": 500, "south":50}, \
+                    {"west":400, "central":100, "east": 400, "south":50}, \
                     ]
     
     for mode in mode_and_routing_rule:

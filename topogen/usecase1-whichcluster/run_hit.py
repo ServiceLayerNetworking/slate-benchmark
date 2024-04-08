@@ -316,13 +316,13 @@ def run_hit(copy_config, routing_rule, target_cluster, target_cluster_rps, wrk_l
         
     path='start'
     url = server_ip + "/" + path
-    headers="{'x-slate-destination':'west'}"
-    distr = "poisson" if copy_config["distribution"] == "exp" else "exp"
+    # headers="{'x-slate-destination':'west'}"
+    headers="{'x-slate-destination':" + f"'{target_cluster}'" + "}"
+    distr = "poisson"
     '''
     /users/gangmuk/projects/hit/hit -d 10 -distr poisson -rps 100 -l hit.log -headers {'x-slate-destination':'west'} -url "http://node1.6nodebettercpu.istio-pg0.clemson.cloudlab.us:31103/start"
     '''
     hit_command = f'/users/gangmuk/projects/hit/hit -d {copy_config["duration"]} -distr {distr} -rps {target_cluster_rps} -l {hit_log_path} -headers {headers} -url {url}'
-    
     print("-"*50)
     print(f"** {wrk_log_path}")
     print(f'cluster: {target_cluster}')
@@ -332,7 +332,6 @@ def run_hit(copy_config, routing_rule, target_cluster, target_cluster_rps, wrk_l
     print(f'headers: {headers}')
     print(f"hit_command: {hit_command}")
     print("-"*50)
-    
     run_command(hit_command)
     print("finish hittttttttttttttttt")
     return f"{target_cluster} {target_cluster_rps} RPS is done"
@@ -435,7 +434,7 @@ def add_latency_rules(src_host, interface, dst_node_ip, delay):
 
 def start_background_noise(node_dict, cpu_noise=30):
     for node in node_dict:
-        if node == "node0":
+        if node == "node0" or node == "node5":
             print("skip start_background_noise in node0. node0 is control plane node")
             continue
         # print(f"Try to run background-noise -cpu={cpu_noise} in {node_dict[node]['hostname']}")
@@ -474,7 +473,8 @@ def main():
                     # {"west": 500}, \
                     
                     ## runtime
-                    {"west":500, "central":200, "east": 500, "south":50}, \
+                    # {"west":500, "central":200, "east": 500, "south":50}, \
+                    {"west":0, "central":100, "east": 0, "south":0}, \
                     ]
 
         
@@ -589,7 +589,7 @@ def main():
                     copied_config[cluster] = copy.deepcopy(CONFIG)
                 future_list = list()
                 for cluster in wrk_log_path_dict:
-                    future_list.append(executor.submit(run_hit, routing_rule, copied_config[cluster], cluster, rps_dict[cluster], wrk_log_path_dict[cluster], hit_log_path_dict[cluster]))
+                    future_list.append(executor.submit(run_hit, copied_config[cluster], routing_rule, cluster, rps_dict[cluster], wrk_log_path_dict[cluster], hit_log_path_dict[cluster]))
                     time.sleep(1)
 
                 ''' record resource allocation '''
