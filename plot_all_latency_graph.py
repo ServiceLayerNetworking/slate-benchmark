@@ -117,11 +117,13 @@ def find_and_process_wrklog_files(base_directory):
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print("Usage: python script.py <rps_threshold> <input_directory>")
+        print("Usage: python script.py <input_directory> <rps_threshold>")
         sys.exit(1)
-    latency_metrics = ['avg', '50%'] #, '99%']
-    rps_threshold = int(sys.argv[1])
-    base_directory = sys.argv[2]
+    latency_metrics = ['avg', '50%', '99%', '99.9%']
+    # latency_metrics = ['avg', '50%', '99%']
+    # latency_metrics = ['avg', '50%']
+    base_directory = sys.argv[1]
+    rps_threshold = int(sys.argv[2])
     wrklog_files = find_and_process_wrklog_files(base_directory)
     latency_dict = dict()
     for wrklog_path in wrklog_files:
@@ -148,7 +150,7 @@ if __name__ == "__main__":
                 df_filtered.to_csv("asdf.csv")
                 for metric in latency_metrics:
                     plt.plot(df_filtered['rps'], df_filtered[metric], label=f"rps-{routing_rule}-{cluster}-{metric}", marker='o')
-                    plt.plot(df_filtered['rps'], df_filtered['tput'], marker='x', linestyle='--', alpha=0.5)
+                    # plt.plot(df_filtered['rps'], df_filtered['tput'], marker='x', linestyle='--', alpha=0.5)
     
     
     plt.title(f'Latency', fontsize=20)
@@ -158,7 +160,7 @@ if __name__ == "__main__":
     plt.yticks(fontsize=14)  # Set y-tick label fontsize
     plt.legend(fontsize=14)
     plt.grid(True)
-    # plt.ylim((0,1000))
+    plt.ylim(bottom=0)
     svc_name = base_directory.split('/')[0]
     merged_string = ''.join(latency_metrics)
     pdf_file_path = f'{base_directory}/latency-{merged_string}.pdf'

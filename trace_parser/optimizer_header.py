@@ -1156,6 +1156,7 @@ def find_root_node(cg):
         # for key in cg:
         #     for sp in cg[key]:
         #         print(f'{key} -> {sp.endpoint_str}')
+        # return False
         assert False
     # print(cg)
     return root_node[0]

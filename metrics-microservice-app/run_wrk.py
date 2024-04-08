@@ -405,19 +405,19 @@ def restart_slate_controller():
     
 # old
 # def add_latency(src_hostname, dst_node_ip, latency):
-#     run_command(f"ssh {src_hostname} sudo tc qdisc del dev eno1 root", required=False)
-#     run_command(f"ssh {src_hostname} sudo tc qdisc add dev eno1 root handle 1: prio")
-#     run_command(f"ssh {src_hostname} sudo tc filter add dev eno1 parent 1:0 protocol ip prio 1 u32 match ip dst {dst_node_ip} flowid 2:1")
-#     run_command(f"ssh {src_hostname} sudo tc qdisc add dev eno1 parent 1:1 handle 2: netem delay {latency}ms")
+#     run_command(f"ssh gangmuk@{src_hostname} sudo tc qdisc del dev eno1 root", required=False)
+#     run_command(f"ssh gangmuk@{src_hostname} sudo tc qdisc add dev eno1 root handle 1: prio")
+#     run_command(f"ssh gangmuk@{src_hostname} sudo tc filter add dev eno1 parent 1:0 protocol ip prio 1 u32 match ip dst {dst_node_ip} flowid 2:1")
+#     run_command(f"ssh gangmuk@{src_hostname} sudo tc qdisc add dev eno1 parent 1:1 handle 2: netem delay {latency}ms")
 
 # new
 def add_latency_rules(src_host, interface, dst_node_ip, delay):
     assert delay > 0
     class_id = f"1:{delay}"
     handle_id = delay
-    run_command(f'ssh {src_host} sudo tc class add dev {interface} parent 1: classid {class_id} htb rate 100mbit', required=False, print_error=False)
-    run_command(f'ssh {src_host} sudo tc qdisc add dev {interface} parent {class_id} handle {handle_id}: netem delay {delay}ms', required=False, print_error=False)
-    run_command(f'ssh {src_host} sudo tc filter add dev {interface} protocol ip parent 1:0 prio 1 u32 match ip dst {dst_node_ip} flowid {class_id}')
+    run_command(f'ssh gangmuk@{src_host} sudo tc class add dev {interface} parent 1: classid {class_id} htb rate 100mbit', required=False, print_error=False)
+    run_command(f'ssh gangmuk@{src_host} sudo tc qdisc add dev {interface} parent {class_id} handle {handle_id}: netem delay {delay}ms', required=False, print_error=False)
+    run_command(f'ssh gangmuk@{src_host} sudo tc filter add dev {interface} protocol ip parent 1:0 prio 1 u32 match ip dst {dst_node_ip} flowid {class_id}')
 
     
 
@@ -468,8 +468,8 @@ def main():
     '''
     mode_set = ["profile", "runtime"]
     mode_and_routing_rule = {\
-        # "profile": ["LOCAL"],\
-        "runtime": ["WATERFALL"],\
+        "profile": ["LOCAL"],\
+        # "runtime": ["WATERFALL"],\
         # "runtime": ["SLATE"],\
         # "runtime": ["WATERFALL", "SLATE"],\
         # "runtime": ["LOCAL", "SLATE", "MCLB",  "WATERFALL"],\
@@ -479,7 +479,7 @@ def main():
     ## for experiment
     all_RPS_list = [ \
                     ## profile
-                    # {"west": 100}, \
+                    {"west": 100}, \
                     # {"west": 200}, \
                     # {"west": 300}, \
                     # {"west": 400}, \
@@ -506,7 +506,8 @@ def main():
                     # {"west": 200, "central": 50, "south": 200, "east": 50}, \
                     # {"west": 250, "central": 50, "south": 250, "east": 50}, \
                     # {"west": 300, "central": 50, "south": 300, "east": 50}, \
-                    {"west": 350, "central": 50, "south": 350, "east": 50}, \
+                    # {"west": 350, "central": 50, "south": 350, "east": 50}, \
+                    # {"west": 400, "central": 50, "south": 400, "east": 50}, \
                     # {"west": 450, "central": 50, "south": 450, "east": 50}, \
                     # {"west": 500, "central": 50, "south": 500, "east": 50}, \
                     # {"west": 550, "central": 50, "south": 550, "east": 50}, \
@@ -516,7 +517,7 @@ def main():
         assert mode in mode_set
     
 
-    node_dict = get_nodename_and_ipaddr("/users/gangmuk/projects/cloudlab_script/config.xml")
+    node_dict = get_nodename_and_ipaddr("/users/gangmuk/projects/slate-benchmark/metrics-microservice-app/config.xml")
     for node in node_dict:
         print(f"node: {node}, hostname: {node_dict[node]['hostname']}, ipaddr: {node_dict[node]['ipaddr']}")
         
@@ -564,15 +565,14 @@ def main():
     pprint(inter_cluster_latency)
     
     for node in node_dict:
-        run_command(f"ssh {node_dict[node]['hostname']} sudo tc qdisc del dev eno1 root", required=False, print_error=False)
+        run_command(f"ssh gangmuk@{node_dict[node]['hostname']} sudo tc qdisc del dev eno1 root", required=False, print_error=False)
         print(f"delete tc qdisc rule in {node_dict[node]['hostname']}")
     
     interface = "eno1"  # Ensure this is the correct interface
-    src_host = "apt178.apt.emulab.net" # node1
     '''inter_cluster_latency["node1"]["node2"] = 40'''
     for src_node in inter_cluster_latency:
         src_host = node_dict[src_node]['hostname']
-        run_command(f'ssh {src_host} sudo tc qdisc add dev {interface} root handle 1: htb')
+        run_command(f'ssh gangmuk@{src_host} sudo tc qdisc add dev {interface} root handle 1: htb')
         for dst_node in inter_cluster_latency[src_node]:
             if src_node == dst_node:
                 continue
@@ -716,7 +716,12 @@ def main():
                             for src_in_pod in flist:
                                 dst_in_host = f'{output_dir}/{routing_rule}-{src_in_pod.split("/")[-1]}'
                                 kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host)
-                            
+                                
+                            # if routing_rule == "WATERFALL":
+                            #     src_in_pod = "/app/alternative_routing_history.csv"
+                            #     dst_in_host = f'{output_dir}/{routing_rule}-{src_in_pod.split("/")[-1]}'
+                            #     kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host)
+                                
                             if routing_rule == "WATERFALL" or routing_rule == "SLATE":
                                 ## copy latency function pdf files for debugging purpose
                                 plt_file_list = list()
@@ -756,7 +761,7 @@ def main():
                 print(f"@@ Total runtime: {duration} seconds")
     # run_command("bash ../delete_node_level_tc_qdisc.sh")
     for node in node_dict:
-        run_command(f"ssh {node_dict[node]['hostname']} sudo tc qdisc del dev eno1 root", required=False, print_error=False)
+        run_command(f"ssh gangmuk@{node_dict[node]['hostname']} sudo tc qdisc del dev eno1 root", required=False, print_error=False)
         print(f"delete tc qdisc rule in {node_dict[node]['hostname']}")
             
 if __name__ == "__main__":

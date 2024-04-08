@@ -78,7 +78,14 @@ def parse_latency_stat_in_wrklog_file(wrklog_path, wrk_config, latency_metrics, 
                 print(f"target_metric: {target_metric}, latency_value: {latency_value}")
                 if target_metric not in latency_dict:
                     latency_dict[target_metric] = []
-                stat_dict[wrk_config["routing_rule"]][str(rps_value)][wrk_config["cluster"]][target_metric] = latency_value
+                try:
+                    stat_dict[wrk_config["routing_rule"]][str(rps_value)][wrk_config["cluster"]][target_metric] = float(latency_value)
+                except Exception as e:
+                    print(f"Error: {e}")
+                    print(f"target_metric: {target_metric}, latency_value: {latency_value}")
+                    print(wrklog_path)
+                    print()
+                    assert False
                 latency_dict[target_metric].append(latency_value)
         
 def find_and_process_wrklog_files(base_directory):
@@ -139,7 +146,7 @@ def find_and_process_wrklog_files(base_directory):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python script.py <input_files> ")
+        print("Usage: python script.py <base_directory> ")
         sys.exit(1)
     wrk_config_list = list()
     base_directory = sys.argv[1]
@@ -168,8 +175,17 @@ if __name__ == "__main__":
     for key, value in stat_dict.items():
         print(f"{key}: {value}")
     # stat_dict[routing_rule][cluster][rps][percentile] = latency_value
-    color_dict = {"SLATE": "blue", "WATERFALL": "red", "REMOTE": "green", "LOCAL": "orange"}
-    cluster_map = {"west":0, "central":1, "south":2, "east":3}
+    color_dict = {"SLATE": "blue", "WATERFALL": "red", "WATERFALL2": "red", "REMOTE": "green", "LOCAL": "orange"}
+    
+    cluster_map = dict()
+    cid = 0
+    for wrk_config in wrk_config_list:
+        if wrk_config['cluster'] not in cluster_map:
+            cluster_map[wrk_config['cluster']] = cid
+            cid += 1
+    # cluster_map = {"west":0, "central":1, "south":2, "east":3}
+    print("cluster_map", cluster_map)
+    
     for wrk_config in wrk_config_list:
         wrk_config['cluster_id'] = cluster_map[wrk_config['cluster']]
     wrk_config_list = sorted(wrk_config_list, key=lambda d: d['cluster'])
@@ -186,7 +202,8 @@ if __name__ == "__main__":
         
         text_to_display = wrk_config["routing_rule"] + "\n"
         for percentile in latency_metrics:
-            text_to_display += percentile + ":" +stat_dict[wrk_config['routing_rule']][str(wrk_config['RPS'])][wrk_config['cluster']][percentile] + "\n"
+            number = str(int(stat_dict[wrk_config['routing_rule']][str(wrk_config['RPS'])][wrk_config['cluster']][percentile]))
+            text_to_display += f"{percentile}:{number}\n"
         if wrk_config['routing_rule'] == 'SLATE':
             axs[cluster_map[wrk_config['cluster']]].text(0.25, 0.0, text_to_display, transform=axs[cluster_map[wrk_config['cluster']]].transAxes, ha='center', color=color_dict[wrk_config['routing_rule']])
         else:

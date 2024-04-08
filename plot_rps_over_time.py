@@ -20,7 +20,7 @@ def plot_rps(csv_file_path, services_to_plot):
     plt.figure(figsize=(10, 7))
 
     # Plot each group
-    linestyle_map = {"metrics-fake-ingress": "-", "metrics-handler": "--"}
+    linestyle_map = {services_to_plot[0]: "-", services_to_plot[1]: "--"}
     color_dict = {"us-west-1": "blue", "us-central-1": "orange", "us-south-1": "red", "us-east-1": "green"}
     for (region, service), group in grouped_data:
         plt.plot(group['counter'], group['rps'], label=f'{region} - {service}', linestyle=linestyle_map[service], color=color_dict[region])
@@ -55,6 +55,8 @@ if __name__ == "__main__":
     
     csv_file_path = sys.argv[1]
     
-    # services_to_plot = ['metrics-fake-ingress']
+    # metrics
     services_to_plot = ['metrics-fake-ingress', 'metrics-handler']
+    # spread
+    services_to_plot = ['frontend', 'a']
     plot_rps(csv_file_path, services_to_plot)
