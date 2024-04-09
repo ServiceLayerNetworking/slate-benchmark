@@ -1,0 +1,59 @@
+services:
+  - name: frontend
+    methods:
+      - method: POST
+        path: /write1kb
+        calls:
+          - name: compute-node
+            method: POST
+            path: /write1kb
+      - method: POST
+        path: /write10kb
+        calls:
+          - name: compute-node
+            method: POST
+            path: /write10kb
+      - method: POST
+        path: /write100kb
+        calls:
+          - name: compute-node
+            method: POST
+            path: /write100kb
+      - method: POST
+        path: /write1mb
+        calls:
+          - name: compute-node
+            method: POST
+            path: /write1mb
+      - method: POST
+        path: /write2mb
+        calls:
+          - name: compute-node
+            method: POST
+            path: /write2mb
+      - method: POST
+        path: /write4mb
+        calls:
+          - name: compute-node
+            method: POST
+            path: /write4mb
+  - name: compute-node
+    methods:
+      - method: POST
+        path: /write1kb
+        writeFileSize: 1024
+      - method: POST
+        path: /write10kb
+        writeFileSize: 10240
+      - method: POST
+        path: /write100kb
+        writeFileSize: 102400
+      - method: POST
+        path: /write1mb
+        writeFileSize: 1048576
+      - method: POST
+        path: /write2mb
+        writeFileSize: 2097152
+      - method: POST
+        path: /write4mb
+        writeFileSize: 4194304

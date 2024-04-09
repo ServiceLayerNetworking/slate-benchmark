@@ -1,0 +1,84 @@
+
+apiVersion: v1                              
+kind: Service                                  
+metadata:                                         
+  name: frontend
+  labels:                                                   
+    app: frontend
+    service: frontend
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: frontend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - image: ghcr.io/gangmuk/compute-diff-frontend:latest
+        imagePullPolicy: Always
+        name: frontend
+        ports:
+        - containerPort: 8080
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+---
+
+
+apiVersion: v1                              
+kind: Service                                  
+metadata:                                         
+  name: compute-node
+  labels:                                                   
+    app: compute-node
+    service: compute-node
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: compute-node
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: compute-node
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: compute-node
+  template:
+    metadata:
+      labels:
+        app: compute-node
+    spec:
+      containers:
+      - image: ghcr.io/gangmuk/compute-diff-compute-node:latest
+        imagePullPolicy: Always
+        name: compute-node
+        ports:
+        - containerPort: 8080
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+---
+
