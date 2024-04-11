@@ -31,7 +31,8 @@ def parse_wrk_config(wrklog_path):
                     print(lines[i])
                     exit()
                 if key == "inter_cluster_latency":
-                    print("skip inter_cluster_latency config")
+                    # print("skip inter_cluster_latency config")
+                    a=1
                 else:
                     wrk_config[key] = value
                 i += 1
@@ -88,27 +89,28 @@ def parse_latency_stat_in_wrklog_file(wrklog_path, wrk_config, latency_metrics, 
         #########################################
         
         cluster = wrk_config["cluster"]
-        rps_value = int(wrk_config[f"{cluster}_RPS"])
+        rps_value = int(wrk_config["RPS"])
         if rps_value <= rps_thr:
-            for key, pattern in latency_patterns.items():
-                latency_value = find_latency_value(pattern, wrklog_file_read)
-                print(f"key: {key}, latency_value: {latency_value}")
-                if key not in latency_dict:
-                    latency_dict[key] = []
-                latency_dict[key].append(latency_value)
             if "rps" not in latency_dict:
                 latency_dict["mode"] = []
                 latency_dict["cluster"] = []
                 latency_dict["rps"] = []
                 latency_dict["routing_rule"] = []
                 latency_dict["tput"] = []
+                latency_dict["req_type"] = []
                 # latency_dict["inter_cluster_latency"] = []
-            latency_dict["rps"].append(rps_value)
+            latency_dict["rps"].append(int(rps_value))
             latency_dict["mode"].append(wrk_config["mode"])
             latency_dict["routing_rule"].append(wrk_config["routing_rule"])
-            # latency_dict["inter_cluster_latency"].append(int(wrk_config["inter_cluster_latency"]))
             latency_dict["cluster"].append(wrk_config["cluster"])
-            latency_dict["tput"].append(tput)
+            latency_dict["tput"].append(int(tput))
+            latency_dict["req_type"].append(wrk_config["req_type"])
+            for key, pattern in latency_patterns.items():
+                latency_value = find_latency_value(pattern, wrklog_file_read)
+                print(f"{wrk_config['RPS']}, {wrk_config['req_type']}, key: {key}, latency_value: {latency_value}")
+                if key not in latency_dict:
+                    latency_dict[key] = []
+                latency_dict[key].append(latency_value)
         
 def find_and_process_wrklog_files(base_directory):
     wrklog_files = glob.glob(f'{base_directory}/**/*.wrklog', recursive=True)
@@ -119,20 +121,22 @@ if __name__ == "__main__":
     if len(sys.argv) != 3:
         print("Usage: python script.py <input_directory> <rps_threshold>")
         sys.exit(1)
-    latency_metrics = ['avg', '50%', '99%', '99.9%']
+    # latency_metrics = ['avg', '50%', '99%', '99.9%']
     # latency_metrics = ['avg', '50%', '99%']
     # latency_metrics = ['avg', '50%']
+    latency_metrics = ['avg']
     base_directory = sys.argv[1]
     rps_threshold = int(sys.argv[2])
     wrklog_files = find_and_process_wrklog_files(base_directory)
     latency_dict = dict()
     for wrklog_path in wrklog_files:
         wrk_config = parse_wrk_config(wrklog_path)
-        print(wrk_config)
+        # print(f"{wrklog_path}")
+        # print(wrk_config)
         parse_latency_stat_in_wrklog_file(wrklog_path, wrk_config, latency_metrics, rps_threshold, latency_dict)
     print("latency_dict")
-    for key, value in latency_dict.items():
-        print(f"{key}: {value}")
+    # for key, value in latency_dict.items():
+    #     print(f"{key}: {value}")
     
     df = pd.DataFrame(latency_dict)
     for metric in latency_metrics:
@@ -146,11 +150,16 @@ if __name__ == "__main__":
             # for inter_cluster_latency in df['inter_cluster_latency'].unique():
             for cluster in df['cluster'].unique():
                 # df_filtered = df[(df['mode'] == mode) & (df['routing_rule'] == routing_rule) & (df['inter_cluster_latency'] == inter_cluster_latency) & (df['cluster'] == cluster)]
-                df_filtered = df[(df['mode'] == mode) & (df['routing_rule'] == routing_rule) & (df['cluster'] == cluster)]
-                df_filtered.to_csv("asdf.csv")
-                for metric in latency_metrics:
-                    plt.plot(df_filtered['rps'], df_filtered[metric], label=f"rps-{routing_rule}-{cluster}-{metric}", marker='o')
-                    # plt.plot(df_filtered['rps'], df_filtered['tput'], marker='x', linestyle='--', alpha=0.5)
+                print("unique req_type", df['req_type'].unique())
+                for req_type in df['req_type'].unique():
+                    df_filtered = df[(df['mode'] == mode) & (df['routing_rule'] == routing_rule) & (df['cluster'] == cluster) & (df['req_type'] == req_type)]
+                    df_filtered.to_csv("asdf.csv")
+                    for metric in latency_metrics:
+                        label = f"{cluster}-{req_type}-{metric}"
+                        plt.plot(df_filtered['rps'], df_filtered[metric], label=label, marker='o')
+                        for i in range(len(df_filtered['rps'])):
+                            print(f"{df_filtered['rps'].iloc[i]} RPS, {df_filtered['req_type'].iloc[i]}, {df_filtered['tput'].iloc[i]} TPUT, {df_filtered[metric].iloc[i]} ms")
+                            # plt.plot(df_filtered['rps'], df_filtered['tput'], marker='x', linestyle='--', alpha=0.5)
     
     
     plt.title(f'Latency', fontsize=20)

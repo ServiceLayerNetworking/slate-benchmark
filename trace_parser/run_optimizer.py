@@ -346,12 +346,10 @@ def trace_string_file_to_trace_data_structure(trace_string_file_path, sample_rat
         for tid in all_traces[cid]:
             tot_num_svc += len(all_traces[cid][tid])
         avg_num_svc = tot_num_svc / len(all_traces[cid])
-        
         required_num_svc = math.ceil(avg_num_svc)
-        required_num_svc = 5
-        
-    print(f"avg_num_svc in {cid}: {avg_num_svc}")
-    print(f"required_num_svc in {cid}: {required_num_svc}")
+        required_num_svc = 2
+        print(f"avg_num_svc in {cid}: {avg_num_svc}")
+        print(f"required_num_svc in {cid}: {required_num_svc}")
     complete_traces = dict()
     for cid in all_traces:
         if cid not in complete_traces:

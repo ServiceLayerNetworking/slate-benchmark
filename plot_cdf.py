@@ -6,8 +6,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import subprocess
 
-req_type = ""
-
 def find_latency_value(pattern, log_content):
     match = re.search(pattern, log_content)
     if match:
@@ -58,7 +56,9 @@ def parse_latency_stat_in_wrklog_file(wrklog_path, wrk_config, latency_metrics, 
         #########################################
         
         cluster = wrk_config["cluster"]
-        rps_value = int(wrk_config[f"{cluster}_RPS"])
+        print(wrk_config)
+        # rps_value = int(wrk_config[f"{cluster}_RPS"])
+        rps_value = int(wrk_config[f"RPS"])
         if rps_value <= rps_thr:
             latency_dict["rps"].append(rps_value)
             latency_dict["mode"].append(wrk_config["mode"])
@@ -157,7 +157,8 @@ if __name__ == "__main__":
         wrk_config_list.append(wrk_config)
     
     stat_dict = dict()
-    latency_metrics = ['avg', '50%', '99%', '99.9%', '99.99%']
+    # latency_metrics = ['avg', '50%', '99%', '99.9%', '99.99%']
+    latency_metrics = ['avg', '50%', '99%']
     latency_dict = dict()
     latency_dict["mode"] = []
     latency_dict["cluster"] = []
@@ -186,7 +187,10 @@ if __name__ == "__main__":
     #         cid += 1
     
     # 2
-    cluster_map = {"west":0, "central":1, "south":2, "east":3}
+    
+    # cluster_map = {"west":0, "central":1, "south":2, "east":3}
+    cluster_map = {"west":0, "east":1}
+    
     print("cluster_map", cluster_map)
     
     for wrk_config in wrk_config_list:
@@ -200,12 +204,18 @@ if __name__ == "__main__":
     fig, axs = plt.subplots(1, len(cluster_map), figsize=(5*len(cluster_map), 5))
     fig.suptitle(' ', fontsize=30)
     # fig.suptitle('Latency CDF', fontsize=20)
+    label_set = set()
     for wrk_config in sorted_wrk_config_list:
         df = pd.DataFrame(wrk_config["percentile_data"], columns=['Value', 'Percentile'])
         df['Percentile'] *= 100
         title = f"{wrk_config['cluster']}, {wrk_config['RPS']} RPS"
-        label = f"{wrk_config['routing_rule']}"
-        axs[cluster_map[wrk_config['cluster']]].plot(df['Value'], df['Percentile'], label=label, color=color_dict[wrk_config['routing_rule']])
+        label = f"{wrk_config['routing_rule']}-{wrk_config['req_type']}"
+        if label not in label_set:
+            label_set.add(label)
+        else:
+            label = None    
+        axs[cluster_map[wrk_config['cluster']]].plot(df['Value'], df['Percentile'], label=label)
+        # axs[cluster_map[wrk_config['cluster']]].plot(df['Value'], df['Percentile'], label=label, color=color_dict[wrk_config['routing_rule']])
         # axs[cluster_map[wrk_config['cluster']]].plot(df['Value'], df['Percentile'], color=color_dict[wrk_config['routing_rule']])
         
         text_to_display = wrk_config["routing_rule"] + "\n"

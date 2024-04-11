@@ -259,7 +259,7 @@ def train_latency_function_with_trace(traces, trace_file_name, directory):
     return coef_dict
 
 
-def trace_string_file_to_trace_data_structure(trace_string_file_path, sample_ratio=1.0):
+def trace_string_file_to_trace_data_structure(trace_string_file_path, required_num_svc, sample_ratio=1.0):
     col = ["cluster_id","svc_name","method","path","trace_id","span_id","parent_span_id","st","et","rt","xt","ct","call_size","inflight_dict","rps_dict"]
     df = pd.read_csv(trace_string_file_path, names=col, header=None)
     print(f"len(df): {len(df)}")
@@ -350,8 +350,8 @@ def trace_string_file_to_trace_data_structure(trace_string_file_path, sample_rat
             tot_num_svc += len(all_traces[cid][tid])
         avg_num_svc = tot_num_svc / len(all_traces[cid])
         
-        required_num_svc = math.ceil(avg_num_svc)
-        required_num_svc = 5
+        # required_num_svc = math.ceil(avg_num_svc)
+        # required_num_svc = 5
         
     print(f"avg_num_svc in {cid}: {avg_num_svc}")
     print(f"required_num_svc in {cid}: {required_num_svc}")
@@ -369,7 +369,7 @@ def trace_string_file_to_trace_data_structure(trace_string_file_path, sample_rat
     return complete_traces
 
 
-def training_phase(trace_file_name, directory):
+def training_phase(trace_file_name, directory, required_num_svc):
     global coef_dict
     # global endpoint_level_inflight
     # global endpoint_level_rps
@@ -386,7 +386,7 @@ def training_phase(trace_file_name, directory):
     
     '''Option 2: Read trace string file'''
     ts = time.time()
-    complete_traces = trace_string_file_to_trace_data_structure(trace_file_name)
+    complete_traces = trace_string_file_to_trace_data_structure(trace_file_name, required_num_svc)
     for cid in complete_traces:
         print(f"len(complete_traces[{cid}]): {len(complete_traces[cid])}")
     print(f"FILE ==> DATA STRUCTURE: {int(time.time()-ts)} seconds")
@@ -411,9 +411,7 @@ def training_phase(trace_file_name, directory):
     for cg_key in ep_str_callgraph_table:
         print(f"{cg_key}: {ep_str_callgraph_table[cg_key]}")
     all_endpoints = tst.get_all_endpoints(stitched_traces)
-    # for cid in all_endpoints:
-    #     for svc_name in all_endpoints[cid]:
-    #         print(f"all_endpoints[{cid}][{svc_name}]: {all_endpoints[cid][svc_name]}")
+    
     if cfg.OUTPUT_WRITE:
         tst.file_write_callgraph_table(sp_callgraph_table)
     placement = tst.get_placement_from_trace(stitched_traces)
@@ -474,77 +472,80 @@ def merge_slatelog_files(directory):
                 outfile.write(infile.read())
     return output_filename
 
-def run(directory):
+def run(directory, required_num_svc):
     assert directory != ""
     merged_trace_file_name = merge_slatelog_files(directory)
     print(f"merged_trace_file_name: {merged_trace_file_name}")
-    training_phase(merged_trace_file_name, directory)
+    training_phase(merged_trace_file_name, directory, required_num_svc)
     return merged_trace_file_name
 
 
 
-directory = sys.argv[1]
-total_num_svc= int(sys.argv[2])
-if len(sys.argv) < 2:
-    print("Usage: python3 replicate.py <directory> <total_num_svc>")
-    sys.exit(1)
+if __name__ == "__main__":
+    directory = sys.argv[1]
+    required_num_svc= int(sys.argv[2])
+    if len(sys.argv) < 2:
+        print("Usage: python3 replicate.py <directory> <required_num_svc>")
+        sys.exit(1)
+        
+    merged_trace_file_name = run(directory, required_num_svc)
+
+    columns = ["cluster_id","svc_name","method","url","trace_id","span_id","parent_span_id","st","et","rt","xt","ct","call_size","inflight_dict","rps_dict"]
+    df = pd.read_csv(merged_trace_file_name, header=None, names=columns)
+
+    trace_span_counts = df.groupby('trace_id').size()
+    trace_ids_with_four_spans = trace_span_counts[trace_span_counts == required_num_svc].index
+    filtered_df = df[df['trace_id'].isin(trace_ids_with_four_spans)]
+    filtered_df.to_csv("four_span_trace.csv", index=False)
+
+    trace_id = filtered_df['trace_id'].unique().tolist()
+    sample_ratio = 0.025
+    sample_size = int(len(trace_id) * sample_ratio)
+    sampled_trace_id = sample(trace_id, sample_size)
+    double_filtered_df = filtered_df[filtered_df['trace_id'].isin(sampled_trace_id)]
+
+    print("num all trace ", len(df['trace_id'].unique()))
+    print("num complete trace", len(filtered_df['trace_id'].unique()))
+    print("num sampled trace", len(double_filtered_df['trace_id'].unique()))
+    # display(double_filtered_df)
+
+    ''' This is where you define replicated cluster for slatelog'''
+    # new_cluster_list = ["us-east-1", "us-central-1", "us-south-1"]
+    new_cluster_dict = dict()
+
+    ######################################################
+    ''' Define how you want to replicate '''
+    # new_cluster_dict["us-east-1"] = ["frontend", "a"]
+    # new_cluster_dict["us-central-1"] = ["frontend", "a"]
+    # new_cluster_dict["us-south-1"] = ["frontend", "a"]
+
+    # new_cluster_dict["us-east-1"] = ["frontend", "a", "b", "c", "d"]
+    # new_cluster_dict["us-central-1"] = ["frontend", "a", "b", "c", "d"]
+    # new_cluster_dict["us-south-1"] = ["frontend", "a", "b", "c", "d"]
     
-merged_trace_file_name = run(directory)
+    ## compute-diff
+    new_cluster_dict["us-east-1"] = ["frontend", "compute-node"]
+    ######################################################
 
-columns = ["cluster_id","svc_name","method","url","trace_id","span_id","parent_span_id","st","et","rt","xt","ct","call_size","inflight_dict","rps_dict"]
-df = pd.read_csv(merged_trace_file_name, header=None, names=columns)
+    new_df_dict = dict()
+    for nc in new_cluster_dict:
+        copy_df = double_filtered_df.copy() # copy orignal trace log df
+        copy_df['cluster_id'] = nc # set 'cluster_id' column to a new cluster name
+        copy_df = copy_df[copy_df['svc_name'].isin(new_cluster_dict[nc])] # filter out services that you don't want to replicate
+        new_df_dict[nc] = copy_df.copy()
 
-trace_span_counts = df.groupby('trace_id').size()
-trace_ids_with_four_spans = trace_span_counts[trace_span_counts == total_num_svc].index
-filtered_df = df[df['trace_id'].isin(trace_ids_with_four_spans)]
-filtered_df.to_csv("four_span_trace.csv", index=False)
+        print(f"Replicated {nc}")
 
-trace_id = filtered_df['trace_id'].unique().tolist()
-sample_ratio = 0.2
-sample_size = int(len(trace_id) * sample_ratio)
-sampled_trace_id = sample(trace_id, sample_size)
-double_filtered_df = filtered_df[filtered_df['trace_id'].isin(sampled_trace_id)]
-double_filtered_df.to_csv("sampled_four_span_trace.csv", index=False)
-
-print("all trace ", len(df['trace_id'].unique()))
-print("four span trace", len(filtered_df['trace_id'].unique()))
-print("sampled four span trace", len(double_filtered_df['trace_id'].unique()))
-# display(double_filtered_df)
-
-''' This is where you define replicated cluster for slatelog'''
-# new_cluster_list = ["us-east-1", "us-central-1", "us-south-1"]
-new_cluster_dict = dict()
-
-######################################################
-''' Define how you want to replicate '''
-# new_cluster_dict["us-east-1"] = ["frontend", "a"]
-# new_cluster_dict["us-central-1"] = ["frontend", "a"]
-# new_cluster_dict["us-south-1"] = ["frontend", "a"]
-
-new_cluster_dict["us-east-1"] = ["frontend", "a", "b", "c", "d"] # cluster name and services that you want to replicate in log
-new_cluster_dict["us-central-1"] = ["frontend", "a", "b", "c", "d"] # cluster name and services that you want to replicate in log
-new_cluster_dict["us-south-1"] = ["frontend", "a", "b", "c", "d"] # cluster name and services that you want to replicate in log
-######################################################
-
-new_df_dict = dict()
-for nc in new_cluster_dict:
-    copy_df = double_filtered_df.copy() # copy orignal trace log df
-    copy_df['cluster_id'] = nc # set 'cluster_id' column to a new cluster name
-    copy_df = copy_df[copy_df['svc_name'].isin(new_cluster_dict[nc])] # filter out services that you don't want to replicate
-    new_df_dict[nc] = copy_df.copy()
-
-    print(f"Replicated {nc}")
-
-# Step 3: Concatenate all DataFrames together
-df_all = double_filtered_df.copy()
-for cluster_id, new_df in new_df_dict.items():
-    df_all = pd.concat([df_all, new_df])
-df_all.sort_values(by=['cluster_id', 'trace_id'], inplace=True)
-output_fn = "replicated-"
-for nc in new_cluster_dict:
-    cluster_id_first_ch = nc.split('-')[1][0]
-    output_fn += f"{cluster_id_first_ch}-"
-output_fn += "trace.csv"
-output_path = directory + output_fn
-df_all.to_csv(output_path, index=False, header=False)
-print("Output file written: ", output_path)
+    # Step 3: Concatenate all DataFrames together
+    df_all = double_filtered_df.copy()
+    for cluster_id, new_df in new_df_dict.items():
+        df_all = pd.concat([df_all, new_df])
+    df_all.sort_values(by=['cluster_id', 'trace_id'], inplace=True)
+    output_fn = "replicated-"
+    for nc in new_cluster_dict:
+        cluster_id_first_ch = nc.split('-')[1][0]
+        output_fn += f"{cluster_id_first_ch}-"
+    output_fn += "trace.csv"
+    output_path = directory + output_fn
+    df_all.to_csv(output_path, index=False, header=False)
+    print("Output file written: ", output_path)
