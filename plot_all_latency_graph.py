@@ -122,9 +122,9 @@ if __name__ == "__main__":
         print("Usage: python script.py <input_directory> <rps_threshold>")
         sys.exit(1)
     # latency_metrics = ['avg', '50%', '99%', '99.9%']
-    # latency_metrics = ['avg', '50%', '99%']
+    latency_metrics = ['avg', '99%']
     # latency_metrics = ['avg', '50%']
-    latency_metrics = ['avg']
+    # latency_metrics = ['avg']
     base_directory = sys.argv[1]
     rps_threshold = int(sys.argv[2])
     wrklog_files = find_and_process_wrklog_files(base_directory)
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     plt.yticks(fontsize=14)  # Set y-tick label fontsize
     plt.legend(fontsize=14)
     plt.grid(True)
-    plt.ylim(bottom=0)
+    # plt.ylim(bottom=0)
     svc_name = base_directory.split('/')[0]
     merged_string = ''.join(latency_metrics)
     pdf_file_path = f'{base_directory}/latency-{merged_string}.pdf'
