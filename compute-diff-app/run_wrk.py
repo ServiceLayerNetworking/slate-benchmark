@@ -94,13 +94,13 @@ def cleanup_on_crash():
 # Signal handler
 def signal_handler(signum, frame):
     print(f"Received signal: {signum}")
-    cleanup_on_crash()
+    # cleanup_on_crash()
     sys.exit(1)
     
 # Exception handler
 def handle_exception(exc_type, exc_value, exc_traceback):
-    print("Unhandled exception:", exc_info=True)
-    cleanup_on_crash()
+    # print("Unhandled exception:", exc_info=True)
+    # cleanup_on_crash()
     if issubclass(exc_type, KeyboardInterrupt):
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
         return
@@ -310,6 +310,7 @@ def run_wrk(copy_config, target_cluster, req_type, target_cluster_rps, wrk_log_p
     
     print("overwrite connection and thread")
     copy_config["connection"] = target_cluster_rps
+    copy_config["req_type"] = req_type
     # if copy_config["connection"] > target_cluster_rps:
     #     # copy_config["connection"] = min(copy_config["connection"], target_cluster_rps)
     #     copy_config["connection"] = target_cluster_rps
@@ -353,17 +354,14 @@ def run_wrk(copy_config, target_cluster, req_type, target_cluster_rps, wrk_log_p
         info += "-- end of config --\n\n"
         f.write(info)
 
-    '''
-    with --u_latency
-    reference: https://github.com/giltene/wrk2, search for Coordinated Omission  
-    '''
-    # wrk_command = f'./wrk -D {copy_config["distribution"]} -t{copy_config["thread"]} -c{copy_config["connection"]} -d{copy_config["duration"]} -L -S -s  --u_latency./{target_cluster}_{req_type}.lua {server_ip} -R{target_cluster_rps} >> {wrk_log_path}'
-    
     print("-"*50)
     print(f"{wrk_log_path}")
     print("-"*50)
-    # run_command("./curl.sh west")
-    wrk_command = f'./wrk -D {copy_config["distribution"]} -t{copy_config["thread"]} -c{copy_config["connection"]} -d{copy_config["duration"]} -L -S -s ./{target_cluster}_{req_type}.lua {server_ip} -R{target_cluster_rps} | grep -v "Thread calibration" >> {wrk_log_path}'
+    lua_file = f"{target_cluster}_{req_type}.lua"
+    print(f"start {req_type} RPS {target_cluster_rps} to {target_cluster} cluster for {copy_config['duration']} seconds, {lua_file}")
+    
+    wrk_command = f'./wrk -D {copy_config["distribution"]} -t{copy_config["thread"]} -c{copy_config["connection"]} -d{copy_config["duration"]} -L -S -s ./{lua_file} {server_ip} -R{target_cluster_rps} | grep -v "Thread calibration" >> {wrk_log_path}'
+    
     run_command(wrk_command)
     
     
@@ -486,39 +484,98 @@ def main():
         'thread': 100, # min(thread, connection, rps-50)
         'connection': 200, # min(connection, rps-50)
         'duration': 60,
-        'cpu_noise': 30
+        # 'cpu_noise': 50,
+        'cpu_noise': 70,
+        'traffic_segmentation': 1, # endpoint level call graph
     }
     benchmark_name="usecase3-compute-diff" # a,b, 1MB and c 2MB file write
-    total_num_services=5
-    capacity = 300
+    total_num_services=2
+    capacity = 700
     degree = 2
     mode_set = ["profile", "runtime"]
     mode_and_routing_rule = {\
-        # "profile": ["LOCAL"],\
-        # "runtime": ["SLATE"],\
-        # "runtime": ["WATERFALL2"],\
-        "runtime": ["SLATE", "WATERFALL2"],\
+        "profile": ["LOCAL"],\
+        # "runtime": ["SLATE", "WATERFALL2"],\
     }
     
     ## for experiment
     all_RPS_list = [ \
                     ## profile
-                    # "west": {"write1kb": 100}, \
-                    # "west": {"write1kb": 200}, \
-                    # "west": {"write1kb": 300}, \
-                    # "west": {"write1kb": 400}, \
-                    # "west": {"write1kb": 500}, \
+                    {"west": {"write1kb": 100}}, \
+                    {"west": {"write1kb": 200}}, \
+                    {"west": {"write1kb": 300}}, \
+                    {"west": {"write1kb": 400}}, \
+                    {"west": {"write1kb": 500}}, \
+                    {"west": {"write1kb": 600}}, \
+                    {"west": {"write1kb": 700}}, \
+                    {"west": {"write1kb": 800}}, \
+                    {"west": {"write1kb": 900}}, \
+                    {"west": {"write1kb": 1000}}, \
                         
-                    # "west": {"write1mb": 100}, \
-                    # "west": {"write1mb": 200}, \
-                    # "west": {"write1mb": 300}, \
-                    # "west": {"write1mb": 400}, \
-                    # "west": {"write1mb": 500}, \
+                    {"west": {"write10kb": 100}}, \
+                    {"west": {"write10kb": 200}}, \
+                    {"west": {"write10kb": 300}}, \
+                    {"west": {"write10kb": 400}}, \
+                    {"west": {"write10kb": 500}}, \
+                    {"west": {"write10kb": 600}}, \
+                    {"west": {"write10kb": 700}}, \
+                    {"west": {"write10kb": 800}}, \
+                    {"west": {"write10kb": 900}}, \
+                    {"west": {"write10kb": 1000}}, \
+                        
+                    {"west": {"write100kb": 100}}, \
+                    {"west": {"write100kb": 200}}, \
+                    {"west": {"write100kb": 300}}, \
+                    {"west": {"write100kb": 400}}, \
+                    {"west": {"write100kb": 500}}, \
+                    {"west": {"write100kb": 600}}, \
+                    {"west": {"write100kb": 700}}, \
+                    {"west": {"write100kb": 800}}, \
+                    {"west": {"write100kb": 900}}, \
+                    {"west": {"write100kb": 1000}}, \
+                        
+                    {"west": {"write1mb": 100}}, \
+                    {"west": {"write1mb": 200}}, \
+                    {"west": {"write1mb": 300}}, \
+                    {"west": {"write1mb": 400}}, \
+                    {"west": {"write1mb": 500}}, \
+                    {"west": {"write1mb": 600}}, \
+                    {"west": {"write1mb": 700}}, \
+                    {"west": {"write1mb": 800}}, \
+                    {"west": {"write1mb": 900}}, \
+                    {"west": {"write1mb": 1000}}, \
+                        
+                    {"west": {"write2mb": 100}}, \
+                    {"west": {"write2mb": 200}}, \
+                    {"west": {"write2mb": 300}}, \
+                    {"west": {"write2mb": 400}}, \
+                    {"west": {"write2mb": 500}}, \
+                    {"west": {"write2mb": 600}}, \
+                    {"west": {"write2mb": 700}}, \
+                    {"west": {"write2mb": 800}}, \
+                    {"west": {"write2mb": 900}}, \
+                    {"west": {"write2mb": 1000}}, \
                     
-                    {
-                    "west": {"write1kb": 400, "write1mb": 100}, \
-                    "east": {"write1kb": 400, "write1mb": 100}, 
-                    }, \
+                    {"west": {"write4mb": 100}}, \
+                    {"west": {"write4mb": 200}}, \
+                    {"west": {"write4mb": 300}}, \
+                    {"west": {"write4mb": 400}}, \
+                    {"west": {"write4mb": 500}}, \
+                    {"west": {"write4mb": 600}}, \
+                    {"west": {"write4mb": 700}}, \
+                    {"west": {"write4mb": 800}}, \
+                    {"west": {"write4mb": 900}}, \
+                    {"west": {"write4mb": 1000}} \
+                    
+                    ## runtime
+                    # {
+                    #   "west": {"write100kb": 500, "write2mb": 500}, \
+                    #   "east": {"write100kb": 100, "write2mb": 100}, \
+                    # }, \
+                    # {
+                    #   "west": {"write1mb": 1000, "write2mb": 500}, \
+                    #   "east": {"write1mb": 100, "write2mb": 100}, \
+                    # } \
                     ]
     
     # req_type_list = ["write1kb", "write10kb", "write100kb", "write1mb", "write2mb", "write4mb"]
@@ -584,8 +641,10 @@ def main():
                 ''' Initialize the output path for different logs'''
                 output_dir = f"{dir_name}/"
                 for cluster in rps_dict:
-                    # cluster[0]: either 'w' or 'e' or 'c'
-                    output_dir += f"{cluster[0]}{rps_dict[cluster]}"
+                    for req_type in rps_dict[cluster]:
+                        output_dir += f"{req_type}/"
+                        # cluster[0]: either 'w' or 'e' or 'c'
+                        output_dir += f"{cluster[0]}{rps_dict[cluster][req_type]}"
                 # e.g., output_dir: get_metric-ww-Mar13_testing/w200e100
                 assert output_dir != ""
                 if not os.path.isdir(output_dir):
@@ -594,24 +653,29 @@ def main():
                     os.makedirs(f"{output_dir}/latency_function")
                 wrk_log_path_dict = dict()
                 for cluster in rps_dict:
-                    wrk_log_path_dict[cluster] = f"{output_dir}/{routing_rule}-{mode}-c{CONFIG['cpu_noise']}-d{degree}-R{rps_dict[cluster]}-{cluster}.wrklog"
+                    if cluster not in wrk_log_path_dict:
+                        wrk_log_path_dict[cluster] = dict()
+                    for req_type in rps_dict[cluster]:
+                        wrk_log_path_dict[cluster][req_type] = f"{output_dir}/{routing_rule}-{mode}-c{CONFIG['cpu_noise']}-d{degree}-R{rps_dict[cluster][req_type]}-{req_type}-{cluster}.wrklog"
                 
-                def recalculate_capacity(capacity, rps_dict):
-                    total_capacity = capacity * len(rps_dict)
-                    total_demand = sum(rps_dict.values())
-                    if total_demand > total_capacity:
-                        return total_demand // len(rps_dict)
-                    else:
-                        return capacity
-                recalculated_capacity = recalculate_capacity(capacity, rps_dict)
-                print(f"** recalculated_capacity: {recalculated_capacity}")
+                # def recalculate_capacity(capacity, rps_dict):
+                #     total_capacity = capacity * len(rps_dict)
+                #     total_demand = sum(rps_dict.values())
+                #     if total_demand > total_capacity:
+                #         return total_demand // len(rps_dict)
+                #     else:
+                #         return capacity
+                # recalculated_capacity = recalculate_capacity(capacity, rps_dict)
+                recalculated_capacity = capacity
+                # print(f"** recalculated_capacity: {recalculated_capacity}")
+                
                 ''' update env.txt and scp to slate-controller pod '''
                 local_env_file = update_env_txt(CONFIG, mode, benchmark_name, total_num_services, routing_rule, rps_dict, inter_cluster_latency, node_to_region, recalculated_capacity, degree)
                 kubectl_cp_from_host_to_slate_controller_pod(local_env_file, "/app/env.txt")
                 if mode == "runtime":
                     slatelog = f"{benchmark_name}-trace.csv"
                     kubectl_cp_from_host_to_slate_controller_pod(slatelog, "/app/trace.csv")
-                    t=20
+                    t=8
                     print(f"sleep for {t} seconds to wait for the training to be done in global controller")
                     for i in range(t):
                         time.sleep(1)
@@ -620,27 +684,36 @@ def main():
                 ''' start to send load concurrently to all clusters'''
                 with concurrent.futures.ThreadPoolExecutor() as executor:
                     for cluster in wrk_log_path_dict:
-                        print(f"cluster: {cluster}, req_type: {req_type}, RPS: {rps_dict[cluster]}")
+                        for req_type in wrk_log_path_dict[cluster]:
+                            print(f"cluster: {cluster}, req_type: {req_type}, RPS: {rps_dict[cluster][req_type]}")
                         # print(f"wrk_log_path: {wrk_log_path_dict[cluster]}")
+                        
                     copied_config = dict()
                     for cluster in wrk_log_path_dict:
-                        copied_config[cluster] = copy.deepcopy(CONFIG)
+                        if cluster not in copied_config:
+                            copied_config[cluster] = dict()
+                        for req_type in wrk_log_path_dict[cluster]:
+                            copied_config[cluster][req_type] = copy.deepcopy(CONFIG)
+                            
                     future_list = list()
                     for cluster in wrk_log_path_dict:
-                        future_list.append(executor.submit(run_wrk, copied_config[cluster], cluster, req_type, rps_dict[cluster], wrk_log_path_dict[cluster]))
-                        time.sleep(1)
+                        for req_type in wrk_log_path_dict[cluster]:
+                            future_list.append(executor.submit(run_wrk, copied_config[cluster][req_type], cluster, req_type, rps_dict[cluster][req_type], wrk_log_path_dict[cluster][req_type]))
+                            time.sleep(1)
                     
                     ''' record resource allocation '''
                     time.sleep(1)
                     for cluster in wrk_log_path_dict:
-                        record_pod_resource_allocation(wrk_log_path_dict[cluster], rps_dict[cluster])
+                        for req_type in wrk_log_path_dict[cluster]:
+                            record_pod_resource_allocation(wrk_log_path_dict[cluster][req_type], rps_dict[cluster][req_type])
                         
-                    ''' record resource usage 20 before the end of the experiment '''
-                    sleep_before_resource_usage_recording = CONFIG['duration'] - 10
-                    time.sleep(sleep_before_resource_usage_recording)
-                    print(f"sleep for {sleep_before_resource_usage_recording} seconds before resource resource usage")
-                    for cluster in wrk_log_path_dict:
-                        record_pod_resource_usage(wrk_log_path_dict[cluster], rps_dict[cluster])
+                    # ''' record resource usage 20 before the end of the experiment '''
+                    # sleep_before_resource_usage_recording = CONFIG['duration'] - 10
+                    # time.sleep(sleep_before_resource_usage_recording)
+                    # print(f"sleep for {sleep_before_resource_usage_recording} seconds before resource resource usage")
+                    # for cluster in wrk_log_path_dict:
+                    #     for req_type in wrk_log_path_dict[cluster]:
+                    #         record_pod_resource_usage(wrk_log_path_dict[cluster][req_type], rps_dict[cluster][req_type])
                         
                     ''' Join all threads '''
                     for future in concurrent.futures.as_completed(future_list):
@@ -675,7 +748,11 @@ def main():
                     if routing_rule == "WATERFALL" or routing_rule == "SLATE" or routing_rule == "WATERFALL2":
                         ## copy latency function pdf files for debugging purpose
                         plt_file_list = list()
-                        for svc in ["frontend", "a", "b", "c"]:
+                        if benchmark_name == "usecase3-compute-diff":
+                            service_list = ["frontend", "compute-node"]
+                        else:
+                            service_list = ["frontend", "a", "b", "c"]
+                        for svc in service_list:
                             plt_file_list.append(f"latency-{svc}.pdf")
                         for file in plt_file_list:
                             src_in_pod = f"/app/{file}"

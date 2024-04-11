@@ -1,0 +1,13 @@
+__main__ - optimizer_entrypoint(line:1120) - ERROR: run_optimizer FAIL (**model solved**) return without updating percentage_df
+apscheduler.executors.default - run_job(line:131) - Job "optimizer_entrypoint (trigger: interval[0:00:01], next run at: 2024-04-10 04:16:51 UTC)" raised an exception
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/apscheduler/executors/base.py", line 125, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "/app/global_controller.py", line 1121, in optimizer_entrypoint
+    write_optimizer_output(optimizer_cnt, percentage_df, desc, "routing_history.csv")
+  File "/app/global_controller.py", line 821, in write_optimizer_output
+    logger.info(f"sim_percentage_df:\n{sim_percentage_df.to_csv()}")
+UnboundLocalError: local variable 'sim_percentage_df' referenced before assignment
+__main__ - optimizer_entrypoint(line:893) - !!! ERROR !!! Total demand(1433) at frontend > total capcity(1400) at compute-node
+__main__ - optimizer_entrypoint(line:897) - recalc capacity: compute-node, old_capacity,717 -> new_capacity, 717
+__main__ - optimizer_entrypoint(line:897) - recalc capacity: compute-node, old_capacity,717 -> new_capacity, 717

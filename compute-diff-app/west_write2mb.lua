@@ -6,7 +6,7 @@ local url = "http://node2.gangmuk-184284.istio-pg0.clemson.cloudlab.us:32340"
 
 local function post()
   local method = "POST"
-  local path = url .. "/write1kb"
+  local path = url .. "/write2mb"
   local headers = {}
   headers["x-slate-destination"] = "west"
   -- headers["Content-Type"] = "application/x-www-form-urlencoded"
