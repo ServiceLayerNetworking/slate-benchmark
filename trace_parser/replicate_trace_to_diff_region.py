@@ -6,7 +6,6 @@ from threading import Lock
 import config as cfg
 import span as sp
 import time_stitching as tst
-import pandas as pd
 from IPython.display import display
 from pprint import pprint
 from sklearn.linear_model import LinearRegression
@@ -20,6 +19,12 @@ import numpy as np
 import sys
 import os
 import glob
+from scipy.optimize import curve_fit
+import warnings
+from scipy.optimize import OptimizeWarning
+warnings.filterwarnings("ignore", category=OptimizeWarning)
+warnings.filterwarnings("ignore", category=RuntimeWarning, message="divide by zero encountered")
+
 
 latency_func = {}
 is_trained_flag = False
@@ -51,61 +56,57 @@ stats_mutex = Lock()
 cluster_pcts = {}
 
 
-def parse_stats_into_spans(body, cluster_id, service):
-    spans = []
-    lines = body.split("\n")
-    '''
-     ['us-west-1', 'profile-us-west-1', 'POST', '/profile.Profile/GetProfiles', '4a1afd4e0565e973d6bfd803432ae314', '31efa4c6f2197ac7', 'd6bfd803432ae314', '1704910272445', '1704910272447', '0', 'POST@/profile.Profile/GetProfiles,1,1|us-west-1', 'profile-us-west-1', 'POST', '/profile.Profile/GetProfiles', '2857529ac30263da51709ea9b6c9c578', '022d10421302e0f6', '51709ea9b6c9c578', '1704910272723', '1704910272725', '0', 'POST@/profile.Profile/GetProfiles,2,1|us-west-1', 'profile-us-west-1', 'POST', '/profile.Profile/GetProfiles', '3e7eb51dcdeeae6b1456481977f216fc', 'c23cfe5e72207f6a', '1456481977f216fc', '1704910272943', '1704910272945', '0', 'POST@/profile.Profile/GetProfiles,3,1|us-west-1', 'profile-us-west-1', 'POST', '/profile.Profile/GetProfiles', '1d99a31fa2261f7d62e52212c362bfda', 'b124fe1f6fc5c726', '62e52212c362bfda', '1704910273122', '1704910273124', '0', 'POST@/profile.Profile/GetProfiles,4,1|us-west-1', 'profile-us-west-1', 'POST', '/profile.Profile/GetProfiles', 'a7eed018a3853824b2bd871b66e07e1d', '4a73e25f4d0526c1', 'b2bd871b66e07e1d', '1704910273304', '1704910273306', '0', 'POST@/profile.Profile/GetProfiles,5,1|us-west-1', 'profile-us-west-1', 'POST', '/profile.Profile/GetProfiles', '9e6ffa80728847844c827938e1fd09c8', '5dc9301134652860', '4c827938e1fd09c8', '1704910273487', '1704910273489', '0', 'POST@/profile.Profile/GetProfiles,6,1|us-west-1', 'profile-us-west-1', 'POST', '/profile.Profile/GetProfiles', '7f1a217d64410611b44abf639652e341', 'f7fe7d2e60f46317', 'b44abf639652e341', '1704910273656', '1704910273657', '0', 'POST@/profile.Profile/GetProfiles,7,1|']
-    '''
-    service_level_rps = int(lines[0])
-    inflightStats = lines[1]
-    requestStats = lines[3:]
-    # app.logger.debug('='*30)
-    # app.logger.debug(f'lines: {lines}')
-    # app.logger.debug('='*30)
-    # app.logger.debug(f'service_level_rps: {service_level_rps}')
-    # app.logger.debug('='*30)
-    # app.logger.debug(f'inflightStats: {inflightStats}')
-    # app.logger.debug('='*30)
-    # app.logger.debug(f'requestStats: {requestStats}')
-    # app.logger.debug('='*30)
-    for span_stat in requestStats:
-        ss = span_stat.split(" ")
-        # app.logger.debug(f"ss: {ss}")
-        # app.logger.debug(f"len(ss): {len(ss)}")
-        ## NOTE: THIS SHOUD BE UPDATED WHEN member fields in span class is updated.
-        if len(ss) != 11:
-            print(f"ERROR, len(ss) != 11, {len(ss)}, {ss}")
-            # assert False
-            continue
-        region = ss[0]
-        serviceName = ss[1]
-        method = ss[2]
-        path = ss[3]
-        traceId = ss[4]
-        spanId = ss[5]
-        parentSpanId = ss[6]
-        startTime = int(ss[7])
-        endTime = int(ss[8])
-        bodySize = int(ss[9])
-        # 'GET@/hotels,0,1|POST@/reservation,2,0|GET@/recommendations,2,1|'
-        endpointInflightStats = ss[10].split("|")
-        if endpointInflightStats[-1] == "":
-            endpointInflightStats = endpointInflightStats[:-1]
-        rps_dict = dict()
-        inflight_dict = dict()
-        for ep_load in endpointInflightStats:
-            method_and_path = ep_load.split(",")[0]
-            method = method_and_path.split("@")[0]
-            path = method_and_path.split("@")[1]
-            endpoint = sp.Endpoint(svc_name=serviceName, method=method, url=path)
-            rps = ep_load.split(",")[1]
-            inflight = ep_load.split(",")[2]
-            rps_dict[str(endpoint)] = rps
-            inflight_dict[str(endpoint)] = inflight
-        spans.append(sp.Span(method, path, serviceName, region, traceId, spanId, parentSpanId, startTime, endTime, bodySize, rps_dict=rps_dict, num_inflight_dict=inflight_dict))
-        print(f"new span parsed")
-    return spans
+def fit_mm1_model(data, y_col_name, svc_name, ep_str, cid, directory):
+    plt.figure()
+    df = pd.DataFrame(data)
+    x_colnames = [x for x in df.columns if x != y_col_name]
+    # for x_col in x_colnames:
+    if len(x_colnames) > 1:
+        print(f"ERROR: {svc_name} service has more than one endpoint")
+        print(f"Fit the function each endpoint separately")
+        assert False
+    x_col = x_colnames[0]
+    df['utilization-'+x_col] = df[x_col]
+    df['utilization-'+x_col] = df['utilization-'+x_col] / df['utilization-'+x_col].max()
+    u_ = df['utilization-'+x_col]
+    y_ = df[y_col_name]
+    print(f"len(u): {len(u_)}, len(y_): {len(y_)}")
+    if np.isinf(u_).any() or np.isnan(u_).any():
+        print("Infinite or NaN values found in 'u'")
+    # plt.scatter(u_, y_, color='blue', alpha=0.1, label='Data')
+    max_rps = df[x_col].max()
+    print(f"max_rps: {max_rps}")
+    norm_u_ = u_*max_rps
+    plt.scatter(norm_u_, y_, color='blue', alpha=0.1, label='Data')
+    def mm1_model(u, a):
+        amplified_a = a * 2
+        return (amplified_a) / (u.max() - u)
+    
+    # weighted mm1
+    # def mm1_model(x, a, b):
+        # return a * x / (b + x)
+
+    popt, pcov = curve_fit(mm1_model, u_, y_, maxfev=10000)
+    u_plot = np.linspace(min(u_), max(u_) * 0.99, 100)  # Avoid division by zero at u=1
+    y_plot = mm1_model(u_plot, *popt)
+    
+    norm_u_plot = u_plot*max_rps
+    plt.plot(norm_u_plot, y_plot, 'r-', label=f'MM1 Fit: $\\frac{{a}}{{1-u}}$, a={popt[0]}')
+    # plt.plot(u_plot, y_plot, 'r-', label=f'MM1 Fit: $\\frac{{a}}{{1-u}}$, a={popt[0]:.2f}')
+    plt.xlabel('Utilization (u_)')
+    plt.ylabel(y_col_name + " ms")
+    plt.title(f'{ep_str} in {cid}')
+    plt.legend()
+    plt.ylim(0, max(y_)*1.1)
+    pdf_fn = f"{directory}/latency-{svc_name}-mm1-model.pdf"
+    plt.savefig(pdf_fn)
+    plt.show()
+    # Output the model parameters and where the plot was saved
+    print(f"Model parameters: a = {popt}")
+    print(f"Output plot saved as: {pdf_fn}")
+    # Return model parameters as a dictionary if needed
+    return {'a': popt[0]}
+
 
 
 def fit_polynomial_regression(data, y_col_name, svc_name, ep_str, cid, trace_file_name, directory):
@@ -225,7 +226,8 @@ def fit_linear_regression(data, y_col_name, svc_name, ep_str, cid):
     return coef
 
 
-def train_latency_function_with_trace(traces, trace_file_name, directory):
+# def train_latency_function_with_trace(traces, trace_file_name, directory):
+def train_latency_function_with_trace(traces, directory):
     # df = pd.read_csv(f"{trace_file_path}")
     # traces = sp.file_to_trace(trace_file_path)
     df = tst.trace_to_df(traces)
@@ -242,100 +244,80 @@ def train_latency_function_with_trace(traces, trace_file_name, directory):
                 ep_df = cid_svc_df[cid_svc_df["endpoint_str"]==ep_str]
                 # Data preparation: load(X) and latency(y) 
                 data = dict()
-                y_col = "latency"
                 for index, row in ep_df.iterrows():
-                    for key, val in row[x_feature].items():
+                    flag = False
+                    for key, val in row[x_feature].items(): # x_feature: rps_dict
+                        # key: ep_str, val: rps
                         if key not in data:
                             data[key] = list()
                         data[key].append(val)
-                    if y_col not in data:
-                        data[y_col] = list()
-                    data[y_col].append(row[target_y])
+                        flag = True
+                    if flag == True:
+                        if "latency" not in data:
+                            data["latency"] = list()
+                        if len(row[x_feature]) == 1:
+                            data["latency"].append(row[target_y])
+                        else:
+                            print(f"ERROR: len(row[x_feature]) != 1: {len(row[x_feature])}")
                 
                 ''' linear regression '''
                 # coef_dict[svc_name][ep_str] = fit_linear_regression(data, y_col, svc_name, ep_str, cid)
                 # coef_dict[svc_name][ep_str] = fit_and_visualize_linear_regression(data, y_col, svc_name, ep_str, cid)
-                coef_dict[svc_name][ep_str] = fit_polynomial_regression(data, y_col, svc_name, ep_str, cid, trace_file_name, directory)
+                
+                data = {key: value for key, value in data.items() if isinstance(value, list)}  # Ensure all values are lists
+                lengths = {key: len(value) for key, value in data.items()}
+                print(lengths)  # This will show you the length of the array for each column
+                try:
+                    df = pd.DataFrame(data)
+                except ValueError as e:
+                    print("Data length mismatch:", e)
+                    # Optional: Log the lengths for debugging
+                    print(lengths)
+                    print("exit...")
+                    exit()
+                
+                coef_dict[svc_name][ep_str] = fit_mm1_model(data, "latency", svc_name, ep_str, cid, directory)
+                # coef_dict[svc_name][ep_str] = fit_polynomial_regression(data, "latency", svc_name, ep_str, cid, trace_file_name, directory)
     return coef_dict
 
 
-def trace_string_file_to_trace_data_structure(trace_string_file_path, required_num_svc, sample_ratio=1.0):
+def trace_string_file_to_trace_data_structure(trace_string_file_path, required_num_svc):
     col = ["cluster_id","svc_name","method","path","trace_id","span_id","parent_span_id","st","et","rt","xt","ct","call_size","inflight_dict","rps_dict"]
     df = pd.read_csv(trace_string_file_path, names=col, header=None)
     print(f"len(df): {len(df)}")
     df = df.loc[df['rt'] > 0]
     print(f"after negative rt filter, len(df): {len(df)}")
-    
-    # df.to_csv(f"trace_string_before_sampling.csv")
-    # if sample_ratio < 1.0:
-    #     df = df.groupby(['trace_id']).sample(frac=sample_ratio)
-    #     df = df.reset_index(drop=True)
-    # df.to_csv(f"trace_string_after_sampling.csv")
-    # print(f"len(df): {len(df)} after sampling")
-    # span_df = df.iloc[:, :-2] # inflight_dict, rps_dict
-    # inflight_df = df.iloc[:, -2:-1] # inflight_dict, rps_dict
-    # rps_df = df.iloc[:, -1:] # inflight_dict, rps_dict
-    
     num_filter_rps_datapoint = 0
-    
     list_of_span = list()
     for index, row in df.iterrows():
         if row["cluster_id"] == "SLATE_UNKNOWN_REGION" or row["svc_name"] == "consul":
             continue
-        # row: user-us-west-1@POST@/user.User/CheckUser:1|,user-us-west-1@POST@/user.User/CheckUser:14|
-        # , is delimiter between rps_dict and inflight_dict
-        # | is delimiter between two endpoints
-        # @ is delimiter between svc_name @ method @ path
-        
         num_inflight_dict = dict()
         rps_dict = dict()
-        
-        # inflight_row =  "user-us-west-1@POST@/user.User/CheckUser:1|user-us-west-1@POST@/user.User/CheckUser:1|"
-        # print(row)
-        # print(row["inflight_dict"])
         inflight_list = row["inflight_dict"].split("|")[:-1]
         for ep_inflight in inflight_list:
-            # print(row)
             temp = ep_inflight.split(":")
-            # print(f"len(temp): {len(temp)}")
-            # print(temp)
             assert len(temp) == 2
-            ep = temp[0] # user-us-west-1@POST@/user.User/CheckUser
-            inflight = int(temp[1]) # 1
-            svc_name = ep.split("@")[0]
-            method = ep.split("@")[1]
-            path = ep.split("@")[2]
+            ep = temp[0]
+            inflight = int(temp[1])
             num_inflight_dict[ep] = inflight
-            
         rps_list = row["rps_dict"].split("|")[:-1]
         for ep_rps in rps_list:
             temp = ep_rps.split(":")
-            # print(f"len(temp): {len(temp)}")
             assert len(temp) == 2
-            ep = temp[0] # user-us-west-1@POST@/user.User/CheckUser
-            rps = int(temp[1]) # 1
+            ep = temp[0]
+            rps = int(temp[1])
             ''' NOTE: HARDCODED, RPS FILTER'''
             if rps > 1000:
                 continue
-            svc_name = ep.split("@")[0]
-            method = ep.split("@")[1]
-            path = ep.split("@")[2]
             rps_dict[ep] = rps
         ''' NOTE: HARDCODED, RPS FILTER'''
         if rps > 1200:
             num_filter_rps_datapoint += 1
             continue
-        ##################################################
-        # serviceName = row["svc_name"]
-        # if serviceName.find("-us-") != -1:
-        #     serviceName = serviceName.split("-us-")[0]
-        ##################################################
         span = sp.Span(row["method"], row["path"], row["svc_name"], row["cluster_id"], row["trace_id"], row["span_id"], row["parent_span_id"], st=float(row["st"]), et=float(row["et"]), callsize=int(row["call_size"]), rps_dict=rps_dict, num_inflight_dict=num_inflight_dict)
         list_of_span.append(span)
-        # print(str(span))
-        # exit()
     print(f"-- num_filter_rps_datapoint: {num_filter_rps_datapoint}")  
-    # Convert list of span to traces data structure
     all_traces = dict()
     for span in list_of_span:
         if span.cluster_id not in all_traces:
@@ -343,18 +325,63 @@ def trace_string_file_to_trace_data_structure(trace_string_file_path, required_n
         if span.trace_id not in all_traces[span.cluster_id]:
             all_traces[span.cluster_id][span.trace_id] = list()
         all_traces[span.cluster_id][span.trace_id].append(span)
-    
-    for cid in all_traces:
-        tot_num_svc = 0
-        for tid in all_traces[cid]:
-            tot_num_svc += len(all_traces[cid][tid])
-        avg_num_svc = tot_num_svc / len(all_traces[cid])
-        
-        # required_num_svc = math.ceil(avg_num_svc)
-        # required_num_svc = 5
-        
-    print(f"avg_num_svc in {cid}: {avg_num_svc}")
     print(f"required_num_svc in {cid}: {required_num_svc}")
+    complete_traces = dict()
+    for cid in all_traces:
+        if cid not in complete_traces:
+            complete_traces[cid] = dict()
+        for tid in all_traces[cid]:
+            if len(all_traces[cid][tid]) == required_num_svc:
+                complete_traces[cid][tid] = all_traces[cid][tid]
+    for cid in all_traces:
+        print(f"len(all_traces[{cid}]): {len(all_traces[cid])}")
+    for cid in complete_traces:
+        print(f"len(complete_traces[{cid}]): {len(complete_traces[cid])}")
+    return complete_traces
+
+def trace_string_file_to_trace_data_structure_with_df(df, required_num_svc):
+    print(f"len(df): {len(df)}")
+    df = df.loc[df['rt'] > 0]
+    print(f"after negative rt filter, len(df): {len(df)}")
+    num_filter_rps_datapoint = 0
+    list_of_span = list()
+    for index, row in df.iterrows():
+        if row["cluster_id"] == "SLATE_UNKNOWN_REGION" or row["svc_name"] == "consul":
+            continue
+        num_inflight_dict = dict()
+        rps_dict = dict()
+        inflight_list = row["inflight_dict"].split("|")[:-1]
+        for ep_inflight in inflight_list:
+            temp = ep_inflight.split(":")
+            assert len(temp) == 2
+            ep = temp[0]
+            inflight = int(temp[1])
+            num_inflight_dict[ep] = inflight
+        rps_list = row["rps_dict"].split("|")[:-1]
+        for ep_rps in rps_list:
+            temp = ep_rps.split(":")
+            assert len(temp) == 2
+            ep = temp[0]
+            rps = int(temp[1])
+            ''' NOTE: HARDCODED, RPS FILTER'''
+            if rps > 1000:
+                continue
+            rps_dict[ep] = rps
+        ''' NOTE: HARDCODED, RPS FILTER'''
+        if rps > 1200:
+            num_filter_rps_datapoint += 1
+            continue
+        span = sp.Span(row["method"], row["path"], row["svc_name"], row["cluster_id"], row["trace_id"], row["span_id"], row["parent_span_id"], st=float(row["st"]), et=float(row["et"]), callsize=int(row["call_size"]), rps_dict=rps_dict, num_inflight_dict=num_inflight_dict)
+        list_of_span.append(span)
+    print(f"-- num_filter_rps_datapoint: {num_filter_rps_datapoint}")  
+    all_traces = dict()
+    for span in list_of_span:
+        if span.cluster_id not in all_traces:
+            all_traces[span.cluster_id] = dict()
+        if span.trace_id not in all_traces[span.cluster_id]:
+            all_traces[span.cluster_id][span.trace_id] = list()
+        all_traces[span.cluster_id][span.trace_id].append(span)
+    print(f"required_num_svc: {required_num_svc}")
     complete_traces = dict()
     for cid in all_traces:
         if cid not in complete_traces:
@@ -371,20 +398,11 @@ def trace_string_file_to_trace_data_structure(trace_string_file_path, required_n
 
 def training_phase(trace_file_name, directory, required_num_svc):
     global coef_dict
-    # global endpoint_level_inflight
-    # global endpoint_level_rps
     global placement
     global all_endpoints
     global endpoint_to_cg_key
     global sp_callgraph_table
     global ep_str_callgraph_table
-    # global traffic_segmentation
-    # global objective
-    
-    '''Option 1: Generate dummy traces'''
-    # complete_traces = gen_trace.run(cfg.NUM_CLUSTER, num_traces=10)
-    
-    '''Option 2: Read trace string file'''
     ts = time.time()
     complete_traces = trace_string_file_to_trace_data_structure(trace_file_name, required_num_svc)
     for cid in complete_traces:
@@ -392,16 +410,13 @@ def training_phase(trace_file_name, directory, required_num_svc):
     print(f"FILE ==> DATA STRUCTURE: {int(time.time()-ts)} seconds")
     '''Time stitching'''
     stitched_traces = tst.stitch_time(complete_traces)
-    
     # stitched_df = tst.trace_to_df(stitched_traces)
     # print(f"len(stitched_df): {len(stitched_df)}")
     # stitched_df = stitched_df.loc[stitched_df['rt'] > 0]
     # stitched_df = stitched_df.loc[stitched_df['xt'] > 0]
     # print(f"after negative xt filter, len(stitched_df): {len(stitched_df)}")
-    
     for cid in stitched_traces:
         print(f"len(stitched_traces[{cid}]): {len(stitched_traces[cid])}")
-    
     '''Create useful data structures from the traces'''
     sp_callgraph_table = tst.traces_to_span_callgraph_table(stitched_traces)
     endpoint_to_cg_key = tst.get_endpoint_to_cg_key_map(stitched_traces)
@@ -411,26 +426,20 @@ def training_phase(trace_file_name, directory, required_num_svc):
     for cg_key in ep_str_callgraph_table:
         print(f"{cg_key}: {ep_str_callgraph_table[cg_key]}")
     all_endpoints = tst.get_all_endpoints(stitched_traces)
-    
     if cfg.OUTPUT_WRITE:
         tst.file_write_callgraph_table(sp_callgraph_table)
     placement = tst.get_placement_from_trace(stitched_traces)
     for cid in placement:
         print(f"placement[{cid}]: {placement[cid]}")
-    
-    
-    '''
-    Train linear regression model
-    The linear regression model is function of "inflight_req"
-    '''
-    coef_dict = train_latency_function_with_trace(stitched_traces, trace_file_name, directory)
-    
+    coef_dict = train_latency_function_with_trace(stitched_traces, directory)
+    print("coef_dict")
+    pprint(coef_dict)
     print("coef_dict before checking")
     for svc_name in coef_dict:
         for ep_str in coef_dict[svc_name]:
             print(f'coef_dict[{svc_name}][{ep_str}]: {coef_dict[svc_name][ep_str]}')
-    
     # NOTE: latency function should be strictly increasing function
+    ''' linear regression '''
     for svc_name in coef_dict: # svc_name: metrics-db
         for ep_str in coef_dict[svc_name]: # ep_str: metrics-db@GET@/dbcall
             for feature_ep in coef_dict[svc_name][ep_str]: # feature_ep: 'metrics-db@GET@/dbcall' or 'intercept'
@@ -445,40 +454,32 @@ def training_phase(trace_file_name, directory, required_num_svc):
                             coef_dict[svc_name][ep_str]['intercept'] = 1
                             print(f"WARNING: coef_dict[{svc_name}][{ep_str}], coefficient is positive.")
                             print(f"WARNING: But, coef_dict[{svc_name}][{ep_str}], intercept is negative. Set it to 0.")
+    ''' MM1 model '''
+    for svc_name in coef_dict: # svc_name: metrics-db
+        for ep_str in coef_dict[svc_name]:
+            for feature_ep in coef_dict[svc_name][ep_str]:
+                if feature_ep != "intercept":
+                    if coef_dict[svc_name][ep_str][feature_ep] < 0:
+                        coef_dict[svc_name][ep_str][feature_ep] = 0
+                        print(f"WARNING!!!: coef_dict[{svc_name}][{ep_str}] coefficient is negative. Set it to 0.")
+                    else: 
+                        if coef_dict[svc_name][ep_str]['intercept'] < 0:
+                            coef_dict[svc_name][ep_str]['intercept'] = 1
+                            print(f"WARNING: But, coef_dict[{svc_name}][{ep_str}], intercept is negative. Set it to 0.")
     print("coef_dict after checking")
     for svc_name in coef_dict:
         for ep_str in coef_dict[svc_name]:
             print(f'coef_dict[{svc_name}][{ep_str}]: {coef_dict[svc_name][ep_str]}')
-            
 
 
-def merge_slatelog_files(directory):
-    """
-    Merges all .slatelog files found within the specified directory and its subdirectories
-    into a single file named merged.slatelog.
-
-    Args:
-    directory (str): The path to the directory to search for .slatelog files.
-    """
-    output_filename = "merged.slatelog"
-    
-    # Find all .slatelog files within the specified directory, including subdirectories
-    slatelog_files = glob.glob(os.path.join(directory, '**', '*.slatelog'), recursive=True)
-    
-    # Merge the contents of these files into the specified output file
+def merge_files(directory, postfix):
+    slatelog_files = glob.glob(os.path.join(directory, '**', f'*{postfix}'), recursive=True)
+    output_filename = f"merged{postfix}"
     with open(output_filename, 'w') as outfile:
         for fname in slatelog_files:
             with open(fname) as infile:
                 outfile.write(infile.read())
     return output_filename
-
-def run(directory, required_num_svc):
-    assert directory != ""
-    merged_trace_file_name = merge_slatelog_files(directory)
-    print(f"merged_trace_file_name: {merged_trace_file_name}")
-    training_phase(merged_trace_file_name, directory, required_num_svc)
-    return merged_trace_file_name
-
 
 
 if __name__ == "__main__":
@@ -487,56 +488,47 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python3 replicate.py <directory> <required_num_svc>")
         sys.exit(1)
-        
-    merged_trace_file_name = run(directory, required_num_svc)
-
-    columns = ["cluster_id","svc_name","method","url","trace_id","span_id","parent_span_id","st","et","rt","xt","ct","call_size","inflight_dict","rps_dict"]
+    merged_trace_file_name = merge_files(directory, ".slatelog")
+    print(f"merged_trace_file_name: {merged_trace_file_name}")
+    columns = ["cluster_id","svc_name","method","path","trace_id","span_id","parent_span_id","st","et","rt","xt","ct","call_size","inflight_dict","rps_dict"]
     df = pd.read_csv(merged_trace_file_name, header=None, names=columns)
-
     trace_span_counts = df.groupby('trace_id').size()
     trace_ids_with_four_spans = trace_span_counts[trace_span_counts == required_num_svc].index
     filtered_df = df[df['trace_id'].isin(trace_ids_with_four_spans)]
-    filtered_df.to_csv("four_span_trace.csv", index=False)
-
     trace_id = filtered_df['trace_id'].unique().tolist()
-    sample_ratio = 0.025
+    sample_ratio = 1.0
     sample_size = int(len(trace_id) * sample_ratio)
     sampled_trace_id = sample(trace_id, sample_size)
     double_filtered_df = filtered_df[filtered_df['trace_id'].isin(sampled_trace_id)]
-
+    # training_phase(merged_trace_file_name, directory, required_num_svc)
+    service_list = df['svc_name'].unique().tolist()
+    print(f"service_list: {service_list}")
+    complete_traces = trace_string_file_to_trace_data_structure_with_df(double_filtered_df, required_num_svc)
+    for cid in complete_traces:
+        print(f"len(complete_traces[{cid}]): {len(complete_traces[cid])}")
+    stitched_traces = tst.stitch_time(complete_traces)
+    for cid in stitched_traces:
+        print(f"len(stitched_traces[{cid}]): {len(stitched_traces[cid])}")
+        
+    coef_dict = train_latency_function_with_trace(stitched_traces, directory)
+    for svc_name in coef_dict:
+        for ep_str in coef_dict[svc_name]:
+            print(f'coef_dict[{svc_name}][{ep_str}]: {coef_dict[svc_name][ep_str]}')
+    
     print("num all trace ", len(df['trace_id'].unique()))
     print("num complete trace", len(filtered_df['trace_id'].unique()))
     print("num sampled trace", len(double_filtered_df['trace_id'].unique()))
-    # display(double_filtered_df)
-
-    ''' This is where you define replicated cluster for slatelog'''
-    # new_cluster_list = ["us-east-1", "us-central-1", "us-south-1"]
-    new_cluster_dict = dict()
-
-    ######################################################
     ''' Define how you want to replicate '''
-    # new_cluster_dict["us-east-1"] = ["frontend", "a"]
-    # new_cluster_dict["us-central-1"] = ["frontend", "a"]
-    # new_cluster_dict["us-south-1"] = ["frontend", "a"]
-
-    # new_cluster_dict["us-east-1"] = ["frontend", "a", "b", "c", "d"]
-    # new_cluster_dict["us-central-1"] = ["frontend", "a", "b", "c", "d"]
-    # new_cluster_dict["us-south-1"] = ["frontend", "a", "b", "c", "d"]
-    
-    ## compute-diff
-    new_cluster_dict["us-east-1"] = ["frontend", "compute-node"]
-    ######################################################
-
+    new_cluster_dict = dict()
+    for cluster in ["us-east-1", "us-central-1", "us-south-1"]:
+        new_cluster_dict[cluster] = service_list
     new_df_dict = dict()
     for nc in new_cluster_dict:
         copy_df = double_filtered_df.copy() # copy orignal trace log df
         copy_df['cluster_id'] = nc # set 'cluster_id' column to a new cluster name
         copy_df = copy_df[copy_df['svc_name'].isin(new_cluster_dict[nc])] # filter out services that you don't want to replicate
         new_df_dict[nc] = copy_df.copy()
-
         print(f"Replicated {nc}")
-
-    # Step 3: Concatenate all DataFrames together
     df_all = double_filtered_df.copy()
     for cluster_id, new_df in new_df_dict.items():
         df_all = pd.concat([df_all, new_df])

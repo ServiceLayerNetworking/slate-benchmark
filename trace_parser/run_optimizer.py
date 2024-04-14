@@ -256,25 +256,13 @@ def train_latency_function_with_trace(traces, trace_file_name, directory):
     return coef_dict
 
 
-def trace_string_file_to_trace_data_structure(trace_string_file_path, sample_ratio=1.0):
+def trace_string_file_to_trace_data_structure(trace_string_file_path):
     col = ["cluster_id","svc_name","method","path","trace_id","span_id","parent_span_id","st","et","rt","xt","ct","call_size","inflight_dict","rps_dict"]
     df = pd.read_csv(trace_string_file_path, names=col, header=None)
     print(f"len(df): {len(df)}")
     df = df.loc[df['rt'] > 0]
     print(f"after negative rt filter, len(df): {len(df)}")
-    
-    # df.to_csv(f"trace_string_before_sampling.csv")
-    # if sample_ratio < 1.0:
-    #     df = df.groupby(['trace_id']).sample(frac=sample_ratio)
-    #     df = df.reset_index(drop=True)
-    # df.to_csv(f"trace_string_after_sampling.csv")
-    # print(f"len(df): {len(df)} after sampling")
-    # span_df = df.iloc[:, :-2] # inflight_dict, rps_dict
-    # inflight_df = df.iloc[:, -2:-1] # inflight_dict, rps_dict
-    # rps_df = df.iloc[:, -1:] # inflight_dict, rps_dict
-    
     num_filter_rps_datapoint = 0
-    
     list_of_span = list()
     for index, row in df.iterrows():
         if row["cluster_id"] == "SLATE_UNKNOWN_REGION" or row["svc_name"] == "consul":
@@ -283,10 +271,8 @@ def trace_string_file_to_trace_data_structure(trace_string_file_path, sample_rat
         # , is delimiter between rps_dict and inflight_dict
         # | is delimiter between two endpoints
         # @ is delimiter between svc_name @ method @ path
-        
         num_inflight_dict = dict()
         rps_dict = dict()
-        
         # inflight_row =  "user-us-west-1@POST@/user.User/CheckUser:1|user-us-west-1@POST@/user.User/CheckUser:1|"
         # print(row)
         # print(row["inflight_dict"])
@@ -303,7 +289,6 @@ def trace_string_file_to_trace_data_structure(trace_string_file_path, sample_rat
             method = ep.split("@")[1]
             path = ep.split("@")[2]
             num_inflight_dict[ep] = inflight
-            
         rps_list = row["rps_dict"].split("|")[:-1]
         for ep_rps in rps_list:
             temp = ep_rps.split(":")
@@ -347,7 +332,12 @@ def trace_string_file_to_trace_data_structure(trace_string_file_path, sample_rat
             tot_num_svc += len(all_traces[cid][tid])
         avg_num_svc = tot_num_svc / len(all_traces[cid])
         required_num_svc = math.ceil(avg_num_svc)
-        required_num_svc = 2
+        
+        required_num_svc = 3 # recommend
+        # required_num_svc = 6 # search
+        # required_num_svc = 2
+        # required_num_svc = 2
+        
         print(f"avg_num_svc in {cid}: {avg_num_svc}")
         print(f"required_num_svc in {cid}: {required_num_svc}")
     complete_traces = dict()
