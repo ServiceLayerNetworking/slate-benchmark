@@ -4,13 +4,15 @@ from random import sample
 import trace_parser
 
 
-directory = sys.argv[1]
-total_num_svc= int(sys.argv[2])
-if len(sys.argv) < 2:
-    print("Usage: python3 replicate.py <original_file> <total_num_svc>")
-    sys.exit(1)
+# directory = sys.argv[1]
+# total_num_svc= int(sys.argv[2])
+# if len(sys.argv) < 2:
+#     print("Usage: python3 replicate.py <original_file> <total_num_svc>")
+#     sys.exit(1)
     
-merged_trace_file_name = trace_parser.run_optimizer.run(directory)
+# merged_trace_file_name = trace_parser.run_optimizer.run(directory)
+
+merged_trace_file_name = "hotelreservation.csv"
 
 columns = ["cluster_id","svc_name","method","url","trace_id","span_id","parent_span_id","st","et","rt","xt","ct","call_size","inflight_dict","rps_dict"]
 df = pd.read_csv(merged_trace_file_name, header=None, names=columns)
@@ -42,9 +44,14 @@ new_cluster_dict = dict()
 # new_cluster_dict["us-central-1"] = ["frontend", "a"]
 # new_cluster_dict["us-south-1"] = ["frontend", "a"]
 
-new_cluster_dict["us-east-1"] = ["frontend", "a", "b", "c", "d"] # cluster name and services that you want to replicate in log
-new_cluster_dict["us-central-1"] = ["frontend", "a", "b", "c", "d"] # cluster name and services that you want to replicate in log
-new_cluster_dict["us-south-1"] = ["frontend", "a", "b", "c", "d"] # cluster name and services that you want to replicate in log
+# new_cluster_dict["us-east-1"] = ["frontend", "a", "b", "c", "d"]
+# new_cluster_dict["us-central-1"] = ["frontend", "a", "b", "c", "d"]
+# new_cluster_dict["us-south-1"] = ["frontend", "a", "b", "c", "d"]
+
+new_cluster_dict["us-east-1"] = ["slateingress", "frontend", "profile", "rate", "recommend", "search", "user", "reservation", "geo"]
+new_cluster_dict["us-central-1"] = ["slateingress", "frontend", "profile", "rate", "recommend", "search", "user", "reservation", "geo"]
+new_cluster_dict["us-south-1"] = ["slateingress", "frontend", "profile", "rate", "recommend", "search", "user", "reservation", "geo"]
+
 ######################################################
 
 new_df_dict = dict()
@@ -61,10 +68,6 @@ df_all = double_filtered_df.copy()
 for cluster_id, new_df in new_df_dict.items():
     df_all = pd.concat([df_all, new_df])
 df_all.sort_values(by=['cluster_id', 'trace_id'], inplace=True)
-output_fn = "replicated-"
-for nc in new_cluster_dict:
-    cluster_id_first_ch = nc.split('-')[1][0]
-    output_fn += cluster_id_first_ch + "-"
-output_fn += original_file
+output_fn = f"replicated-{merged_trace_file_name}.csv"
 df_all.to_csv(output_fn, index=False, header=False)
 print("Output file written: ", output_fn)
