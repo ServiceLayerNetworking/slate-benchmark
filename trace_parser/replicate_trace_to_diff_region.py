@@ -109,8 +109,9 @@ def fit_mm1_model(data, y_col_name, svc_name, ep_str, cid, directory):
 
 
 
-def fit_polynomial_regression(data, y_col_name, svc_name, ep_str, cid, trace_file_name, directory):
-    degree_list = [1,2,3,4]
+def fit_polynomial_regression(data, y_col_name, svc_name, ep_str, cid, directory, degree):
+    # degree_list = [1,2,3,4]
+    degree_list = [degree]
     plt.figure()
     df = pd.DataFrame(data)
     x_colnames = [x for x in df.columns if x != y_col_name]
@@ -123,6 +124,9 @@ def fit_polynomial_regression(data, y_col_name, svc_name, ep_str, cid, trace_fil
         model.fit(X_transformed, y)
         # print(f'x_colnames: {x_colnames}')
         feature_names = x_colnames.copy() + ['intercept']
+        print("model.coef_")
+        print(model.coef_)
+        model.coef_[0] *= 2
         coefficients = pd.Series(model.coef_, index=feature_names)
 
         '''plot'''
@@ -227,11 +231,9 @@ def fit_linear_regression(data, y_col_name, svc_name, ep_str, cid):
 
 
 # def train_latency_function_with_trace(traces, trace_file_name, directory):
-def train_latency_function_with_trace(traces, directory):
-    # df = pd.read_csv(f"{trace_file_path}")
-    # traces = sp.file_to_trace(trace_file_path)
+def train_latency_function_with_trace(model, traces, directory, degree):
     df = tst.trace_to_df(traces)
-    # df.to_csv(f"trace_to_file.csv")
+    coef_dict = dict()
     for cid in df["cluster_id"].unique():
         cid_df = df[df["cluster_id"]==cid]
         for svc_name in cid_df["svc_name"].unique():
@@ -275,9 +277,13 @@ def train_latency_function_with_trace(traces, directory):
                     print(lengths)
                     print("exit...")
                     exit()
-                
-                coef_dict[svc_name][ep_str] = fit_mm1_model(data, "latency", svc_name, ep_str, cid, directory)
-                # coef_dict[svc_name][ep_str] = fit_polynomial_regression(data, "latency", svc_name, ep_str, cid, trace_file_name, directory)
+                if model == "poly":
+                    coef_dict[svc_name][ep_str] = fit_polynomial_regression(data, "latency", svc_name, ep_str, cid, directory, degree)
+                elif model == "mm1":
+                    coef_dict[svc_name][ep_str] = fit_mm1_model(data, "latency", svc_name, ep_str, cid, directory)
+                else:
+                    print(f"ERROR: model: {model}")
+                    assert False
     return coef_dict
 
 
@@ -395,81 +401,84 @@ def trace_string_file_to_trace_data_structure_with_df(df, required_num_svc):
         print(f"len(complete_traces[{cid}]): {len(complete_traces[cid])}")
     return complete_traces
 
-
-def training_phase(trace_file_name, directory, required_num_svc):
-    global coef_dict
-    global placement
-    global all_endpoints
-    global endpoint_to_cg_key
-    global sp_callgraph_table
-    global ep_str_callgraph_table
-    ts = time.time()
-    complete_traces = trace_string_file_to_trace_data_structure(trace_file_name, required_num_svc)
-    for cid in complete_traces:
-        print(f"len(complete_traces[{cid}]): {len(complete_traces[cid])}")
-    print(f"FILE ==> DATA STRUCTURE: {int(time.time()-ts)} seconds")
-    '''Time stitching'''
-    stitched_traces = tst.stitch_time(complete_traces)
-    # stitched_df = tst.trace_to_df(stitched_traces)
-    # print(f"len(stitched_df): {len(stitched_df)}")
-    # stitched_df = stitched_df.loc[stitched_df['rt'] > 0]
-    # stitched_df = stitched_df.loc[stitched_df['xt'] > 0]
-    # print(f"after negative xt filter, len(stitched_df): {len(stitched_df)}")
-    for cid in stitched_traces:
-        print(f"len(stitched_traces[{cid}]): {len(stitched_traces[cid])}")
-    '''Create useful data structures from the traces'''
-    sp_callgraph_table = tst.traces_to_span_callgraph_table(stitched_traces)
-    endpoint_to_cg_key = tst.get_endpoint_to_cg_key_map(stitched_traces)
-    ep_str_callgraph_table = tst.traces_to_endpoint_str_callgraph_table(stitched_traces)
-    print("ep_str_callgraph_table")
-    print(f"num different callgraph: {len(ep_str_callgraph_table)}")
-    for cg_key in ep_str_callgraph_table:
-        print(f"{cg_key}: {ep_str_callgraph_table[cg_key]}")
-    all_endpoints = tst.get_all_endpoints(stitched_traces)
-    if cfg.OUTPUT_WRITE:
-        tst.file_write_callgraph_table(sp_callgraph_table)
-    placement = tst.get_placement_from_trace(stitched_traces)
-    for cid in placement:
-        print(f"placement[{cid}]: {placement[cid]}")
-    coef_dict = train_latency_function_with_trace(stitched_traces, directory)
-    print("coef_dict")
-    pprint(coef_dict)
-    print("coef_dict before checking")
-    for svc_name in coef_dict:
-        for ep_str in coef_dict[svc_name]:
-            print(f'coef_dict[{svc_name}][{ep_str}]: {coef_dict[svc_name][ep_str]}')
-    # NOTE: latency function should be strictly increasing function
-    ''' linear regression '''
-    for svc_name in coef_dict: # svc_name: metrics-db
-        for ep_str in coef_dict[svc_name]: # ep_str: metrics-db@GET@/dbcall
-            for feature_ep in coef_dict[svc_name][ep_str]: # feature_ep: 'metrics-db@GET@/dbcall' or 'intercept'
-                if feature_ep != "intercept": # a in a*(x^degree) + b
-                    if coef_dict[svc_name][ep_str][feature_ep] < 0:
-                        coef_dict[svc_name][ep_str][feature_ep] = 0
-                        # coef_dict[svc_name][ep_str]['intercept'] = 1
-                        print(f"WARNING!!!: coef_dict[{svc_name}][{ep_str}] coefficient is negative. Set it to 0.")
-                    else: 
-                        if coef_dict[svc_name][ep_str]['intercept'] < 0:
-                            # a is positive but intercept is negative
-                            coef_dict[svc_name][ep_str]['intercept'] = 1
-                            print(f"WARNING: coef_dict[{svc_name}][{ep_str}], coefficient is positive.")
-                            print(f"WARNING: But, coef_dict[{svc_name}][{ep_str}], intercept is negative. Set it to 0.")
-    ''' MM1 model '''
-    for svc_name in coef_dict: # svc_name: metrics-db
-        for ep_str in coef_dict[svc_name]:
-            for feature_ep in coef_dict[svc_name][ep_str]:
-                if feature_ep != "intercept":
-                    if coef_dict[svc_name][ep_str][feature_ep] < 0:
-                        coef_dict[svc_name][ep_str][feature_ep] = 0
-                        print(f"WARNING!!!: coef_dict[{svc_name}][{ep_str}] coefficient is negative. Set it to 0.")
-                    else: 
-                        if coef_dict[svc_name][ep_str]['intercept'] < 0:
-                            coef_dict[svc_name][ep_str]['intercept'] = 1
-                            print(f"WARNING: But, coef_dict[{svc_name}][{ep_str}], intercept is negative. Set it to 0.")
-    print("coef_dict after checking")
-    for svc_name in coef_dict:
-        for ep_str in coef_dict[svc_name]:
-            print(f'coef_dict[{svc_name}][{ep_str}]: {coef_dict[svc_name][ep_str]}')
+# not used
+# def training_phase(trace_file_name, directory, required_num_svc):
+#     global coef_dict
+#     global placement
+#     global all_endpoints
+#     global endpoint_to_cg_key
+#     global sp_callgraph_table
+#     global ep_str_callgraph_table
+#     ts = time.time()
+#     complete_traces = trace_string_file_to_trace_data_structure(trace_file_name, required_num_svc)
+#     for cid in complete_traces:
+#         print(f"len(complete_traces[{cid}]): {len(complete_traces[cid])}")
+#     print(f"FILE ==> DATA STRUCTURE: {int(time.time()-ts)} seconds")
+#     '''Time stitching'''
+#     stitched_traces = tst.stitch_time(complete_traces)
+#     # stitched_df = tst.trace_to_df(stitched_traces)
+#     # print(f"len(stitched_df): {len(stitched_df)}")
+#     # stitched_df = stitched_df.loc[stitched_df['rt'] > 0]
+#     # stitched_df = stitched_df.loc[stitched_df['xt'] > 0]
+#     # print(f"after negative xt filter, len(stitched_df): {len(stitched_df)}")
+#     for cid in stitched_traces:
+#         print(f"len(stitched_traces[{cid}]): {len(stitched_traces[cid])}")
+#     '''Create useful data structures from the traces'''
+#     sp_callgraph_table = tst.traces_to_span_callgraph_table(stitched_traces)
+#     endpoint_to_cg_key = tst.get_endpoint_to_cg_key_map(stitched_traces)
+#     ep_str_callgraph_table = tst.traces_to_endpoint_str_callgraph_table(stitched_traces)
+#     print("ep_str_callgraph_table")
+#     print(f"num different callgraph: {len(ep_str_callgraph_table)}")
+#     for cg_key in ep_str_callgraph_table:
+#         print(f"{cg_key}: {ep_str_callgraph_table[cg_key]}")
+#     all_endpoints = tst.get_all_endpoints(stitched_traces)
+#     if cfg.OUTPUT_WRITE:
+#         tst.file_write_callgraph_table(sp_callgraph_table)
+#     placement = tst.get_placement_from_trace(stitched_traces)
+#     for cid in placement:
+#         print(f"placement[{cid}]: {placement[cid]}")
+#     poly_coef_dict, mm1_coef_dict = train_latency_function_with_trace(stitched_traces, directory)
+#     print("-"*60)
+#     print("poly_coef_dict before checking")
+#     for svc_name in poly_coef_dict:
+#         for ep_str in poly_coef_dict[svc_name]:
+#             print(f'poly_coef_dict[{svc_name}][{ep_str}]: {poly_coef_dict[svc_name][ep_str]}')
+#     print("-"*60)
+#     print("mm1_coef_dict")
+#     pprint(mm1_coef_dict)
+#     print("-"*60)
+#     # NOTE: latency function should be strictly increasing function
+#     ''' linear regression '''
+#     for svc_name in coef_dict: # svc_name: metrics-db
+#         for ep_str in coef_dict[svc_name]: # ep_str: metrics-db@GET@/dbcall
+#             for feature_ep in coef_dict[svc_name][ep_str]: # feature_ep: 'metrics-db@GET@/dbcall' or 'intercept'
+#                 if feature_ep != "intercept": # a in a*(x^degree) + b
+#                     if coef_dict[svc_name][ep_str][feature_ep] < 0:
+#                         coef_dict[svc_name][ep_str][feature_ep] = 0
+#                         # coef_dict[svc_name][ep_str]['intercept'] = 1
+#                         print(f"WARNING!!!: coef_dict[{svc_name}][{ep_str}] coefficient is negative. Set it to 0.")
+#                     else: 
+#                         if coef_dict[svc_name][ep_str]['intercept'] < 0:
+#                             # a is positive but intercept is negative
+#                             coef_dict[svc_name][ep_str]['intercept'] = 1
+#                             print(f"WARNING: coef_dict[{svc_name}][{ep_str}], coefficient is positive.")
+#                             print(f"WARNING: But, coef_dict[{svc_name}][{ep_str}], intercept is negative. Set it to 0.")
+#     ''' MM1 model '''
+#     for svc_name in coef_dict: # svc_name: metrics-db
+#         for ep_str in coef_dict[svc_name]:
+#             for feature_ep in coef_dict[svc_name][ep_str]:
+#                 if feature_ep != "intercept":
+#                     if coef_dict[svc_name][ep_str][feature_ep] < 0:
+#                         coef_dict[svc_name][ep_str][feature_ep] = 0
+#                         print(f"WARNING!!!: coef_dict[{svc_name}][{ep_str}] coefficient is negative. Set it to 0.")
+#                     else: 
+#                         if coef_dict[svc_name][ep_str]['intercept'] < 0:
+#                             coef_dict[svc_name][ep_str]['intercept'] = 1
+#                             print(f"WARNING: But, coef_dict[{svc_name}][{ep_str}], intercept is negative. Set it to 0.")
+#     print("coef_dict after checking")
+#     for svc_name in coef_dict:
+#         for ep_str in coef_dict[svc_name]:
+#             print(f'coef_dict[{svc_name}][{ep_str}]: {coef_dict[svc_name][ep_str]}')
 
 
 def merge_files(directory, postfix):
@@ -510,17 +519,30 @@ if __name__ == "__main__":
     for cid in stitched_traces:
         print(f"len(stitched_traces[{cid}]): {len(stitched_traces[cid])}")
         
-    coef_dict = train_latency_function_with_trace(stitched_traces, directory)
-    for svc_name in coef_dict:
-        for ep_str in coef_dict[svc_name]:
-            print(f'coef_dict[{svc_name}][{ep_str}]: {coef_dict[svc_name][ep_str]}')
+    degree = 2 # NOTE
+    poly_coef_dict = train_latency_function_with_trace("poly", stitched_traces, directory, degree)
+    mm1_coef_dict = train_latency_function_with_trace("mm1", stitched_traces, directory, degree=None)
+    
+    
+    print("-"*80)
+    # with open(f"{directory}/poly_coef_dict.csv", "w") as f:
+    with open(f"/users/gangmuk/projects/DeathStarBench/hotelReservation/coef_multiplied_by_two.csv", "a") as f:
+        for svc_name in poly_coef_dict:
+            for ep_str in poly_coef_dict[svc_name]:
+                for feature in poly_coef_dict[svc_name][ep_str]:
+                    print(f'poly_coef_dict,{svc_name},{ep_str},{feature},{poly_coef_dict[svc_name][ep_str][feature]}')
+                    f.write(f'{svc_name},{ep_str},{feature},{poly_coef_dict[svc_name][ep_str][feature]}\n')
+                
+    print("-"*80)
     
     print("num all trace ", len(df['trace_id'].unique()))
     print("num complete trace", len(filtered_df['trace_id'].unique()))
     print("num sampled trace", len(double_filtered_df['trace_id'].unique()))
     ''' Define how you want to replicate '''
     new_cluster_dict = dict()
-    for cluster in ["us-east-1", "us-central-1", "us-south-1"]:
+    # replicated_cluster_list = ["us-east-1", "us-central-1", "us-south-1"]
+    replicated_cluster_list = []
+    for cluster in replicated_cluster_list:
         new_cluster_dict[cluster] = service_list
     new_df_dict = dict()
     for nc in new_cluster_dict:

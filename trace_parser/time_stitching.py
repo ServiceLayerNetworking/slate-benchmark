@@ -632,6 +632,9 @@ def stitch_time(traces):
                 if cid not in ret_traces:
                     ret_traces[cid] = dict()
                 ret_traces[cid][tid] = traces[cid][tid]
+            else:
+                # skip this trace
+                continue
     # df = trace_to_df(traces)
     # print_all_trace(traces)
     
@@ -642,6 +645,8 @@ def stitch_trace(trace):
     ep_str_cg, tot_num_node_in_topology = single_trace_to_endpoint_str_callgraph(trace)
     # print(f"tot_num_node_in_topology: {tot_num_node_in_topology}")
     root_ep_str = opt_func.find_root_node(ep_str_cg)
+    if root_ep_str == False:
+        return False
     # print(f"root_ep: {root_ep_str}")
     # pprint(f"ep_str_cg: {ep_str_cg}")
     # exit()
