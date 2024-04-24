@@ -55,11 +55,12 @@ def parse_latency_stat_in_wrklog_file(wrklog_path, wrk_config, latency_metrics, 
             print("Requests per second:", tput)
         else:
             print("Pattern not found")
+            print(wrklog_path)
             assert False
         #########################################
         
         cluster = wrk_config["cluster"]
-        print(wrk_config)
+        # print(wrk_config)
         # rps_value = int(wrk_config[f"{cluster}_RPS"])
         rps_value = int(wrk_config[f"RPS"])
         if rps_value <= rps_thr:
@@ -78,7 +79,7 @@ def parse_latency_stat_in_wrklog_file(wrklog_path, wrk_config, latency_metrics, 
                 
             for target_metric, pattern in latency_patterns.items():
                 latency_value = find_latency_value(pattern, wrklog_file_read)
-                print(f"target_metric: {target_metric}, latency_value: {latency_value}")
+                # print(f"target_metric: {target_metric}, latency_value: {latency_value}")
                 if target_metric not in latency_dict:
                     latency_dict[target_metric] = []
                 try:
@@ -142,8 +143,8 @@ def extract_cdf_data(wrklog_path):
 
 def find_and_process_wrklog_files(base_directory):
     wrklog_files = glob.glob(f'{base_directory}/**/*.wrklog', recursive=True)
-    for file in wrklog_files:
-        print(file)
+    # for file in wrklog_files:
+    #     print(file)
     return wrklog_files
 
 
@@ -169,7 +170,7 @@ if __name__ == "__main__":
     latency_dict["tput"] = []
     for wrklog_path in wrklog_files:
         wrk_config = parse_wrk_config(wrklog_path)
-        print(wrk_config)
+        # print(wrk_config)
         parse_latency_stat_in_wrklog_file(wrklog_path, wrk_config, latency_metrics, latency_dict, stat_dict)
     # print("latency_dict")
     # for key, value in latency_dict.items():
@@ -179,8 +180,8 @@ if __name__ == "__main__":
     #     print(f"{key}: {value}")
     
     color_dict = {"SLATE": "blue", "WATERFALL": "red", "WATERFALL2": "red", "REMOTE": "green", "LOCAL": "orange"}
-    # cluster_map = {"west":0, "central":1, "south":2, "east":3}
-    cluster_map = {"west":0, "east":1}
+    cluster_map = {"west":0, "central":1, "south":2, "east":3}
+    # cluster_map = {"west":0, "east":1}
     print("cluster_map", cluster_map)
     for wrk_config in wrk_config_list:
         wrk_config['cluster_id'] = cluster_map[wrk_config['cluster']]

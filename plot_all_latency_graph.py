@@ -77,20 +77,19 @@ def parse_latency_stat_in_wrklog_file(wrklog_path, wrk_config, latency_metrics, 
     with open(wrklog_path, 'r') as file:
         wrklog_file_read = file.read()
         
-        #########################################
-        pattern = r"Requests/sec:\s*(\d+\.\d+)"
-        match = re.search(pattern, wrklog_file_read)
-        if match:
-            tput = float(match.group(1))
-            print("Requests per second:", tput)
-        else:
-            print("Pattern not found")
-            assert False
-        #########################################
-        
-        cluster = wrk_config["cluster"]
         rps_value = int(wrk_config["RPS"])
         if rps_value <= rps_thr:
+            pattern = r"Requests/sec:\s*(\d+\.\d+)"
+            match = re.search(pattern, wrklog_file_read)
+            if match:
+                tput = float(match.group(1))
+                print("Requests per second:", tput)
+            else:
+                print(f"ERROR: wrklog_path: {wrklog_path}")
+                print("ERROR: Pattern not found")
+                assert False
+            
+            cluster = wrk_config["cluster"]
             if "rps" not in latency_dict:
                 latency_dict["mode"] = []
                 latency_dict["cluster"] = []

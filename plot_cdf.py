@@ -222,10 +222,11 @@ if __name__ == "__main__":
         for percentile in latency_metrics:
             number = str(int(stat_dict[wrk_config['routing_rule']][str(wrk_config['RPS'])][wrk_config['cluster']][percentile]))
             text_to_display += f"{percentile}:{number}\n"
-        if wrk_config['routing_rule'] == 'SLATE':
-            axs[cluster_map[wrk_config['cluster']]].text(0.25, 0.0, text_to_display, transform=axs[cluster_map[wrk_config['cluster']]].transAxes, ha='center', color=color_dict[wrk_config['routing_rule']])
-        else:
-            axs[cluster_map[wrk_config['cluster']]].text(0.8, 0.0, text_to_display, transform=axs[cluster_map[wrk_config['cluster']]].transAxes, ha='center', color=color_dict[wrk_config['routing_rule']])
+            
+        # if wrk_config['routing_rule'] == 'SLATE':
+        #     axs[cluster_map[wrk_config['cluster']]].text(0.25, 0.0, text_to_display, transform=axs[cluster_map[wrk_config['cluster']]].transAxes, ha='center', color=color_dict[wrk_config['routing_rule']])
+        # else:
+        #     axs[cluster_map[wrk_config['cluster']]].text(0.8, 0.0, text_to_display, transform=axs[cluster_map[wrk_config['cluster']]].transAxes, ha='center', color=color_dict[wrk_config['routing_rule']])
             
         axs[cluster_map[wrk_config['cluster']]].set_title(title, fontsize=20)
         # axs[cluster_map[wrk_config['cluster']]].legend(fontsize=12)
@@ -248,7 +249,7 @@ if __name__ == "__main__":
     assert len(labels) > 0
     print(labels)
     # plt.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=3, fontsize=12)
-    fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5,1.0), ncol=3, fontsize=16)
+    fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5,1.0), ncol=4, fontsize=16)
     # plt.legend(handles, labels, loc='upper center', fontsize=12)
     plt.subplots_adjust(bottom=0.2)  # You might need to adjust this value
     plt.tight_layout()
