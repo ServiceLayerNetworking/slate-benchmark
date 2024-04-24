@@ -33,39 +33,58 @@ def schedule_to_control_plane(deployment_name, namespace):
      print(f"Deployment '{deployment_name}' in namespace '{namespace}' has been updated.")
 
 
-def update_hpa(namespace, hpa_name, min_replicas):
+def update_hpa(namespace, hpa_name, min_replicas, max_replicas):
     config.load_kube_config()
     api_instance = client.AutoscalingV1Api()
-    hpa = api_instance.read_namespaced_horizontal_pod_autoscaler(hpa_name, namespace)
-    hpa.spec.min_replicas = min_replicas
-    api_instance.patch_namespaced_horizontal_pod_autoscaler(hpa_name, namespace, hpa)
-    print(f"HPA '{hpa_name}' in namespace '{namespace}' has been updated to minReplicas={min_replicas}")
-
+    if max_replicas < min_replicas:
+        print("Error: maxReplicas must be greater than or equal to minReplicas")
+        return
+    body = {
+        "spec": {
+            "minReplicas": min_replicas,
+            "maxReplicas": max_replicas
+        }
+    }
+    try:
+        api_instance.patch_namespaced_horizontal_pod_autoscaler(hpa_name, namespace, body)
+        print("HPA updated successfully.")
+    except client.exceptions.ApiException as e:
+        print("Failed to update HPA:", e)
+    print(f"Update HPA '{hpa_name}, maxReplicas={max_replicas}, minReplicas={min_replicas}")
+    
+    
+def remove_resource_limits(namespace, deployment_name):
+    config.load_kube_config()
+    apps_v1 = client.AppsV1Api()
+    patch = {
+        "spec": {
+            "template": {
+                "spec": {
+                    "containers": [
+                        {
+                            "name": "istio-proxy",  # You might need to adjust this if the container name differs
+                            "resources": {
+                                "limits": None
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    }
+    try:
+        apps_v1.patch_namespaced_deployment(name=deployment_name, namespace=namespace, body=patch)
+        print(f"Resource limits removed from deployment {deployment_name} in namespace {namespace}.")
+    except client.exceptions.ApiException as e:
+        print("Failed to patch the deployment:", e)
+        
 if __name__ == "__main__":
     namespace = 'istio-system'  # Change this to the namespace of your HPA
     hpa_name = 'istio-ingressgateway'
-    min_replicas = 3
-    update_hpa(namespace, hpa_name, min_replicas)
+    min_replicas = 10
+    max_replicas = 100
+    update_hpa(namespace, hpa_name, min_replicas, max_replicas)
     schedule_to_control_plane("istio-ingressgateway", "istio-system")
     schedule_to_control_plane("istiod", "istio-system")
+    remove_resource_limits("istio-system", "istio-ingressgateway")
 
-
-## It is deprecated. because there is hpa for istio-ingressgateway that has 1 minReplicas
-# def update_replicas(deployment_name, namespace, replicas):
-#     config.load_kube_config()
-#     api_instance = client.AppsV1Api()
-#     patch = {
-#         "spec": {
-#             "replicas": replicas
-#         }
-#     }
-#     try:
-#         api_response = api_instance.patch_namespaced_deployment(
-#             name=deployment_name,
-#             namespace=namespace,
-#             body=patch
-#         )
-#         print(f"Update num of replicas: {deployment_name}, num: {replicas}")
-#     except client.rest.ApiException as e:
-#         print("An error occurred: %s" % e)
-# update_replicas("istio-ingressgateway", "istio-system", 4)

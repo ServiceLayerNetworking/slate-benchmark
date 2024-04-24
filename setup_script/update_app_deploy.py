@@ -26,8 +26,8 @@ def set_replicas_for_all_deployments(replica_count):
         else:
             print(f"Skipping deployment: {deployment.metadata.name}")
 
-num_replia = int(sys.argv[1])
 if len(sys.argv) != 2:
     print("Usage: python update_app_deploy.py <replica_count>")
     sys.exit(1)
+num_replia = int(sys.argv[1])
 set_replicas_for_all_deployments(num_replia)  # Replace 'X' with the desired number of replicas
