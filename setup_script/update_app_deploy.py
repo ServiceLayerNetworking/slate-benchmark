@@ -15,11 +15,11 @@ def get_hotel_deployment_list():
 def set_replicas_for_all_deployments(replica_count):
     config.load_kube_config()
     apps_v1_api = client.AppsV1Api()
-    deploy_list = get_hotel_deployment_list()
+    # deploy_list = get_hotel_deployment_list()
     # print(f"deploy_list: {deploy_list}")
     deployments = apps_v1_api.list_namespaced_deployment(namespace="default")
     for deployment in deployments.items:
-        if deployment.metadata.name in deploy_list:
+        if deployment.metadata.name != "slate-controller":
             deployment.spec.replicas = replica_count
             apps_v1_api.patch_namespaced_deployment(name=deployment.metadata.name, namespace="default", body=deployment)
             print(f"Updating deployment: {deployment.metadata.name}, replicas: {replica_count}")

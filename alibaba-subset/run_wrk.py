@@ -438,7 +438,7 @@ def restart_deploy(exclude=[]):
         deployments = api_instance.list_namespaced_deployment(namespace="default")
         for deployment in deployments.items:
             if deployment.metadata.name not in exclude:
-                run_command(f"kubectl rollout restart deploy {deployment.metadata.name}")
+                run_command(f"kubectl rollout restart deploy {deployment.metadata.name} ")
     except client.ApiException as e:
         print("Exception when calling AppsV1Api->list_namespaced_deployment: %s\n" % e)
         
@@ -464,6 +464,8 @@ def start_background_noise(node_dict, cpu_noise=30):
         # print(f"Try to run background-noise -cpu={cpu_noise} in {node_dict[node]['hostname']}")
         print("ADITYA: ", f"ssh gangmuk@{node_dict[node]['hostname']} 'nohup /users/gangmuk/projects/slate-benchmark/background-noise/background-noise -cpu={cpu_noise} &'")
         run_command(f"ssh gangmuk@{node_dict[node]['hostname']} 'nohup /users/gangmuk/projects/slate-benchmark/background-noise/background-noise -cpu={cpu_noise} > /dev/null 2>&1 &'", nonblock=False)
+        # run_command(f"ssh gangmuk@{node_dict[node]['hostname']} '", nonblock=False)
+
         print(f"background-noise -cpu={cpu_noise} in {node_dict[node]['hostname']}")
 
 
@@ -514,13 +516,13 @@ def main():
                     # "search-w1100": {"west": {"search": 1100}}, \
                     # "search-w1200": {"west": {"search": 1200}}, \
                         
-                    # "light-w100": {"west": {"light": 100}}, \
-                    # "light-w200": {"west": {"light": 200}}, \
-                    # "light-w300": {"west": {"light": 300}}, \
-                    # "light-w400": {"west": {"light": 400}}, \
-                    # "light-w500": {"west": {"light": 500}}, \
-                    # "light-w600": {"west": {"light": 600}}, \
-                    # "light-w700": {"west": {"light": 700}}, \
+                    "light-w100": {"west": {"light": 100}}, \
+                    "light-w200": {"west": {"light": 200}}, \
+                    "light-w300": {"west": {"light": 300}}, \
+                    "light-w400": {"west": {"light": 400}}, \
+                    "light-w500": {"west": {"light": 500}}, \
+                    "light-w600": {"west": {"light": 600}}, \
+                    "light-w700": {"west": {"light": 700}}, \
                     "light-w800": {"west": {"light": 800}}, \
                     # "light-w900": {"west": {"light": 900}}, \
                     # "light-w1000": {"west": {"light": 1000}}, \
@@ -542,17 +544,17 @@ def main():
                     "heavy-w600": {"west": {"heavy": 600}}, \
                     "heavy-w700": {"west": {"heavy": 700}}, \
                     "heavy-w800": {"west": {"heavy": 800}}, \
-                    "heavy-w900": {"west": {"heavy": 900}}, \
-                    "heavy-w1000": {"west": {"heavy": 1000}}, \
-                    "heavy-w1200": {"west": {"heavy": 1100}}, \
-                    "heavy-w1200": {"west": {"heavy": 1200}}, \
-                    "heavy-w1300": {"west": {"heavy": 1300}}, \
-                    "heavy-w1400": {"west": {"heavy": 1400}}, \
-                    "heavy-w1500": {"west": {"heavy": 1500}}, \
-                    "heavy-w1600": {"west": {"heavy": 1600}}, \
-                    "heavy-w1700": {"west": {"heavy": 1700}}, \
-                    "heavy-w1800": {"west": {"heavy": 1800}}, \
-                    "heavy-w1900": {"west": {"heavy": 1900}}, \
+                    # "heavy-w900": {"west": {"heavy": 900}}, \
+                    # "heavy-w1000": {"west": {"heavy": 1000}}, \
+                    # "heavy-w1200": {"west": {"heavy": 1100}}, \
+                    # "heavy-w1200": {"west": {"heavy": 1200}}, \
+                    # "heavy-w1300": {"west": {"heavy": 1300}}, \
+                    # "heavy-w1400": {"west": {"heavy": 1400}}, \
+                    # "heavy-w1500": {"west": {"heavy": 1500}}, \
+                    # "heavy-w1600": {"west": {"heavy": 1600}}, \
+                    # "heavy-w1700": {"west": {"heavy": 1700}}, \
+                    # "heavy-w1800": {"west": {"heavy": 1800}}, \
+                    # "heavy-w1900": {"west": {"heavy": 1900}}, \
                         
                     # "recommend-w100": {"west": {"recommend": 100}}, \
                     # "recommend-w200": {"west": {"recommend": 200}}, \
@@ -641,29 +643,73 @@ def main():
     }
     
         
-    node_to_region = {"node1":"us-west-1", "node2":"us-east-1", "node3":"us-central-1", "node4":"us-south-1"}
+    # node_to_region = {"node1":"us-west-1", "node2":"us-east-1", "node3":"us-central-1",
+    #                   }
+    
+    region_to_node = {
+        "us-west-1": ["node1", "node2", "node3"],
+        "us-east-1": ["node4", "node5", "node6"],
+        "us-central-1": ["node7", "node8", "node9"],
+        "us-south-1": ["node10", "node11", "node12"]
+    }
+    region_latencies = {
+        "us-west-1": {
+            "us-east-1": 33,
+            "us-central-1": 15,
+            "us-south-1": 20,
+        },
+        "us-east-1": {
+            "us-central-1": 20,
+            "us-south-1": 15,
+        },
+        "us-central-1": {
+            "us-south-1": 10,
+        }
+    }
+    # node_to_region = {"node1": "us-west-1", "node2": "us-west-1", "node3": "us-west-1",
+    #                   "node4": "us-east-1", "node5": "us-east-1", "node6": "us-east-1",
+    #                   "node7": "us-central-1", "node8": "us-central-1", "node9": "us-central-1",
+    #                   "node10": "us-south-1", "node11": "us-south-1", "node12": "us-south-1"}
+    node_to_region = {}
+    for region, nodes in region_to_node.items():
+        for n in nodes:
+            node_to_region[n] = region
     
     inter_cluster_latency = dict()
     for src_node in node_to_region:
         inter_cluster_latency[src_node] = dict()
     
     # GCP, OR, SLC, IOW, SC
-    inter_cluster_latency["node1"]["node2"] = 33 # west east
-    inter_cluster_latency["node1"]["node3"] = 15 # west, central
-    inter_cluster_latency["node1"]["node4"] = 20 # west, south 
-    inter_cluster_latency["node2"]["node3"] = 20 # east, central
-    inter_cluster_latency["node2"]["node4"] = 15 # east, south
-    inter_cluster_latency["node3"]["node4"] = 10 # central, south
-    inter_cluster_latency["node1"]["node1"] = 0 # west, west
-    inter_cluster_latency["node2"]["node2"] = 0 # central, central
-    inter_cluster_latency["node3"]["node3"] = 0 # south, south
-    inter_cluster_latency["node4"]["node4"] = 0 # east, east
+    # Collect all unique regions
+    all_regions = set(region_latencies.keys())
+    for region in region_latencies:
+        all_regions.update(region_latencies[region].keys())
 
-    for src_node in inter_cluster_latency:
-        for dst_node in inter_cluster_latency[src_node]:
-            if src_node == dst_node:
-                continue
-            inter_cluster_latency[dst_node][src_node] = inter_cluster_latency[src_node][dst_node]
+    # ensure symmetry
+    for region in all_regions:
+        if region not in region_latencies:
+            region_latencies[region] = {}
+        for other_region in all_regions:
+            if other_region not in region_latencies[region]:
+                if region == other_region:
+                    region_latencies[region][other_region] = 0  # latency to self is zero
+                elif other_region in region_latencies and region in region_latencies[other_region]:
+                    # Copy the reverse latency if it exists
+                    region_latencies[region][other_region] = region_latencies[other_region][region]
+                else:
+                    # Initialize to None if no data is available in either direction
+                    region_latencies[region][other_region] = None
+    
+    # Initialize the inter_cluster_latency dictionary
+    inter_cluster_latency = {node: {} for region in region_to_node for node in region_to_node[region]}
+
+    # Populate the inter_cluster_latency dictionary based on region latencies
+    for src_region, src_nodes in region_to_node.items():
+        for src_node in src_nodes:
+            for dst_region, dst_nodes in region_to_node.items():
+                for dst_node in dst_nodes:
+                    inter_cluster_latency[src_node][dst_node] = region_latencies[src_region][dst_region]
+    
     print("inter_cluster_latency")
     pprint(inter_cluster_latency)
     
@@ -834,9 +880,9 @@ def main():
                     print(f"mode: {mode} is not supported")
                     assert False
                 '''end of one set of experiment'''
-                restart_deploy(exclude=[])
+                # restart_deploy(exclude=[])
                 # run_command("kubectl rollout restart deploy slate-controller")
-                # run_command("kubectl rollout restart deploy -l=region=us-west-1", required=True)
+                run_command("kubectl rollout restart deploy -l=region=us-west-1", required=True)
                 # run_command("kubectl rollout restart deploy slateingress-us-west-1")
                 # run_command("kubectl rollout restart deploy slateingress-us-east-1")
                 # run_command("kubectl rollout restart deploy slateingress-us-central-1")
