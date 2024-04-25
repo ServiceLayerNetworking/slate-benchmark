@@ -881,7 +881,7 @@ def main():
                     assert False
                 '''end of one set of experiment'''
                 # restart_deploy(exclude=[])
-                # run_command("kubectl rollout restart deploy slate-controller")
+                run_command("kubectl rollout restart deploy slate-controller")
                 run_command("kubectl rollout restart deploy -l=region=us-west-1", required=True)
                 # run_command("kubectl rollout restart deploy slateingress-us-west-1")
                 # run_command("kubectl rollout restart deploy slateingress-us-east-1")
