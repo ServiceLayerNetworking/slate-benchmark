@@ -69,29 +69,41 @@ def fit_mm1_model(data, y_col_name, svc_name, ep_str, cid, directory):
     df['utilization-'+x_col] = df[x_col]
     df['utilization-'+x_col] = df['utilization-'+x_col] / df['utilization-'+x_col].max()
     u_ = df['utilization-'+x_col]
+    # print(f"max(u_): {u_.max()}")
     y_ = df[y_col_name]
     print(f"len(u): {len(u_)}, len(y_): {len(y_)}")
     if np.isinf(u_).any() or np.isnan(u_).any():
         print("Infinite or NaN values found in 'u'")
+    print(f"u_: {u_}")
     # plt.scatter(u_, y_, color='blue', alpha=0.1, label='Data')
     max_rps = df[x_col].max()
     print(f"max_rps: {max_rps}")
-    norm_u_ = u_*max_rps
-    plt.scatter(norm_u_, y_, color='blue', alpha=0.1, label='Data')
-    constant = 1.08
+    
     def mm1_model(u, a, b):
+        # print(f"mm1_model, u: {u}")
+        # print(f"mm1_model, len(u): {len(u)}")
+        # print(f"mm1_model, a: {a}")
+        # print(f"mm1_model, b: {b}")
         amplified_a = a * 1
-        return (amplified_a) / (u.max()*constant - u)+b
-
+        return ((amplified_a) / (u.max() - u)) + b
+    
+    
+    # initial_guesses = [1, 0]  # Adjust as needed
+    # bounds = (0, [np.inf, np.inf])  # Adjust as needed
+    # bounds = ([0, -np.inf], [np.inf, np.inf])  # Adjust as needed
+    # popt, pcov = curve_fit(mm1_model, u_, y_, p0=initial_guesses, bounds=bounds, maxfev=10000)
+    
     popt, pcov = curve_fit(mm1_model, u_, y_, maxfev=10000)
     print(f"popt = {popt}")
-    u_plot = np.linspace(min(u_), max(u_) * 0.99, 100)  # Avoid division by zero at u=1
-    y_plot = mm1_model(u_plot, *popt)
+    print(f"pcov = {pcov}")
     
+    ######################################################3
+    u_plot = np.linspace(min(u_), max(u_) * 0.99, 100)
+    y_plot = mm1_model(u_plot, *popt)
+    norm_u_ = u_*max_rps
+    plt.scatter(norm_u_, y_, color='blue', alpha=0.1, label='Data')
     norm_u_plot = u_plot*max_rps
-    #plt.plot(norm_u_plot, y_plot, 'r-', label=f'MM1 Fit: $\\frac{{a}}{{c-u}}+b$,a={popt[0]}, c={u_.max()*constant}, b={popt[1]}')
-    plt.plot(norm_u_plot, y_plot, 'r-', label=f'MM1 Fit: $\\frac{{a}}{{c-u}}+b$\n$a={popt[0]:.2f}, c={(u_.max()*constant):.2f}, b={popt[1]:.2f}$')
-    # plt.plot(u_plot, y_plot, 'r-', label=f'MM1 Fit: $\\frac{{a}}{{1-u}}$, a={popt[0]:.2f}')
+    plt.plot(norm_u_plot, y_plot, 'r-', label=f'MM1 Fit: $\\frac{{a}}{{1-u}}$, a={popt[0]}')
     plt.xlabel('Utilization (u_)')
     plt.ylabel(y_col_name + " ms")
     plt.title(f'{ep_str} in {cid}')
@@ -100,10 +112,8 @@ def fit_mm1_model(data, y_col_name, svc_name, ep_str, cid, directory):
     pdf_fn = f"{directory}/latency-{svc_name}-mm1-model.pdf"
     plt.savefig(pdf_fn)
     plt.show()
-    # Output the model parameters and where the plot was saved
-    print(f"Model parameters: a = {popt}")
     print(f"Output plot saved as: {pdf_fn}")
-    # Return model parameters as a dictionary if needed
+    ######################################################3
     return {'a': popt[0]}
 
 
@@ -497,11 +507,9 @@ if __name__ == "__main__":
         print("Usage: python3 replicate.py <directory> <required_num_svc>")
         sys.exit(1)
     merged_trace_file_name = merge_files(directory, ".slatelog")
-    # merged_trace_file_name = "merged.slatelog"
-    #print(f"merged_trace_file_name: {merged_trace_file_name}")
+    print(f"merged_trace_file_name: {merged_trace_file_name}")
     columns = ["cluster_id","svc_name","method","path","trace_id","span_id","parent_span_id","st","et","rt","xt","ct","call_size","inflight_dict","rps_dict"]
     df = pd.read_csv(merged_trace_file_name, header=None, names=columns)
-    #print(f"orig df: {df}")
     trace_span_counts = df.groupby('trace_id').size()
     trace_ids_with_four_spans = trace_span_counts[trace_span_counts == required_num_svc].index
     filtered_df = df[df['trace_id'].isin(trace_ids_with_four_spans)]
@@ -514,26 +522,30 @@ if __name__ == "__main__":
     service_list = df['svc_name'].unique().tolist()
     print(f"service_list: {service_list}")
     complete_traces = trace_string_file_to_trace_data_structure_with_df(double_filtered_df, required_num_svc)
-    print(f"printing complete_traces: {complete_traces}")
     for cid in complete_traces:
         print(f"len(complete_traces[{cid}]): {len(complete_traces[cid])}")
     stitched_traces = tst.stitch_time(complete_traces)
     for cid in stitched_traces:
         print(f"len(stitched_traces[{cid}]): {len(stitched_traces[cid])}")
         
-    degree = 2 # NOTE
-    #poly_coef_dict = train_latency_function_with_trace("poly", stitched_traces, directory, degree)
     mm1_coef_dict = train_latency_function_with_trace("mm1", stitched_traces, directory, degree=None)
+    with open(f"/users/gangmuk/projects/DeathStarBench/hotelReservation/coef_multiplied_by_two.csv", "a") as f:
+        for svc_name in mm1_coef_dict:
+            for endpoint in mm1_coef_dict[svc_name]:
+                for feature in mm1_coef_dict[svc_name][endpoint]:
+                    print(f"mm1_coef_dict,{svc_name},{endpoint},{feature},{mm1_coef_dict[svc_name][endpoint][feature]}")
+    exit()
     
-    
+    degree = 2 # NOTE
+    poly_coef_dict = train_latency_function_with_trace("poly", stitched_traces, directory, degree)
     print("-"*80)
     # with open(f"{directory}/poly_coef_dict.csv", "w") as f:
-    # with open(f"/users/gangmuk/projects/DeathStarBench/hotelReservation/coef_multiplied_by_two.csv", "a") as f:
-    #     for svc_name in poly_coef_dict:
-    #         for ep_str in poly_coef_dict[svc_name]:
-    #             for feature in poly_coef_dict[svc_name][ep_str]:
-    #                 print(f'poly_coef_dict,{svc_name},{ep_str},{feature},{poly_coef_dict[svc_name][ep_str][feature]}')
-    #                 f.write(f'{svc_name},{ep_str},{feature},{poly_coef_dict[svc_name][ep_str][feature]}\n')
+    with open(f"/users/gangmuk/projects/DeathStarBench/hotelReservation/coef_multiplied_by_two.csv", "a") as f:
+        for svc_name in poly_coef_dict:
+            for ep_str in poly_coef_dict[svc_name]:
+                for feature in poly_coef_dict[svc_name][ep_str]:
+                    print(f'poly_coef_dict,{svc_name},{ep_str},{feature},{poly_coef_dict[svc_name][ep_str][feature]}')
+                    f.write(f'{svc_name},{ep_str},{feature},{poly_coef_dict[svc_name][ep_str][feature]}\n')
                 
     print("-"*80)
     
