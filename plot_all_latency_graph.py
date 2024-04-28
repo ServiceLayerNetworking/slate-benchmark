@@ -153,7 +153,7 @@ if __name__ == "__main__":
                 print("unique req_type", df['req_type'].unique())
                 for req_type in df['req_type'].unique():
                     df_filtered = df[(df['mode'] == mode) & (df['routing_rule'] == routing_rule) & (df['cluster'] == cluster) & (df['req_type'] == req_type)]
-                    df_filtered.to_csv("asdf.csv")
+                    df_filtered.to_csv("plot_all_latency_summary.csv")
                     for metric in latency_metrics:
                         label = f"{cluster}-{req_type}-{metric}"
                         plt.plot(df_filtered['rps'], df_filtered[metric], label=label, marker='o')

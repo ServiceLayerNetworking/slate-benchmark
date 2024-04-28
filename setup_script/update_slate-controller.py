@@ -36,5 +36,5 @@ if __name__ == "__main__":
     namespace = 'default'
     deployment_name = 'slate-controller'
     node_label_key = 'kubernetes.io/hostname'
-    node_label_value = 'node15.16node.istio.emulab.net'
+    node_label_value = 'node5.gangmuk-203881.istio-pg0.clemson.cloudlab.us'
     update_deployment_with_node_affinity(namespace, deployment_name, node_label_key, node_label_value)
