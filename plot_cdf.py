@@ -188,8 +188,8 @@ if __name__ == "__main__":
     
     # 2
     
-    # cluster_map = {"west":0, "central":1, "south":2, "east":3}
-    cluster_map = {"west":0, "east":1}
+    cluster_map = {"west":0, "central":1, "south":2, "east":3}
+    # cluster_map = {"west":0, "east":1}
     
     print("cluster_map", cluster_map)
     

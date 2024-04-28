@@ -1,0 +1,36 @@
+span - __init__(line:80) - ERROR: class Span, negative exclusive time, -1
+__main__ - trace_string_file_to_trace_data_structure(line:1445) - !!! ERROR !!!: failed to create span with error: 
+__main__ - trace_string_file_to_trace_data_structure(line:1446) - !!! ERROR !!!: row: cluster_id                                       us-west-1
+svc_name                                            mc46a6
+method                                                POST
+path                                                /heavy
+trace_id                  5d6449e67272919d9a4812fa950539ce
+span_id                                   d85e69896a9f84fd
+parent_span_id                            15ec82190973c207
+st                                                     9.0
+et                                                    10.0
+rt                                                     1.0
+xt                                                     1.0
+ct                                                     1.0
+call_size                                               -1
+inflight_dict     mc46a6@POST@/heavy:18446744073709546741|
+rps_dict                           mc46a6@POST@/heavy:351|
+Name: 0, dtype: object
+apscheduler.executors.default - run_job(line:131) - Job "training_phase (trigger: interval[0:00:01], next run at: 2024-04-28 00:04:11 UTC)" raised an exception
+Traceback (most recent call last):
+  File "/app/global_controller.py", line 1438, in trace_string_file_to_trace_data_structure
+    span = sp.Span(row["method"], row["path"], row["svc_name"], row["cluster_id"], \
+  File "/app/span.py", line 81, in __init__
+    assert False
+AssertionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/apscheduler/executors/base.py", line 125, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "/app/global_controller.py", line 1674, in training_phase
+    traces = trace_string_file_to_trace_data_structure(load_coef_flag=load_coef_flag)
+  File "/app/global_controller.py", line 1447, in trace_string_file_to_trace_data_structure
+    assert False
+AssertionError

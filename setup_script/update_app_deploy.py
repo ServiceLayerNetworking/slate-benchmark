@@ -19,7 +19,8 @@ def set_replicas_for_all_deployments(replica_count):
     # print(f"deploy_list: {deploy_list}")
     deployments = apps_v1_api.list_namespaced_deployment(namespace="default")
     for deployment in deployments.items:
-        if deployment.metadata.name != "slate-controller":
+        # if deployment.metadata.name != "slate-controller":
+        if "sslateingress" in deployment.metadata.name:
             deployment.spec.replicas = replica_count
             apps_v1_api.patch_namespaced_deployment(name=deployment.metadata.name, namespace="default", body=deployment)
             print(f"Updating deployment: {deployment.metadata.name}, replicas: {replica_count}")

@@ -3,7 +3,7 @@ import subprocess
 # Dictionary mapping regions to nodes
 region_to_node = {
     "us-west-1": ["node1", "node2", "node3"],
-    "us-east-1": ["node4", "node5", "node6"],
+    "us-east-1": ["node4",  "node5", "node6"],
     "us-central-1": ["node7", "node8", "node+9"],
     "us-south-1": ["node10", "node11", "node12"]
 }

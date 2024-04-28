@@ -1,0 +1,144 @@
+-- start of config --
+distribution,exp
+thread,300
+connection,300
+duration,60
+background_noise,0
+traffic_segmentation,1
+mode,runtime
+inter_cluster_latency,us-west-1,us-west-1,0
+inter_cluster_latency,us-west-1,us-east-1,33
+inter_cluster_latency,us-east-1,us-west-1,33
+inter_cluster_latency,us-west-1,us-central-1,15
+inter_cluster_latency,us-central-1,us-west-1,15
+inter_cluster_latency,us-west-1,us-south-1,20
+inter_cluster_latency,us-south-1,us-west-1,20
+inter_cluster_latency,us-east-1,us-east-1,0
+inter_cluster_latency,us-east-1,us-central-1,20
+inter_cluster_latency,us-central-1,us-east-1,20
+inter_cluster_latency,us-east-1,us-south-1,15
+inter_cluster_latency,us-south-1,us-east-1,15
+inter_cluster_latency,us-central-1,us-central-1,0
+inter_cluster_latency,us-central-1,us-south-1,10
+inter_cluster_latency,us-south-1,us-central-1,10
+inter_cluster_latency,us-south-1,us-south-1,0
+benchmark_name,alibaba
+total_num_services,2
+degree,2
+load_coef_flag,1
+routing_rule,WATERFALL2
+west_light_RPS,300
+west_heavy_RPS,300
+east_light_RPS,100
+east_heavy_RPS,100
+central_light_RPS,100
+central_heavy_RPS,100
+south_light_RPS,100
+south_heavy_RPS,100
+capacity,700
+req_type,light
+cluster,west
+RPS,300
+-- end of config --
+
+Running 1m test @ http://node0.16node.istio.emulab.net:31795
+  300 threads and 300 connections
+
+
+-----------------------------------------------------------------------
+Test Results @ http://node0.16node.istio.emulab.net:31795 
+  Thread Stats   Avg      Stdev     99%   +/- Stdev
+    Latency    24.96ms   32.00ms 188.03ms   94.52%
+    Req/Sec     0.88      4.12    23.00     95.19%
+  Latency Distribution (HdrHistogram - Recorded Latency)
+ 50.000%   17.06ms
+ 75.000%   21.57ms
+ 90.000%   30.30ms
+ 99.000%  188.03ms
+ 99.900%  310.02ms
+ 99.990%  381.44ms
+ 99.999%  417.28ms
+100.000%  417.28ms
+
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+       8.207     0.000000            1         1.00
+      12.431     0.100000         1354         1.11
+      13.671     0.200000         2688         1.25
+      14.847     0.300000         4027         1.43
+      15.895     0.400000         5370         1.67
+      17.055     0.500000         6711         2.00
+      17.727     0.550000         7390         2.22
+      18.479     0.600000         8050         2.50
+      19.359     0.650000         8716         2.86
+      20.351     0.700000         9389         3.33
+      21.567     0.750000        10056         4.00
+      22.399     0.775000        10392         4.44
+      23.279     0.800000        10728         5.00
+      24.415     0.825000        11064         5.71
+      25.631     0.850000        11397         6.67
+      27.439     0.875000        11732         8.00
+      28.623     0.887500        11900         8.89
+      30.303     0.900000        12066        10.00
+      32.335     0.912500        12233        11.43
+      36.191     0.925000        12402        13.33
+      45.183     0.937500        12569        16.00
+      54.591     0.943750        12652        17.78
+      68.927     0.950000        12736        20.00
+      86.783     0.956250        12821        22.86
+     100.799     0.962500        12904        26.67
+     118.399     0.968750        12988        32.00
+     128.511     0.971875        13029        35.56
+     137.599     0.975000        13071        40.00
+     149.503     0.978125        13113        45.71
+     159.487     0.981250        13157        53.33
+     168.319     0.984375        13197        64.00
+     174.079     0.985938        13218        71.11
+     178.687     0.987500        13239        80.00
+     184.831     0.989062        13261        91.43
+     192.127     0.990625        13281       106.67
+     199.679     0.992188        13303       128.00
+     205.951     0.992969        13312       142.22
+     214.015     0.993750        13323       160.00
+     219.903     0.994531        13333       182.86
+     226.943     0.995313        13344       213.33
+     239.103     0.996094        13355       256.00
+     244.223     0.996484        13359       284.44
+     247.551     0.996875        13365       320.00
+     256.255     0.997266        13370       365.71
+     274.431     0.997656        13375       426.67
+     282.367     0.998047        13380       512.00
+     293.375     0.998242        13383       568.89
+     299.775     0.998437        13386       640.00
+     302.591     0.998633        13388       731.43
+     308.479     0.998828        13391       853.33
+     310.015     0.999023        13393      1024.00
+     318.719     0.999121        13395      1137.78
+     318.975     0.999219        13396      1280.00
+     321.535     0.999316        13397      1462.86
+     332.031     0.999414        13399      1706.67
+     340.991     0.999512        13400      2048.00
+     346.111     0.999561        13401      2275.56
+     346.111     0.999609        13401      2560.00
+     353.535     0.999658        13402      2925.71
+     364.799     0.999707        13403      3413.33
+     364.799     0.999756        13403      4096.00
+     375.039     0.999780        13404      4551.11
+     375.039     0.999805        13404      5120.00
+     375.039     0.999829        13404      5851.43
+     381.439     0.999854        13405      6826.67
+     381.439     0.999878        13405      8192.00
+     381.439     0.999890        13405      9102.22
+     381.439     0.999902        13405     10240.00
+     381.439     0.999915        13405     11702.86
+     417.279     0.999927        13406     13653.33
+     417.279     1.000000        13406          inf
+#[Mean    =       24.956, StdDeviation   =       31.998]
+#[Max     =      417.024, Total count    =        13406]
+#[Buckets =           27, SubBuckets     =         2048]
+-----------------------------------------------------------------------
+  16457 requests in 1.00m, 2.68MB read
+  Socket errors: connect 0, read 0, write 0, timeout 1213
+Requests/sec:    274.21  
+Transfer/sec:     45.80KB

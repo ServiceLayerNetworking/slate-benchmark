@@ -1,0 +1,140 @@
+-- start of config --
+distribution,exp
+thread,400
+connection,400
+duration,60
+background_noise,60
+traffic_segmentation,1
+mode,profile
+inter_cluster_latency,us-west-1,us-west-1,0
+inter_cluster_latency,us-west-1,us-east-1,33
+inter_cluster_latency,us-east-1,us-west-1,33
+inter_cluster_latency,us-west-1,us-central-1,15
+inter_cluster_latency,us-central-1,us-west-1,15
+inter_cluster_latency,us-west-1,us-south-1,20
+inter_cluster_latency,us-south-1,us-west-1,20
+inter_cluster_latency,us-east-1,us-east-1,0
+inter_cluster_latency,us-east-1,us-central-1,20
+inter_cluster_latency,us-central-1,us-east-1,20
+inter_cluster_latency,us-east-1,us-south-1,15
+inter_cluster_latency,us-south-1,us-east-1,15
+inter_cluster_latency,us-central-1,us-central-1,0
+inter_cluster_latency,us-central-1,us-south-1,10
+inter_cluster_latency,us-south-1,us-central-1,10
+inter_cluster_latency,us-south-1,us-south-1,0
+benchmark_name,hotelreservation
+total_num_services,2
+degree,2
+load_coef_flag,1
+routing_rule,LOCAL
+west_light_RPS,400
+capacity,800
+req_type,light
+cluster,west
+RPS,400
+-- end of config --
+
+Running 1m test @ http://node0.16node.istio.emulab.net:31795
+  400 threads and 400 connections
+
+
+-----------------------------------------------------------------------
+Test Results @ http://node0.16node.istio.emulab.net:31795 
+  Thread Stats   Avg      Stdev     99%   +/- Stdev
+    Latency    11.52ms    2.77ms  19.61ms   83.88%
+    Req/Sec     0.99      5.75    37.00     96.69%
+  Latency Distribution (HdrHistogram - Recorded Latency)
+ 50.000%   10.97ms
+ 75.000%   12.53ms
+ 90.000%   14.46ms
+ 99.000%   19.61ms
+ 99.900%   43.94ms
+ 99.990%   59.58ms
+ 99.999%   63.10ms
+100.000%   63.10ms
+
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+       7.455     0.000000            1         1.00
+       9.095     0.100000         1994         1.11
+       9.599     0.200000         3991         1.25
+      10.063     0.300000         5968         1.43
+      10.511     0.400000         7957         1.67
+      10.967     0.500000         9933         2.00
+      11.223     0.550000        10931         2.22
+      11.487     0.600000        11915         2.50
+      11.783     0.650000        12893         2.86
+      12.135     0.700000        13897         3.33
+      12.535     0.750000        14873         4.00
+      12.767     0.775000        15368         4.44
+      13.031     0.800000        15864         5.00
+      13.303     0.825000        16361         5.71
+      13.639     0.850000        16859         6.67
+      14.039     0.875000        17356         8.00
+      14.239     0.887500        17600         8.89
+      14.463     0.900000        17845        10.00
+      14.751     0.912500        18094        11.43
+      15.079     0.925000        18341        13.33
+      15.471     0.937500        18589        16.00
+      15.703     0.943750        18714        17.78
+      15.959     0.950000        18839        20.00
+      16.271     0.956250        18961        22.86
+      16.591     0.962500        19084        26.67
+      16.959     0.968750        19209        32.00
+      17.167     0.971875        19276        35.56
+      17.391     0.975000        19333        40.00
+      17.711     0.978125        19393        45.71
+      18.031     0.981250        19456        53.33
+      18.559     0.984375        19520        64.00
+      18.815     0.985938        19549        71.11
+      19.071     0.987500        19580        80.00
+      19.439     0.989062        19610        91.43
+      19.855     0.990625        19643       106.67
+      20.447     0.992188        19673       128.00
+      20.847     0.992969        19688       142.22
+      21.199     0.993750        19704       160.00
+      21.551     0.994531        19718       182.86
+      22.239     0.995313        19734       213.33
+      23.183     0.996094        19749       256.00
+      23.551     0.996484        19758       284.44
+      24.479     0.996875        19765       320.00
+      25.535     0.997266        19772       365.71
+      26.399     0.997656        19780       426.67
+      28.815     0.998047        19788       512.00
+      31.439     0.998242        19792       568.89
+      35.231     0.998437        19796       640.00
+      38.367     0.998633        19799       731.43
+      40.863     0.998828        19803       853.33
+      45.503     0.999023        19807      1024.00
+      46.271     0.999121        19809      1137.78
+      49.279     0.999219        19811      1280.00
+      50.463     0.999316        19813      1462.86
+      51.839     0.999414        19815      1706.67
+      52.671     0.999512        19817      2048.00
+      52.799     0.999561        19818      2275.56
+      52.991     0.999609        19819      2560.00
+      54.431     0.999658        19820      2925.71
+      54.655     0.999707        19821      3413.33
+      55.647     0.999756        19822      4096.00
+      55.647     0.999780        19822      4551.11
+      57.407     0.999805        19823      5120.00
+      57.407     0.999829        19823      5851.43
+      59.583     0.999854        19824      6826.67
+      59.583     0.999878        19824      8192.00
+      59.583     0.999890        19824      9102.22
+      60.287     0.999902        19825     10240.00
+      60.287     0.999915        19825     11702.86
+      60.287     0.999927        19825     13653.33
+      60.287     0.999939        19825     16384.00
+      60.287     0.999945        19825     18204.44
+      63.103     0.999951        19826     20480.00
+      63.103     1.000000        19826          inf
+#[Mean    =       11.519, StdDeviation   =        2.769]
+#[Max     =       63.072, Total count    =        19826]
+#[Buckets =           27, SubBuckets     =         2048]
+-----------------------------------------------------------------------
+  23874 requests in 1.00m, 3.88MB read
+  Socket errors: connect 0, read 0, write 0, timeout 1574
+Requests/sec:    397.84  
+Transfer/sec:     66.27KB

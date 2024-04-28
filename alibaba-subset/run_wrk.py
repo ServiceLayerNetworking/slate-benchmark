@@ -76,12 +76,16 @@ for node in node_dict:
 assert len(node_dict) > 0
 
 def pkill_background_noise(node_dict):
+    print("WARNING: SKIP pkill_background_noise")
+    return
     for node in node_dict:
         pkill_command = 'pkill -f background-noise'
         run_command(f"ssh gangmuk@{node_dict[node]['hostname']} {pkill_command}", required=False, print_error=False)
         print(f"{pkill_command} in {node_dict[node]['hostname']}")
         
 def delete_tc_rule_in_client(node_dict):
+    print("WARNING: SKIP delete_tc_rule_in_client")
+    return
     for node in node_dict:
         run_command(f"ssh gangmuk@{node_dict[node]['hostname']} sudo tc qdisc del dev eno1 root", required=False, print_error=False)
         print(f"delete tc qdisc rule in {node_dict[node]['hostname']}")
@@ -485,48 +489,37 @@ def main():
         'background_noise': bg,
         'traffic_segmentation': 1, # endpoint level call graph
     }
-    benchmark_name="hotelreservation" # a,b, 1MB and c 2MB file write
+    benchmark_name="alibaba" # a,b, 1MB and c 2MB file write
     total_num_services=2
-    # capacity_list = [500, 600, 700, 800, 1000]
-    capacity_list = [800]
+
+    capacity_list = [300]
+    # capacity_list = [500, 700]
     degree = 2
     
-    
-    mode = "profile"
-    # routing_rule_list = ["WATERFALL2"]
-    # routing_rule_list = ["SLATE"]
-    # routing_rule_list = ["WATERFALL2", "SLATE"]
-    
     # mode = "profile"
-    routing_rule_list = ["LOCAL"] # profile
+    # routing_rule_list = ["LOCAL"] # profile
+    
+    mode = "runtime"
+    # routing_rule_list = ["SLATE"]
+    # routing_rule_list = ["WATERFALL2", "LOCAL"]
+    routing_rule_list = ["WATERFALL2"]
+    # routing_rule_list = ["SLATE", "WATERFALL2", "LOCAL"]
+    
     
     ## for experiment
     all_RPS_list = {
                     ## profile
-                    # "search-w100": {"west": {"search": 100}}, \
-                    # "search-w200": {"west": {"search": 200}}, \
-                    # "search-w300": {"west": {"search": 300}}, \
-                    # "search-w400": {"west": {"search": 400}}, \
-                    # "search-w500": {"west": {"search": 500}}, \
-                    # "search-w600": {"west": {"search": 600}}, \
-                    # "search-w700": {"west": {"search": 700}}, \
-                    # "search-w800": {"west": {"search": 800}}, \
-                    # "search-w900": {"west": {"search": 900}}, \
-                    # "search-w1000": {"west": {"search": 1000}}, \
-                    # "search-w1100": {"west": {"search": 1100}}, \
-                    # "search-w1200": {"west": {"search": 1200}}, \
-                        
-                    "light-w100": {"west": {"light": 100}}, \
-                    "light-w200": {"west": {"light": 200}}, \
-                    "light-w300": {"west": {"light": 300}}, \
-                    "light-w400": {"west": {"light": 400}}, \
-                    "light-w500": {"west": {"light": 500}}, \
-                    "light-w600": {"west": {"light": 600}}, \
-                    "light-w700": {"west": {"light": 700}}, \
-                    "light-w800": {"west": {"light": 800}}, \
+                    # "light-w100": {"west": {"light": 100}}, \
+                    # "light-w200": {"west": {"light": 200}}, \
+                    # "light-w300": {"west": {"light": 300}}, \
+                    # "light-w400": {"west": {"light": 400}}, \
+                    # "light-w500": {"west": {"light": 500}}, \
+                    # "light-w600": {"west": {"light": 600}}, \
+                    # "light-w700": {"west": {"light": 700}}, \
+                    # "light-w800": {"west": {"light": 800}}, \
                     # "light-w900": {"west": {"light": 900}}, \
                     # "light-w1000": {"west": {"light": 1000}}, \
-                    # "light-w1200": {"west": {"light": 1100}}, \
+                    # "light-w1100": {"west": {"light": 1100}}, \
                     # "light-w1200": {"west": {"light": 1200}}, \
                     # "light-w1300": {"west": {"light": 1300}}, \
                     # "light-w1400": {"west": {"light": 1400}}, \
@@ -536,17 +529,17 @@ def main():
                     # "light-w1800": {"west": {"light": 1800}}, \
                     # "light-w1900": {"west": {"light": 1900}}, \
 
-                    "heavy-w100": {"west": {"heavy": 100}}, \
-                    "heavy-w200": {"west": {"heavy": 200}}, \
-                    "heavy-w300": {"west": {"heavy": 300}}, \
-                    "heavy-w400": {"west": {"heavy": 400}}, \
-                    "heavy-w500": {"west": {"heavy": 500}}, \
-                    "heavy-w600": {"west": {"heavy": 600}}, \
-                    "heavy-w700": {"west": {"heavy": 700}}, \
-                    "heavy-w800": {"west": {"heavy": 800}}, \
+                    # "heavy-w100": {"west": {"heavy": 100}}, \
+                    # "heavy-w200": {"west": {"heavy": 200}}, \
+                    # "heavy-w300": {"west": {"heavy": 300}}, \
+                    # "heavy-w400": {"west": {"heavy": 400}}, \
+                    # "heavy-w500": {"west": {"heavy": 500}}, \
+                    # "heavy-w600": {"west": {"heavy": 600}}, \
+                    # "heavy-w700": {"west": {"heavy": 700}}, \
+                    # "heavy-w800": {"west": {"heavy": 800}}, \
                     # "heavy-w900": {"west": {"heavy": 900}}, \
                     # "heavy-w1000": {"west": {"heavy": 1000}}, \
-                    # "heavy-w1200": {"west": {"heavy": 1100}}, \
+                    # "heavy-w1100": {"west": {"heavy": 1100}}, \
                     # "heavy-w1200": {"west": {"heavy": 1200}}, \
                     # "heavy-w1300": {"west": {"heavy": 1300}}, \
                     # "heavy-w1400": {"west": {"heavy": 1400}}, \
@@ -555,97 +548,76 @@ def main():
                     # "heavy-w1700": {"west": {"heavy": 1700}}, \
                     # "heavy-w1800": {"west": {"heavy": 1800}}, \
                     # "heavy-w1900": {"west": {"heavy": 1900}}, \
-                        
-                    # "recommend-w100": {"west": {"recommend": 100}}, \
-                    # "recommend-w200": {"west": {"recommend": 200}}, \
-                    # "recommend-w300": {"west": {"recommend": 300}}, \
-                    # "recommend-w400": {"west": {"recommend": 400}}, \
-                    # "recommend-w500": {"west": {"recommend": 500}}, \
-                    # "recommend-w600": {"west": {"recommend": 600}}, \
-                    # "recommend-w700": {"west": {"recommend": 700}}, \
-                    # "recommend-w800": {"west": {"recommend": 800}}, \
-                    # "recommend-w900": {"west": {"recommend": 900}}, \
-                    # "recommend-w1000": {"west": {"recommend": 1000}}, \
-                    # "recommend-w1100": {"west": {"recommend": 1100}}, \
-                    # "recommend-w1200": {"west": {"recommend": 1200}}, \
-                    # "recommend-w1300": {"west": {"recommend": 1300}}, \
-                    # "recommend-w1400": {"west": {"recommend": 1400}}, \
-                    # "recommend-w1500": {"west": {"recommend": 1500}}, \
-                        
-                    # "user-w100": {"west": {"user": 100}}, \
-                    # "user-w200": {"west": {"user": 200}}, \
-                    # "user-w300": {"west": {"user": 300}}, \
-                    # "user-w400": {"west": {"user": 400}}, \
-                    # "user-w500": {"west": {"user": 500}}, \
-                    # "user-w600": {"west": {"user": 600}}, \
-                    # "user-w700": {"west": {"user": 700}}, \
-                    # "user-w800": {"west": {"user": 800}}, \
-                    # "user-w900": {"west": {"user": 900}}, \
-                    # "user-w1000": {"west": {"user": 1000}}, \
-                    # "user-w1100": {"west": {"user": 1100}}, \
-                    # "user-w1200": {"west": {"user": 1200}}, \
-                    # "user-w1300": {"west": {"user": 1300}}, \
-                    # "user-w1400": {"west": {"user": 1400}}, \
-                    # "user-w1500": {"west": {"user": 1500}}, \
-                        
-                        
+
                     ## runtime
-                    # capacity for each service when two replicas. CPU: Intel(R) Xeon(R) CPU E5-2660 v2 @ 2.20GHz
-                    # user: 1500
-                    # recommend: 1500
-                    # reserve: 1200
-                    # search: 1000
-                    # "w400-e400-c400-s400": {"west":    {"user": 400, "recommend":400, "reserve":400, "search":400}, \
-                    #                         "east":    {"user": 400, "recommend":400, "reserve":400, "search":400}, \
-                    #                         "central": {"user": 400, "recommend":400, "reserve":400, "search":400}, \
-                    #                         "south":   {"user": 400, "recommend":400, "reserve":400, "search":400}}, \
-                    # "W400-E100-C100-S100": {"west":    {"user": 400, "recommend":400, "reserve":400, "search":400}, \
-                    #                         "east":    {"user": 100, "recommend":100, "reserve":100, "search":100}, \
-                    #                         "central": {"user": 100, "recommend":100, "reserve":100, "search":100}, \
-                    #                         "south":   {"user": 100, "recommend":100, "reserve":100, "search":100}}, \
-                                                
+                    # six replica for sslateingress
+                    # three replicas for other services
+                    # CPU: Intel(R) Xeon(R) CPU E5-2630 v3 @ 2.40GHz
                     
-                    # "W500-E100-C100-S100": {"west":    {"user": 500, "recommend":500, "reserve":500, "search":500}, \
-                    #                         "east":    {"user": 100, "recommend":100, "reserve":100, "search":100}, \
-                    #                         "central": {"user": 100, "recommend":100, "reserve":100, "search":100}, \
-                    #                         "south":   {"user": 100, "recommend":100, "reserve":100, "search":100}}, \
-                                                
+                    ##################################
+                    ### Alibaba capacity threshold ###
+                    ##################################
                     
-                    # "Wsr800ur200-E100-C100-S100": {"west":    {"user": 200, "recommend":200, "reserve":800, "search":800}, \
-                    #                          "east":    {"user": 100, "recommend":100, "reserve":100, "search":100}, \
-                    #                          "central": {"user": 100, "recommend":100, "reserve":100, "search":100}, \
-                    #                          "south":   {"user": 100, "recommend":100, "reserve":100, "search":100}}, \
-                                                 
-                    # "Ws800r500ur200-E100-C100-S100": {"west":    {"user": 200, "recommend":200, "reserve":500, "search":800}, \
-                    #                          "east":    {"user": 100, "recommend":100, "reserve":100, "search":100}, \
-                    #                          "central": {"user": 100, "recommend":100, "reserve":100, "search":100}, \
-                    #                          "south":   {"user": 100, "recommend":100, "reserve":100, "search":100}}, \
-                                                 
-                    # "Wu800r500sr200-E100-C100-S100": {"west":    {"user": 800, "recommend":500, "reserve":200, "search":200}, \
-                    #                          "east":    {"user": 100, "recommend":100, "reserve":100, "search":100}, \
-                    #                          "central": {"user": 100, "recommend":100, "reserve":100, "search":100}, \
-                    #                          "south":   {"user": 100, "recommend":100, "reserve":100, "search":100}}, \
-                                                 
-                    # "Ws500urr200-E100-C100-S100": {"west":    {"user": 200, "recommend":200, "reserve":200, "search":500}, \
-                    #                          "east":    {"user": 100, "recommend":100, "reserve":100, "search":100}, \
-                    #                          "central": {"user": 100, "recommend":100, "reserve":100, "search":100}, \
-                    #                          "south":   {"user": 100, "recommend":100, "reserve":100, "search":100}}, \
-                                                 
-                    # "Wu1000srr100-E100-C100-S100": {"west":    {"user": 1000, "recommend":100, "reserve":100, "search":100}, \
-                    #                          "east":    {"user": 100, "recommend":100, "reserve":100, "search":100}, \
-                    #                          "central": {"user": 100, "recommend":100, "reserve":100, "search":100}, \
-                    #                          "south":   {"user": 100, "recommend":100, "reserve":100, "search":100}}, \
-                                                 
-                    # "Wsr800ur200-E100-C100-S100": {"west":    {"user": 100, "recommend":100, "reserve":100, "search":1000}, \
-                    #                                 "east":    {"user": 100, "recommend":100, "reserve":1000, "search":100}, \
-                    #                                 "central": {"user": 100, "recommend":1000, "reserve":100, "search":100}, \
-                    #                                 "south":   {"user": 1000, "recommend":100, "reserve":100, "search":100}}, \
+                    ## Based on average
+                    # light: 1500 (50ms)
+                    # heavy: 700 (100ms)
+                    
+                    ## Based on 99%
+                    # light: 1200 (60ms)
+                    # heavy: 500 (300ms)
+                    # heavy: 300 (100ms)
+                    
+                    # capacity: 300
+                    # capacity: 500
+                    # capacity: 700
+                    
+                    "W300-E100-C100-S100": {"west":    {"light": 300, "heavy":300,}, \
+                                            "east":    {"light": 100, "heavy":100,}, \
+                                            "central": {"light": 100, "heavy":100,}, \
+                                            "south":   {"light": 100, "heavy":100,}}, \
+                    
+                    "W400-E100-C100-S100": {"west":    {"light": 400, "heavy":400,}, \
+                                            "east":    {"light": 100, "heavy":100,}, \
+                                            "central": {"light": 100, "heavy":100,}, \
+                                            "south":   {"light": 100, "heavy":100,}}, \
+                    
+                    "W500-E100-C100-S100": {"west":    {"light": 500, "heavy":500,}, \
+                                            "east":    {"light": 100, "heavy":100,}, \
+                                            "central": {"light": 100, "heavy":100,}, \
+                                            "south":   {"light": 100, "heavy":100,}}, \
+                        
+                    "W700-E100-C100-S100": {"west":    {"light": 700, "heavy":700,}, \
+                                            "east":    {"light": 100, "heavy":100,}, \
+                                            "central": {"light": 100, "heavy":100,}, \
+                                            "south":   {"light": 100, "heavy":100,}}, \
+                    
+                    "Wl700h300-E100-C100-S100": {"west":    {"light": 700, "heavy":300,}, \
+                                                "east":    {"light": 100, "heavy":100,}, \
+                                                "central": {"light": 100, "heavy":100,}, \
+                                                "south":   {"light": 100, "heavy":100,}}, \
+                                                    
+                    "Wl300h700-E100-C100-S100": {"west":    {"light": 300, "heavy":700,}, \
+                                                "east":    {"light": 100, "heavy":100,}, \
+                                                "central": {"light": 100, "heavy":100,}, \
+                                                "south":   {"light": 100, "heavy":100,}}, \
+
+                    "Wl800h100-E100-C100-S100": {"west":    {"light": 800, "heavy":100,}, \
+                                                "east":    {"light": 100, "heavy":100,}, \
+                                                "central": {"light": 100, "heavy":100,}, \
+                                                "south":   {"light": 100, "heavy":100,}}, \
+
+                        
+                    "Wl1000h100-E100-C100-S100": {"west":    {"light": 1000, "heavy":100,}, \
+                                                "east":    {"light": 100, "heavy":100,}, \
+                                                "central": {"light": 100, "heavy":100,}, \
+                                                "south":   {"light": 100, "heavy":100,}}, \
+
+                    "Wl1000h300-E100-C100-S100": {"west":    {"light": 1000, "heavy":300,}, \
+                                                "east":    {"light": 100, "heavy":100,}, \
+                                                "central": {"light": 100, "heavy":100,}, \
+                                                "south":   {"light": 100, "heavy":100,}}, \
     }
-    
-        
-    # node_to_region = {"node1":"us-west-1", "node2":"us-east-1", "node3":"us-central-1",
-    #                   }
-    
+            
     region_to_node = {
         "us-west-1": ["node1", "node2", "node3"],
         "us-east-1": ["node4", "node5", "node6"],
@@ -654,13 +626,13 @@ def main():
     }
     region_latencies = {
         "us-west-1": {
-            "us-east-1": 33,
             "us-central-1": 15,
             "us-south-1": 20,
+            "us-east-1": 33,
         },
         "us-east-1": {
-            "us-central-1": 20,
             "us-south-1": 15,
+            "us-central-1": 20,
         },
         "us-central-1": {
             "us-south-1": 10,
@@ -714,6 +686,8 @@ def main():
     pprint(inter_cluster_latency)
     
     def apply_all_tc_rule(interface, inter_cluster_latency, node_dict):
+        print("WARNING: SKIP apply_all_tc_rule")
+        return
         for src_node in inter_cluster_latency:
             src_host = node_dict[src_node]['hostname']
             run_command(f'ssh gangmuk@{src_host} sudo tc qdisc add dev {interface} root handle 1: htb')
@@ -725,15 +699,19 @@ def main():
                 add_latency_rules(src_host, interface, dst_node_ip, delay)
                 print(f"Added {delay}ms from {src_host}({src_node}) to {dst_node_ip}({dst_node})")
                 
+    network_interface = "eno1"
     if mode == "runtime":    
         pkill_background_noise(node_dict)
         delete_tc_rule_in_client(node_dict)
         network_interface = "eno1"
         if mode == "runtime":
             apply_all_tc_rule(network_interface, inter_cluster_latency, node_dict)
+            # print("Skip apply_all_tc_rule in runtime mode")
+            # time.sleep(3)
         else:
             print("Skip apply_all_tc_rule in profile mode")
-    start_background_noise(node_dict, CONFIG['background_noise'])
+    if CONFIG['background_noise'] > 0:
+        start_background_noise(node_dict, CONFIG['background_noise'])
 
     CONFIG["mode"] = mode
     for src_node in inter_cluster_latency:
@@ -804,7 +782,7 @@ def main():
                     kubectl_cp_from_host_to_slate_controller_pod("coef.csv", "/app/coef.csv")
                     slatelog = f"{benchmark_name}-trace.csv"
                     kubectl_cp_from_host_to_slate_controller_pod(slatelog, "/app/trace.csv")
-                    t=5
+                    t=10
                     print(f"sleep for {t} seconds to wait for the training to be done in global controller")
                     for i in range(t):
                         time.sleep(1)
@@ -825,26 +803,6 @@ def main():
                             future_list.append(executor.submit(run_wrk, copy.deepcopy(CONFIG), cluster, req_type, rps_dict[cluster][req_type], wrk_log_path_dict[cluster][req_type]))
                             # future_list.append(executor.submit(run_wrk, copied_config[cluster][req_type], cluster, req_type, rps_dict[cluster][req_type], wrk_log_path_dict[cluster][req_type]))
                             time.sleep(0.1)
-                    
-                    # time.sleep(1)
-                    # ts = time.time()
-                    # for cluster in wrk_log_path_dict:
-                    #     for req_type in wrk_log_path_dict[cluster]:
-                    #         # record_pod_resource_allocation(wrk_log_path_dict[cluster][req_type], rps_dict[cluster][req_type])
-                    #         record_pod_resource_allocation(fn_prefix_dict[cluster][req_type], resource_alloc_dir, rps_dict[cluster][req_type])
-                    # res_record_duration = time.time() - ts
-                    # print(f"finish recording resource allocation, duration: {res_record_duration}")
-                    
-                    # sleep_before_resource_usage_recording = CONFIG['duration'] - res_record_duration
-                    # assert sleep_before_resource_usage_recording > 0
-                    # print(f"sleep for {sleep_before_resource_usage_recording} seconds before resource resource usage")
-                    # while True:
-                    #     if sleep_before_resource_usage_recording <= 0:
-                    #         break
-                    #     print(f"sleep for {sleep_before_resource_usage_recording} seconds")
-                    #     time.sleep(1)
-                    #     sleep_before_resource_usage_recording -= 1
-                    
                     time.sleep(20)
                     print("start recording pod resource usage")
                     for cluster in wrk_log_path_dict:
@@ -880,9 +838,11 @@ def main():
                     print(f"mode: {mode} is not supported")
                     assert False
                 '''end of one set of experiment'''
-                # restart_deploy(exclude=[])
-                run_command("kubectl rollout restart deploy slate-controller")
-                run_command("kubectl rollout restart deploy -l=region=us-west-1", required=True)
+                if mode == "runtime":
+                    restart_deploy(exclude=[])
+                else:
+                    run_command("kubectl rollout restart deploy slate-controller")
+                    run_command("kubectl rollout restart deploy -l=region=us-west-1", required=True)
                 # run_command("kubectl rollout restart deploy slateingress-us-west-1")
                 # run_command("kubectl rollout restart deploy slateingress-us-east-1")
                 # run_command("kubectl rollout restart deploy slateingress-us-central-1")
@@ -896,9 +856,11 @@ def main():
     #     run_command(f"ssh gangmuk@{node_dict[node]['hostname']} pkill background-nois")
     #     print(f"start background-noise in {node_dict[node]['hostname']}")
     
-    for node in node_dict:
-        run_command(f"ssh gangmuk@{node_dict[node]['hostname']} sudo tc qdisc del dev eno1 root", required=False, print_error=False)
-        print(f"delete tc qdisc rule in {node_dict[node]['hostname']}")
+    delete_tc_rule_in_client(node_dict)
+    
+    # for node in node_dict:
+    #     run_command(f"ssh gangmuk@{node_dict[node]['hostname']} sudo tc qdisc del dev eno1 root", required=False, print_error=False)
+    #     print(f"delete tc qdisc rule in {node_dict[node]['hostname']}")
             
 if __name__ == "__main__":
     main()

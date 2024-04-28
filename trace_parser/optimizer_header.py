@@ -1150,15 +1150,16 @@ def find_root_node(cg):
         print(f'ERROR: cannot find root node in callgraph')
         assert False
     if len(root_node) > 1:
-        print(f'ERROR: too many root node in callgraph')
         # print(f"{cg}")
-        for rn in root_node:
-            print(f'root_node: {rn}')
         # for key in cg:
         #     for sp in cg[key]:
         #         print(f'{key} -> {sp.endpoint_str}')
         # return False
         # assert False
+        
+        for rn in root_node:
+            print(f'root_node: {rn}')
+        print(f'ERROR: too many root node in callgraph')
         return False
     # print(cg)
     return root_node[0]

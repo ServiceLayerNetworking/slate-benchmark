@@ -258,6 +258,8 @@ def change_to_relative_time(single_trace):
     try:
         sp_cg = single_trace_to_span_callgraph(single_trace)
         root_span = opt_func.find_root_node(sp_cg)
+        if root_span == False:
+            return False
         base_t = root_span.st
     except Exception as error:
         print(error)
@@ -265,10 +267,14 @@ def change_to_relative_time(single_trace):
     for span in single_trace:
         span.st -= base_t
         span.et -= base_t
-        assert span.st >= 0
-        assert span.et >= 0
-        assert span.et >= span.st
-
+        if span.st < 0.0:
+            # print(f"ERROR: span.st cannot be negative value: {span.st}")
+            # print(span)
+            return False
+            # assert span.st >= 0
+            # assert span.et >= 0
+            # assert span.et >= span.st
+    return True
 
 def print_single_trace(single_trace):
     print(f"print_sinelg_trace")
@@ -593,20 +599,43 @@ def analyze_critical_path_time(single_trace):
     return True
 
 
-def trace_to_df(traces_):
-    list_of_unfold_span = list()
+
+
+def trace_to_unfolded_df(traces_):
     colname = list()
+    list_of_unfold_span = list()
     for cid in traces_:
         for tid, single_trace in traces_[cid].items():
             for span in single_trace:
                 unfold_span = span.unfold()
                 if len(colname) == 0:
                     colname = unfold_span.keys()
-                    # print("colname, ", colname)
-                # print(f"unfold_span: {unfold_span}")
                 list_of_unfold_span.append(unfold_span)
     df = pd.DataFrame(list_of_unfold_span)
-    # df.to_csv("temp.csv")
+    df.sort_values(by=["trace_id"])
+    df.reset_index(drop=True)
+    return df
+
+def trace_to_df(traces_):
+    list_of_unfold_span = list()
+    # colname = list()
+    # columns = ["cluster_id","svc_name","method","path","trace_id","span_id","parent_span_id","st","et","rt","xt","ct","call_size","inflight_dict","rps_dict", "endpoint_str"]
+    columns = ["cluster_id","svc_name","method","path","trace_id","span_id","parent_span_id","st","et","rt","xt","ct","call_size","inflight_dict","rps_dict"]
+    for cid in traces_:
+        for tid, single_trace in traces_[cid].items():
+            for span in single_trace:
+                # unfold_span = span.unfold()
+                # if len(colname) == 0:
+                #     colname = unfold_span.keys()
+                # list_of_unfold_span.append(unfold_span)
+                span_str = str(span).split(",")
+                if len(span_str) != 15:
+                    print(span_str)
+                    continue
+                # span_str.append(span.endpoint_str)
+                list_of_unfold_span.append(span_str)
+                
+    df = pd.DataFrame(list_of_unfold_span, columns=columns)
     df.sort_values(by=["trace_id"])
     df.reset_index(drop=True)
     return df
@@ -650,7 +679,9 @@ def stitch_trace(trace):
     # print(f"root_ep: {root_ep_str}")
     # pprint(f"ep_str_cg: {ep_str_cg}")
     # exit()
-    change_to_relative_time(trace)
+    relative_time_ret = change_to_relative_time(trace)
+    if relative_time_ret == False:
+        return False
     xt_ret = calc_exclusive_time(trace)
     ct_ret = analyze_critical_path_time(trace)
     if xt_ret == False or ct_ret == False:

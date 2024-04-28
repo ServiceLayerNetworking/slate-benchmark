@@ -47,12 +47,18 @@ def parse_latency_stat_in_wrklog_file(wrklog_path, wrk_config, latency_metrics, 
     with open(wrklog_path, 'r') as file:
         wrklog_file_read = file.read()
         
+        pattern = r"reconnect_socket"
+        match = re.search(pattern, wrklog_file_read)
+        if match:
+            print("WARNING: reconnect_socket exists")
+
+        
         #########################################
         pattern = r"Requests/sec:\s*(\d+\.\d+)"
         match = re.search(pattern, wrklog_file_read)
         if match:
             tput = float(match.group(1))
-            print("Requests per second:", tput)
+            print(f"{wrk_config['routing_rule']}, {wrk_config['cluster']}, {wrk_config['req_type']}, {wrk_config['RPS']}, Actual tput: {tput}, Gap: {int(float(wrk_config['RPS']) - tput)}")
         else:
             print("Pattern not found")
             print(wrklog_path)
@@ -189,16 +195,35 @@ if __name__ == "__main__":
     sorted_wrk_config_list = sorted(wrk_config_list, key=lambda d: d['cluster_id'])
     # for wrk_config in sorted_wrk_config_list:
     #     print(f"sorted_wrk_config_list: {wrk_config['cluster']}, {wrk_config['cluster_id']}")
+    
+    # #1f77b4, #ff7f0e, #2ca02c, #d62728, #9467bd, #8c564b, #e377c2, #7f7f7f, #bcbd22, #17becf.
+    
+    # req_type_color_dict = {"user": "#1f77b4", "recommend": "#ff7f0e", "search": "#2ca02c", "reserve": "#d62728"}
+    
     latency = dict()
     count = dict()
     for wrk_config in sorted_wrk_config_list:
         percentile_df = pd.DataFrame(wrk_config["percentile_data"], columns=['Value', 'Percentile', 'TotalCount'])
         percentile_df['Percentile'] *= 100
         routing_rule = wrk_config["routing_rule"]
+        
+        if wrk_config['routing_rule'] == "WATERFALL2" and wrk_config['capacity'] == "700":
+            continue
+
         if 'req_type' in wrk_config:
-            key = f"{wrk_config['routing_rule']}-{wrk_config['req_type']}"
+            if wrk_config['routing_rule'] == "SLATE":
+                key = f"{wrk_config['routing_rule']}-{wrk_config['req_type']}"
+            elif wrk_config['routing_rule'] == "WATERFALL2":
+                key = f"WF({wrk_config['capacity']})-{wrk_config['req_type']}"
+            elif wrk_config['routing_rule'] == "LOCAL":
+                key = f"LOCAL-{wrk_config['req_type']}"
+            else:
+                print(f"Unknown routing_rule: {wrk_config['routing_rule']}")
+                assert False
+            # else:
+            #     key = f"{wrk_config['routing_rule']}-{wrk_config['req_type']}-cap{wrk_config['capacity']})"
         else:
-            key = wrk_config['routing_rule']
+            assert False
         for index, row in percentile_df.iterrows():
             if key not in latency:
                 latency[key] = []
@@ -217,14 +242,23 @@ if __name__ == "__main__":
         # plt.plot(sorted_data, cdf, color=color_dict[key], label=key)
         if "SLATE" in key:
             linestyle = '-'
+        elif "WATERFALL" in key or "WF" in key:
+            # linestyle = 'dashed'
+            linestyle = (5, (10, 3)) # long dash with offset
         else:
-            linestyle = '--'
-        plt.plot(sorted_data, cdf, linestyle=linestyle, label=key)
-    plt.title('All clusters', fontsize=16)
-    plt.xlabel('Latency (ms)', fontsize=12)
-    plt.ylabel('CDF', fontsize=12)
+            linestyle = ':'
+        plt.plot(sorted_data, cdf, linestyle=linestyle, label=key, linewidth=1.2)
+        # plt.plot(sorted_data, cdf, linestyle=linestyle, label=key, color=req_type_color_dict[key.split("-")[1]])
+    # plt.title('Hotel reservation', fontsize=18)
+    plt.xlabel('Latency (ms)', fontsize=18)
+    # plt.ylabel('CDF', fontsize=18)
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
     plt.grid(True)
-    plt.legend()
+    plt.legend(fontsize=10)
+    plt.tight_layout()
+    plt.ylim(0, 1)
+    plt.xlim(left=0)
     plt.savefig(f'{base_directory}/merged_cdf.pdf')
     print(f"output pdf: {base_directory}/merged_cdf.pdf")
     plt.show()

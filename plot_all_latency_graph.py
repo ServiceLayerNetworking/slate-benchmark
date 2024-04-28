@@ -121,9 +121,9 @@ if __name__ == "__main__":
         print("Usage: python script.py <input_directory> <rps_threshold>")
         sys.exit(1)
     # latency_metrics = ['avg', '50%', '99%', '99.9%']
-    # latency_metrics = ['avg', '99%']
     # latency_metrics = ['avg', '50%']
-    latency_metrics = ['avg']
+    latency_metrics = ['avg', '99%']
+    # latency_metrics = ['avg']
     base_directory = sys.argv[1]
     rps_threshold = int(sys.argv[2])
     wrklog_files = find_and_process_wrklog_files(base_directory)
