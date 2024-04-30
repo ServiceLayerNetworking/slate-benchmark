@@ -1,0 +1,51 @@
+Endpoint: checkout cart
+    1 /hipstershop.PaymentService/Charge
+    2 /hipstershop.RecommendationService/ListRecommendations
+    3 /cart/checkout
+    4 /hipstershop.EmailService/SendOrderConfirmation
+    5 /hipstershop.CheckoutService/PlaceOrder
+    6 /hipstershop.CurrencyService/GetSupportedCurrencies
+    7 /hipstershop.ProductCatalogService/ListProducts
+    8 /hipstershop.ProductCatalogService/GetProduct (removed)
+    9 /hipstershop.ShippingService/ShipOrder
+    10 /hipstershop.CartService/GetCart
+
+    CURRENT VERSION
+    1 /hipstershop.PaymentService/Charge
+    2 /hipstershop.RecommendationService/ListRecommendations
+    3 /cart/checkout
+    4 /hipstershop.EmailService/SendOrderConfirmation
+    5 /hipstershop.CheckoutService/PlaceOrder
+    6 /hipstershop.CurrencyService/GetSupportedCurrencies
+    7 /hipstershop.ProductCatalogService/ListProducts
+    8 /hipstershop.ShippingService/ShipOrder
+    9 /hipstershop.CartService/GetCart
+
+    1 /hipstershop.PaymentService/Charge *
+    2 /hipstershop.RecommendationService/ListRecommendations *
+    3 /cart/checkout *
+    4 /hipstershop.EmailService/SendOrderConfirmation *
+    5 /hipstershop.CheckoutService/PlaceOrder *
+    6 /hipstershop.ShippingService/ShipOrder *
+    7 /hipstershop.CartService/GetCart *
+    
+    * 9 /hipstershop.CurrencyService/Convert (does not have parent at all. the frontend was the parent when GetSupported was not removed)
+
+                                                  /cart/checkout   *
+    990                                           /cart/checkout   
+    993                   /hipstershop.ShippingService/ShipOrder   *
+    1010  /hipstershop.RecommendationService/ListRecommendations   *
+    1024                 /hipstershop.CheckoutService/PlaceOrder   *
+    1032         /hipstershop.EmailService/SendOrderConfirmation   *
+    1042                        /hipstershop.CartService/GetCart   *
+    1057                      /hipstershop.PaymentService/Charge *
+
+    6 /hipstershop.CurrencyService/GetSupportedCurrencies ** (removed)
+    7 /hipstershop.ProductCatalogService/ListProducts **** (joker)
+
+    REMOVE
+    /hipstershop.ShippingService/GetQuote (removed)
+    /hipstershop.CartService/EmptyCart  (removed)
+    /hipstershop.ProductCatalogService/GetProduct (removed) (GetProduct is called by addtocart request type.)
+
+    POST PROCESSED

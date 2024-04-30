@@ -1,0 +1,5658 @@
+apiVersion: v1
+items:
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '3'
+      kubectl.kubernetes.io/last-applied-configuration: '{"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{"deployment.kubernetes.io/revision":"2"},"creationTimestamp":"2024-04-26T02:05:28Z","generation":3,"name":"adservice-us-central-1","namespace":"default","resourceVersion":"549208","uid":"5f4f51bf-9882-41b9-90b1-6a5213a7c017"},"spec":{"progressDeadlineSeconds":600,"replicas":3,"revisionHistoryLimit":10,"selector":{"matchLabels":{"app":"adservice"}},"strategy":{"rollingUpdate":{"maxSurge":"25%","maxUnavailable":"25%"},"type":"RollingUpdate"},"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt":"2024-04-25T21:06:43-05:00","sidecar.istio.io/bootstrapOverride":"shared-span-bootstrap-config","sidecar.istio.io/proxyCPU":"100m","sidecar.istio.io/proxyCPULimit":"4000m","sidecar.istio.io/proxyMemory":"128Mi","sidecar.istio.io/proxyMemoryLimit":"1Gi"},"creationTimestamp":null,"labels":{"app":"adservice","region":"us-central-1"}},"spec":{"containers":[{"env":[{"name":"PORT","value":"9555"}],"image":"gcr.io/google-samples/microservices-demo/adservice:v0.10.0","imagePullPolicy":"IfNotPresent","livenessProbe":{"failureThreshold":3,"grpc":{"port":9555,"service":""},"initialDelaySeconds":20,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":1},"name":"server","ports":[{"containerPort":9555,"protocol":"TCP"}],"readinessProbe":{"failureThreshold":3,"grpc":{"port":9555,"service":""},"initialDelaySeconds":20,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":1},"resources":{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"200m","memory":"180Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File"}],"dnsPolicy":"ClusterFirst","nodeSelector":{"topology.kubernetes.io/zone":"us-central-1"},"restartPolicy":"Always","schedulerName":"default-scheduler","securityContext":{"fsGroup":1000,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000},"serviceAccount":"adservice","serviceAccountName":"adservice","terminationGracePeriodSeconds":5}}},"status":{"availableReplicas":1,"conditions":[{"lastTransitionTime":"2024-04-26T02:05:28Z","lastUpdateTime":"2024-04-26T02:07:45Z","message":"ReplicaSet
+        \"adservice-us-central-1-6dd899f76\" has successfully progressed.","reason":"NewReplicaSetAvailable","status":"True","type":"Progressing"},{"lastTransitionTime":"2024-04-26T02:11:29Z","lastUpdateTime":"2024-04-26T02:11:29Z","message":"Deployment
+        does not have minimum availability.","reason":"MinimumReplicasUnavailable","status":"False","type":"Available"}],"observedGeneration":3,"readyReplicas":1,"replicas":3,"unavailableReplicas":2,"updatedReplicas":3}}
+
+        '
+    creationTimestamp: '2024-04-26T02:05:28Z'
+    generation: 4
+    name: adservice-us-central-1
+    namespace: default
+    resourceVersion: '553282'
+    uid: 5f4f51bf-9882-41b9-90b1-6a5213a7c017
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: adservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: adservice
+          region: us-central-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '9555'
+          image: gcr.io/google-samples/microservices-demo/adservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 9555
+              service: ''
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 9555
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 9555
+              service: ''
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 300m
+              memory: 300Mi
+            requests:
+              cpu: 200m
+              memory: 180Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-central-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: adservice
+        serviceAccountName: adservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:12:19Z'
+      lastUpdateTime: '2024-04-26T02:12:19Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    - lastTransitionTime: '2024-04-26T02:05:28Z'
+      lastUpdateTime: '2024-04-26T02:13:52Z'
+      message: ReplicaSet "adservice-us-central-1-5bcd7fb7df" is progressing.
+      reason: ReplicaSetUpdated
+      status: 'True'
+      type: Progressing
+    observedGeneration: 4
+    readyReplicas: 3
+    replicas: 4
+    unavailableReplicas: 1
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '3'
+      kubectl.kubernetes.io/last-applied-configuration: '{"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{"deployment.kubernetes.io/revision":"2"},"creationTimestamp":"2024-04-26T02:05:28Z","generation":3,"name":"adservice-us-east-1","namespace":"default","resourceVersion":"549220","uid":"9bc00ae4-ad7f-479a-9f60-59f80724bace"},"spec":{"progressDeadlineSeconds":600,"replicas":3,"revisionHistoryLimit":10,"selector":{"matchLabels":{"app":"adservice"}},"strategy":{"rollingUpdate":{"maxSurge":"25%","maxUnavailable":"25%"},"type":"RollingUpdate"},"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt":"2024-04-25T21:06:43-05:00","sidecar.istio.io/bootstrapOverride":"shared-span-bootstrap-config","sidecar.istio.io/proxyCPU":"100m","sidecar.istio.io/proxyCPULimit":"4000m","sidecar.istio.io/proxyMemory":"128Mi","sidecar.istio.io/proxyMemoryLimit":"1Gi"},"creationTimestamp":null,"labels":{"app":"adservice","region":"us-east-1"}},"spec":{"containers":[{"env":[{"name":"PORT","value":"9555"}],"image":"gcr.io/google-samples/microservices-demo/adservice:v0.10.0","imagePullPolicy":"IfNotPresent","livenessProbe":{"failureThreshold":3,"grpc":{"port":9555,"service":""},"initialDelaySeconds":20,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":1},"name":"server","ports":[{"containerPort":9555,"protocol":"TCP"}],"readinessProbe":{"failureThreshold":3,"grpc":{"port":9555,"service":""},"initialDelaySeconds":20,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":1},"resources":{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"200m","memory":"180Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File"}],"dnsPolicy":"ClusterFirst","nodeSelector":{"topology.kubernetes.io/zone":"us-east-1"},"restartPolicy":"Always","schedulerName":"default-scheduler","securityContext":{"fsGroup":1000,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000},"serviceAccount":"adservice","serviceAccountName":"adservice","terminationGracePeriodSeconds":5}}},"status":{"availableReplicas":1,"conditions":[{"lastTransitionTime":"2024-04-26T02:05:28Z","lastUpdateTime":"2024-04-26T02:07:45Z","message":"ReplicaSet
+        \"adservice-us-east-1-78f655986\" has successfully progressed.","reason":"NewReplicaSetAvailable","status":"True","type":"Progressing"},{"lastTransitionTime":"2024-04-26T02:11:29Z","lastUpdateTime":"2024-04-26T02:11:29Z","message":"Deployment
+        does not have minimum availability.","reason":"MinimumReplicasUnavailable","status":"False","type":"Available"}],"observedGeneration":3,"readyReplicas":1,"replicas":3,"unavailableReplicas":2,"updatedReplicas":3}}
+
+        '
+    creationTimestamp: '2024-04-26T02:05:28Z'
+    generation: 4
+    name: adservice-us-east-1
+    namespace: default
+    resourceVersion: '553308'
+    uid: 9bc00ae4-ad7f-479a-9f60-59f80724bace
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: adservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: adservice
+          region: us-east-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '9555'
+          image: gcr.io/google-samples/microservices-demo/adservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 9555
+              service: ''
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 9555
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 9555
+              service: ''
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 300m
+              memory: 300Mi
+            requests:
+              cpu: 200m
+              memory: 180Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-east-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: adservice
+        serviceAccountName: adservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:12:30Z'
+      lastUpdateTime: '2024-04-26T02:12:30Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    - lastTransitionTime: '2024-04-26T02:05:28Z'
+      lastUpdateTime: '2024-04-26T02:13:53Z'
+      message: ReplicaSet "adservice-us-east-1-7dccfd58c7" is progressing.
+      reason: ReplicaSetUpdated
+      status: 'True'
+      type: Progressing
+    observedGeneration: 4
+    readyReplicas: 3
+    replicas: 4
+    unavailableReplicas: 1
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '3'
+      kubectl.kubernetes.io/last-applied-configuration: '{"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{"deployment.kubernetes.io/revision":"2"},"creationTimestamp":"2024-04-26T02:05:28Z","generation":3,"name":"adservice-us-south-1","namespace":"default","resourceVersion":"549217","uid":"b6103821-6388-4adf-8f4e-46262477cd18"},"spec":{"progressDeadlineSeconds":600,"replicas":3,"revisionHistoryLimit":10,"selector":{"matchLabels":{"app":"adservice"}},"strategy":{"rollingUpdate":{"maxSurge":"25%","maxUnavailable":"25%"},"type":"RollingUpdate"},"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt":"2024-04-25T21:06:43-05:00","sidecar.istio.io/bootstrapOverride":"shared-span-bootstrap-config","sidecar.istio.io/proxyCPU":"100m","sidecar.istio.io/proxyCPULimit":"4000m","sidecar.istio.io/proxyMemory":"128Mi","sidecar.istio.io/proxyMemoryLimit":"1Gi"},"creationTimestamp":null,"labels":{"app":"adservice","region":"us-south-1"}},"spec":{"containers":[{"env":[{"name":"PORT","value":"9555"}],"image":"gcr.io/google-samples/microservices-demo/adservice:v0.10.0","imagePullPolicy":"IfNotPresent","livenessProbe":{"failureThreshold":3,"grpc":{"port":9555,"service":""},"initialDelaySeconds":20,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":1},"name":"server","ports":[{"containerPort":9555,"protocol":"TCP"}],"readinessProbe":{"failureThreshold":3,"grpc":{"port":9555,"service":""},"initialDelaySeconds":20,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":1},"resources":{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"200m","memory":"180Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File"}],"dnsPolicy":"ClusterFirst","nodeSelector":{"topology.kubernetes.io/zone":"us-south-1"},"restartPolicy":"Always","schedulerName":"default-scheduler","securityContext":{"fsGroup":1000,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000},"serviceAccount":"adservice","serviceAccountName":"adservice","terminationGracePeriodSeconds":5}}},"status":{"availableReplicas":1,"conditions":[{"lastTransitionTime":"2024-04-26T02:05:29Z","lastUpdateTime":"2024-04-26T02:07:45Z","message":"ReplicaSet
+        \"adservice-us-south-1-678bbf796d\" has successfully progressed.","reason":"NewReplicaSetAvailable","status":"True","type":"Progressing"},{"lastTransitionTime":"2024-04-26T02:11:29Z","lastUpdateTime":"2024-04-26T02:11:29Z","message":"Deployment
+        does not have minimum availability.","reason":"MinimumReplicasUnavailable","status":"False","type":"Available"}],"observedGeneration":3,"readyReplicas":1,"replicas":3,"unavailableReplicas":2,"updatedReplicas":3}}
+
+        '
+    creationTimestamp: '2024-04-26T02:05:28Z'
+    generation: 4
+    name: adservice-us-south-1
+    namespace: default
+    resourceVersion: '553319'
+    uid: b6103821-6388-4adf-8f4e-46262477cd18
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: adservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: adservice
+          region: us-south-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '9555'
+          image: gcr.io/google-samples/microservices-demo/adservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 9555
+              service: ''
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 9555
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 9555
+              service: ''
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 300m
+              memory: 300Mi
+            requests:
+              cpu: 200m
+              memory: 180Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-south-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: adservice
+        serviceAccountName: adservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:12:30Z'
+      lastUpdateTime: '2024-04-26T02:12:30Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    - lastTransitionTime: '2024-04-26T02:05:29Z'
+      lastUpdateTime: '2024-04-26T02:13:53Z'
+      message: ReplicaSet "adservice-us-south-1-5d8bb9d97c" is progressing.
+      reason: ReplicaSetUpdated
+      status: 'True'
+      type: Progressing
+    observedGeneration: 4
+    readyReplicas: 3
+    replicas: 4
+    unavailableReplicas: 1
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '3'
+      kubectl.kubernetes.io/last-applied-configuration: '{"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{"deployment.kubernetes.io/revision":"2"},"creationTimestamp":"2024-04-26T02:05:28Z","generation":3,"name":"adservice-us-west-1","namespace":"default","resourceVersion":"549219","uid":"1fa88e66-176b-452e-b6d4-a61ef456336a"},"spec":{"progressDeadlineSeconds":600,"replicas":3,"revisionHistoryLimit":10,"selector":{"matchLabels":{"app":"adservice"}},"strategy":{"rollingUpdate":{"maxSurge":"25%","maxUnavailable":"25%"},"type":"RollingUpdate"},"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt":"2024-04-25T21:06:43-05:00","sidecar.istio.io/bootstrapOverride":"shared-span-bootstrap-config","sidecar.istio.io/proxyCPU":"100m","sidecar.istio.io/proxyCPULimit":"4000m","sidecar.istio.io/proxyMemory":"128Mi","sidecar.istio.io/proxyMemoryLimit":"1Gi"},"creationTimestamp":null,"labels":{"app":"adservice","region":"us-west-1"}},"spec":{"containers":[{"env":[{"name":"PORT","value":"9555"}],"image":"gcr.io/google-samples/microservices-demo/adservice:v0.10.0","imagePullPolicy":"IfNotPresent","livenessProbe":{"failureThreshold":3,"grpc":{"port":9555,"service":""},"initialDelaySeconds":20,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":1},"name":"server","ports":[{"containerPort":9555,"protocol":"TCP"}],"readinessProbe":{"failureThreshold":3,"grpc":{"port":9555,"service":""},"initialDelaySeconds":20,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":1},"resources":{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"200m","memory":"180Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File"}],"dnsPolicy":"ClusterFirst","nodeSelector":{"topology.kubernetes.io/zone":"us-west-1"},"restartPolicy":"Always","schedulerName":"default-scheduler","securityContext":{"fsGroup":1000,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000},"serviceAccount":"adservice","serviceAccountName":"adservice","terminationGracePeriodSeconds":5}}},"status":{"availableReplicas":1,"conditions":[{"lastTransitionTime":"2024-04-26T02:05:28Z","lastUpdateTime":"2024-04-26T02:07:30Z","message":"ReplicaSet
+        \"adservice-us-west-1-869564fc5d\" has successfully progressed.","reason":"NewReplicaSetAvailable","status":"True","type":"Progressing"},{"lastTransitionTime":"2024-04-26T02:11:29Z","lastUpdateTime":"2024-04-26T02:11:29Z","message":"Deployment
+        does not have minimum availability.","reason":"MinimumReplicasUnavailable","status":"False","type":"Available"}],"observedGeneration":3,"readyReplicas":1,"replicas":3,"unavailableReplicas":2,"updatedReplicas":3}}
+
+        '
+    creationTimestamp: '2024-04-26T02:05:28Z'
+    generation: 4
+    name: adservice-us-west-1
+    namespace: default
+    resourceVersion: '553324'
+    uid: 1fa88e66-176b-452e-b6d4-a61ef456336a
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: adservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: adservice
+          region: us-west-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '9555'
+          image: gcr.io/google-samples/microservices-demo/adservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 9555
+              service: ''
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 9555
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 9555
+              service: ''
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 300m
+              memory: 300Mi
+            requests:
+              cpu: 200m
+              memory: 180Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-west-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: adservice
+        serviceAccountName: adservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:12:17Z'
+      lastUpdateTime: '2024-04-26T02:12:17Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    - lastTransitionTime: '2024-04-26T02:05:28Z'
+      lastUpdateTime: '2024-04-26T02:13:53Z'
+      message: ReplicaSet "adservice-us-west-1-7897b4bc4f" is progressing.
+      reason: ReplicaSetUpdated
+      status: 'True'
+      type: Progressing
+    observedGeneration: 4
+    readyReplicas: 3
+    replicas: 4
+    unavailableReplicas: 1
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:29Z'
+    generation: 3
+    name: cartservice-us-central-1
+    namespace: default
+    resourceVersion: '551042'
+    uid: 8f42b3ce-877e-44f4-a80f-143b5f852a4c
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: cartservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: cartservice
+          region: us-central-1
+      spec:
+        containers:
+        - env:
+          - name: REDIS_ADDR
+            value: redis-cart:6379
+          image: gcr.io/google-samples/microservices-demo/cartservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 7070
+              service: ''
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 7070
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 7070
+              service: ''
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 300m
+              memory: 128Mi
+            requests:
+              cpu: 200m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-central-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: cartservice
+        serviceAccountName: cartservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:29Z'
+      lastUpdateTime: '2024-04-26T02:07:26Z'
+      message: ReplicaSet "cartservice-us-central-1-5c5df98559" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:05Z'
+      lastUpdateTime: '2024-04-26T02:12:05Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:29Z'
+    generation: 3
+    name: cartservice-us-east-1
+    namespace: default
+    resourceVersion: '551593'
+    uid: 1d0ad6a5-f465-4ea0-892b-ed98c7f352ae
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: cartservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: cartservice
+          region: us-east-1
+      spec:
+        containers:
+        - env:
+          - name: REDIS_ADDR
+            value: redis-cart:6379
+          image: gcr.io/google-samples/microservices-demo/cartservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 7070
+              service: ''
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 7070
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 7070
+              service: ''
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 300m
+              memory: 128Mi
+            requests:
+              cpu: 200m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-east-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: cartservice
+        serviceAccountName: cartservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:29Z'
+      lastUpdateTime: '2024-04-26T02:07:26Z'
+      message: ReplicaSet "cartservice-us-east-1-c4d559cb5" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:13Z'
+      lastUpdateTime: '2024-04-26T02:12:13Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:29Z'
+    generation: 3
+    name: cartservice-us-south-1
+    namespace: default
+    resourceVersion: '551089'
+    uid: 847dc9e2-af6f-4252-9452-407d985acef8
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: cartservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: cartservice
+          region: us-south-1
+      spec:
+        containers:
+        - env:
+          - name: REDIS_ADDR
+            value: redis-cart:6379
+          image: gcr.io/google-samples/microservices-demo/cartservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 7070
+              service: ''
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 7070
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 7070
+              service: ''
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 300m
+              memory: 128Mi
+            requests:
+              cpu: 200m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-south-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: cartservice
+        serviceAccountName: cartservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:29Z'
+      lastUpdateTime: '2024-04-26T02:07:16Z'
+      message: ReplicaSet "cartservice-us-south-1-7c499b7fb7" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:06Z'
+      lastUpdateTime: '2024-04-26T02:12:06Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:29Z'
+    generation: 3
+    name: cartservice-us-west-1
+    namespace: default
+    resourceVersion: '551182'
+    uid: 75a55d4e-8cd8-454a-8e93-64765203f8bb
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: cartservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: cartservice
+          region: us-west-1
+      spec:
+        containers:
+        - env:
+          - name: REDIS_ADDR
+            value: redis-cart:6379
+          image: gcr.io/google-samples/microservices-demo/cartservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 7070
+              service: ''
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 7070
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 7070
+              service: ''
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 300m
+              memory: 128Mi
+            requests:
+              cpu: 200m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-west-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: cartservice
+        serviceAccountName: cartservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:29Z'
+      lastUpdateTime: '2024-04-26T02:07:16Z'
+      message: ReplicaSet "cartservice-us-west-1-685d469865" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:07Z'
+      lastUpdateTime: '2024-04-26T02:12:07Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:30Z'
+    generation: 3
+    name: checkoutservice-us-central-1
+    namespace: default
+    resourceVersion: '551127'
+    uid: dac82fa9-bfe1-442c-b485-b9d6d0795507
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: checkoutservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: checkoutservice
+          region: us-central-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '5050'
+          - name: PRODUCT_CATALOG_SERVICE_ADDR
+            value: productcatalogservice:3550
+          - name: SHIPPING_SERVICE_ADDR
+            value: shippingservice:50051
+          - name: PAYMENT_SERVICE_ADDR
+            value: paymentservice:50051
+          - name: EMAIL_SERVICE_ADDR
+            value: emailservice:5000
+          - name: CURRENCY_SERVICE_ADDR
+            value: currencyservice:7000
+          - name: CART_SERVICE_ADDR
+            value: cartservice:7070
+          image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 5050
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 5050
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 5050
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-central-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: checkoutservice
+        serviceAccountName: checkoutservice
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:30Z'
+      lastUpdateTime: '2024-04-26T02:07:09Z'
+      message: ReplicaSet "checkoutservice-us-central-1-69dcd6465d" has successfully
+        progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:06Z'
+      lastUpdateTime: '2024-04-26T02:12:06Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:30Z'
+    generation: 3
+    name: checkoutservice-us-east-1
+    namespace: default
+    resourceVersion: '551403'
+    uid: 7233c9e7-fb71-4ca1-b4ee-284161e2bc8b
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: checkoutservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: checkoutservice
+          region: us-east-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '5050'
+          - name: PRODUCT_CATALOG_SERVICE_ADDR
+            value: productcatalogservice:3550
+          - name: SHIPPING_SERVICE_ADDR
+            value: shippingservice:50051
+          - name: PAYMENT_SERVICE_ADDR
+            value: paymentservice:50051
+          - name: EMAIL_SERVICE_ADDR
+            value: emailservice:5000
+          - name: CURRENCY_SERVICE_ADDR
+            value: currencyservice:7000
+          - name: CART_SERVICE_ADDR
+            value: cartservice:7070
+          image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 5050
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 5050
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 5050
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-east-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: checkoutservice
+        serviceAccountName: checkoutservice
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:30Z'
+      lastUpdateTime: '2024-04-26T02:07:11Z'
+      message: ReplicaSet "checkoutservice-us-east-1-9d495d6" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:11Z'
+      lastUpdateTime: '2024-04-26T02:12:11Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:30Z'
+    generation: 3
+    name: checkoutservice-us-south-1
+    namespace: default
+    resourceVersion: '551416'
+    uid: df31e9df-f638-433d-93f7-566e31b9c294
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: checkoutservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: checkoutservice
+          region: us-south-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '5050'
+          - name: PRODUCT_CATALOG_SERVICE_ADDR
+            value: productcatalogservice:3550
+          - name: SHIPPING_SERVICE_ADDR
+            value: shippingservice:50051
+          - name: PAYMENT_SERVICE_ADDR
+            value: paymentservice:50051
+          - name: EMAIL_SERVICE_ADDR
+            value: emailservice:5000
+          - name: CURRENCY_SERVICE_ADDR
+            value: currencyservice:7000
+          - name: CART_SERVICE_ADDR
+            value: cartservice:7070
+          image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 5050
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 5050
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 5050
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-south-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: checkoutservice
+        serviceAccountName: checkoutservice
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:30Z'
+      lastUpdateTime: '2024-04-26T02:07:02Z'
+      message: ReplicaSet "checkoutservice-us-south-1-57b6b454f8" has successfully
+        progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:11Z'
+      lastUpdateTime: '2024-04-26T02:12:11Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:29Z'
+    generation: 3
+    name: checkoutservice-us-west-1
+    namespace: default
+    resourceVersion: '551543'
+    uid: f65bdfc0-1f84-4cc8-804f-46ac293d56ad
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: checkoutservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: checkoutservice
+          region: us-west-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '5050'
+          - name: PRODUCT_CATALOG_SERVICE_ADDR
+            value: productcatalogservice:3550
+          - name: SHIPPING_SERVICE_ADDR
+            value: shippingservice:50051
+          - name: PAYMENT_SERVICE_ADDR
+            value: paymentservice:50051
+          - name: EMAIL_SERVICE_ADDR
+            value: emailservice:5000
+          - name: CURRENCY_SERVICE_ADDR
+            value: currencyservice:7000
+          - name: CART_SERVICE_ADDR
+            value: cartservice:7070
+          image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 5050
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 5050
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 5050
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-west-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: checkoutservice
+        serviceAccountName: checkoutservice
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:30Z'
+      lastUpdateTime: '2024-04-26T02:07:58Z'
+      message: ReplicaSet "checkoutservice-us-west-1-7ff8d7cf8" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:12Z'
+      lastUpdateTime: '2024-04-26T02:12:12Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:31Z'
+    generation: 3
+    name: currencyservice-us-central-1
+    namespace: default
+    resourceVersion: '551386'
+    uid: 6cc452eb-5285-46c3-9d79-ede392b054d9
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: currencyservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: currencyservice
+          region: us-central-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '7000'
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/currencyservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 7000
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 7000
+            name: grpc
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 7000
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-central-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: currencyservice
+        serviceAccountName: currencyservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:31Z'
+      lastUpdateTime: '2024-04-26T02:07:10Z'
+      message: ReplicaSet "currencyservice-us-central-1-5d5f9ddb94" has successfully
+        progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:11Z'
+      lastUpdateTime: '2024-04-26T02:12:11Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:30Z'
+    generation: 3
+    name: currencyservice-us-east-1
+    namespace: default
+    resourceVersion: '551612'
+    uid: 3b0514f6-9f26-4fe7-a6b3-9106eccfa191
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: currencyservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: currencyservice
+          region: us-east-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '7000'
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/currencyservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 7000
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 7000
+            name: grpc
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 7000
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-east-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: currencyservice
+        serviceAccountName: currencyservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:30Z'
+      lastUpdateTime: '2024-04-26T02:07:11Z'
+      message: ReplicaSet "currencyservice-us-east-1-7944b5f9b8" has successfully
+        progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:13Z'
+      lastUpdateTime: '2024-04-26T02:12:13Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:31Z'
+    generation: 3
+    name: currencyservice-us-south-1
+    namespace: default
+    resourceVersion: '551943'
+    uid: fd294904-040b-493a-8e16-e4658628d54d
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: currencyservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: currencyservice
+          region: us-south-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '7000'
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/currencyservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 7000
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 7000
+            name: grpc
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 7000
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-south-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: currencyservice
+        serviceAccountName: currencyservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:31Z'
+      lastUpdateTime: '2024-04-26T02:07:04Z'
+      message: ReplicaSet "currencyservice-us-south-1-6496c4df6b" has successfully
+        progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:19Z'
+      lastUpdateTime: '2024-04-26T02:12:19Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:30Z'
+    generation: 3
+    name: currencyservice-us-west-1
+    namespace: default
+    resourceVersion: '551824'
+    uid: 7acb3328-6008-44b6-9c8b-c2460a622a4c
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: currencyservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: currencyservice
+          region: us-west-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '7000'
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/currencyservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 7000
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 7000
+            name: grpc
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 7000
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-west-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: currencyservice
+        serviceAccountName: currencyservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:30Z'
+      lastUpdateTime: '2024-04-26T02:08:00Z'
+      message: ReplicaSet "currencyservice-us-west-1-6474786744" has successfully
+        progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:16Z'
+      lastUpdateTime: '2024-04-26T02:12:16Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:32Z'
+    generation: 3
+    name: emailservice-us-central-1
+    namespace: default
+    resourceVersion: '551483'
+    uid: 37ca71b9-ab4c-4d45-b481-764448a066cb
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: emailservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: emailservice
+          region: us-central-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '8080'
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/emailservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 8080
+              service: ''
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 8080
+              service: ''
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-central-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: emailservice
+        serviceAccountName: emailservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:32Z'
+      lastUpdateTime: '2024-04-26T02:07:11Z'
+      message: ReplicaSet "emailservice-us-central-1-794b54598d" has successfully
+        progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:12Z'
+      lastUpdateTime: '2024-04-26T02:12:12Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:32Z'
+    generation: 3
+    name: emailservice-us-east-1
+    namespace: default
+    resourceVersion: '551630'
+    uid: 8a2b31c0-581d-4ef8-83eb-3cc5c62f46df
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: emailservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: emailservice
+          region: us-east-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '8080'
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/emailservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 8080
+              service: ''
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 8080
+              service: ''
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-east-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: emailservice
+        serviceAccountName: emailservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:32Z'
+      lastUpdateTime: '2024-04-26T02:07:13Z'
+      message: ReplicaSet "emailservice-us-east-1-7b6f6dbf68" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:13Z'
+      lastUpdateTime: '2024-04-26T02:12:13Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:32Z'
+    generation: 3
+    name: emailservice-us-south-1
+    namespace: default
+    resourceVersion: '551823'
+    uid: 9cac079d-52d5-414c-9d91-2827c0c8a3fb
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: emailservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: emailservice
+          region: us-south-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '8080'
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/emailservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 8080
+              service: ''
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 8080
+              service: ''
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-south-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: emailservice
+        serviceAccountName: emailservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:32Z'
+      lastUpdateTime: '2024-04-26T02:07:06Z'
+      message: ReplicaSet "emailservice-us-south-1-7c7854f6b4" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:16Z'
+      lastUpdateTime: '2024-04-26T02:12:16Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:31Z'
+    generation: 3
+    name: emailservice-us-west-1
+    namespace: default
+    resourceVersion: '552000'
+    uid: b0a12508-e07a-4244-9a78-fab2f2742ff0
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: emailservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: emailservice
+          region: us-west-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '8080'
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/emailservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 8080
+              service: ''
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 8080
+              service: ''
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-west-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: emailservice
+        serviceAccountName: emailservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:32Z'
+      lastUpdateTime: '2024-04-26T02:08:05Z'
+      message: ReplicaSet "emailservice-us-west-1-86646b8d" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:19Z'
+      lastUpdateTime: '2024-04-26T02:12:19Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:33Z'
+    generation: 3
+    name: frontend-us-central-1
+    namespace: default
+    resourceVersion: '551712'
+    uid: 37e3175e-14ad-4ee8-888f-6a2e4c9fb514
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: frontend
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+          sidecar.istio.io/rewriteAppHTTPProbers: 'true'
+        creationTimestamp: null
+        labels:
+          app: frontend
+          region: us-central-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '8080'
+          - name: PRODUCT_CATALOG_SERVICE_ADDR
+            value: productcatalogservice:3550
+          - name: CURRENCY_SERVICE_ADDR
+            value: currencyservice:7000
+          - name: CART_SERVICE_ADDR
+            value: cartservice:7070
+          - name: RECOMMENDATION_SERVICE_ADDR
+            value: recommendationservice:8080
+          - name: SHIPPING_SERVICE_ADDR
+            value: shippingservice:50051
+          - name: CHECKOUT_SERVICE_ADDR
+            value: checkoutservice:5050
+          - name: AD_SERVICE_ADDR
+            value: adservice:9555
+          - name: SHOPPING_ASSISTANT_SERVICE_ADDR
+            value: shoppingassistantservice:80
+          - name: ENABLE_PROFILER
+            value: '0'
+          image: gcr.io/google-samples/microservices-demo/frontend:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              httpHeaders:
+              - name: Cookie
+                value: shop_session-id=x-liveness-probe
+              path: /_healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              httpHeaders:
+              - name: Cookie
+                value: shop_session-id=x-readiness-probe
+              path: /_healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-central-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: frontend
+        serviceAccountName: frontend
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:33Z'
+      lastUpdateTime: '2024-04-26T02:07:18Z'
+      message: ReplicaSet "frontend-us-central-1-6c49545d6d" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:15Z'
+      lastUpdateTime: '2024-04-26T02:12:15Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:33Z'
+    generation: 3
+    name: frontend-us-east-1
+    namespace: default
+    resourceVersion: '552355'
+    uid: d48bb788-0d89-4064-9410-4a24cc44361c
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: frontend
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+          sidecar.istio.io/rewriteAppHTTPProbers: 'true'
+        creationTimestamp: null
+        labels:
+          app: frontend
+          region: us-east-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '8080'
+          - name: PRODUCT_CATALOG_SERVICE_ADDR
+            value: productcatalogservice:3550
+          - name: CURRENCY_SERVICE_ADDR
+            value: currencyservice:7000
+          - name: CART_SERVICE_ADDR
+            value: cartservice:7070
+          - name: RECOMMENDATION_SERVICE_ADDR
+            value: recommendationservice:8080
+          - name: SHIPPING_SERVICE_ADDR
+            value: shippingservice:50051
+          - name: CHECKOUT_SERVICE_ADDR
+            value: checkoutservice:5050
+          - name: AD_SERVICE_ADDR
+            value: adservice:9555
+          - name: SHOPPING_ASSISTANT_SERVICE_ADDR
+            value: shoppingassistantservice:80
+          - name: ENABLE_PROFILER
+            value: '0'
+          image: gcr.io/google-samples/microservices-demo/frontend:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              httpHeaders:
+              - name: Cookie
+                value: shop_session-id=x-liveness-probe
+              path: /_healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              httpHeaders:
+              - name: Cookie
+                value: shop_session-id=x-readiness-probe
+              path: /_healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-east-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: frontend
+        serviceAccountName: frontend
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:33Z'
+      lastUpdateTime: '2024-04-26T02:07:58Z'
+      message: ReplicaSet "frontend-us-east-1-6cbcb9dcdb" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:24Z'
+      lastUpdateTime: '2024-04-26T02:12:24Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:33Z'
+    generation: 3
+    name: frontend-us-south-1
+    namespace: default
+    resourceVersion: '552189'
+    uid: 59b35721-767d-4064-99c3-82fe78e9878d
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: frontend
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+          sidecar.istio.io/rewriteAppHTTPProbers: 'true'
+        creationTimestamp: null
+        labels:
+          app: frontend
+          region: us-south-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '8080'
+          - name: PRODUCT_CATALOG_SERVICE_ADDR
+            value: productcatalogservice:3550
+          - name: CURRENCY_SERVICE_ADDR
+            value: currencyservice:7000
+          - name: CART_SERVICE_ADDR
+            value: cartservice:7070
+          - name: RECOMMENDATION_SERVICE_ADDR
+            value: recommendationservice:8080
+          - name: SHIPPING_SERVICE_ADDR
+            value: shippingservice:50051
+          - name: CHECKOUT_SERVICE_ADDR
+            value: checkoutservice:5050
+          - name: AD_SERVICE_ADDR
+            value: adservice:9555
+          - name: SHOPPING_ASSISTANT_SERVICE_ADDR
+            value: shoppingassistantservice:80
+          - name: ENABLE_PROFILER
+            value: '0'
+          image: gcr.io/google-samples/microservices-demo/frontend:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              httpHeaders:
+              - name: Cookie
+                value: shop_session-id=x-liveness-probe
+              path: /_healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              httpHeaders:
+              - name: Cookie
+                value: shop_session-id=x-readiness-probe
+              path: /_healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-south-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: frontend
+        serviceAccountName: frontend
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:33Z'
+      lastUpdateTime: '2024-04-26T02:07:18Z'
+      message: ReplicaSet "frontend-us-south-1-9bf7bb864" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:22Z'
+      lastUpdateTime: '2024-04-26T02:12:22Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:33Z'
+    generation: 3
+    name: frontend-us-west-1
+    namespace: default
+    resourceVersion: '552539'
+    uid: ff2d3fa7-23f8-4ff4-9446-0650f4649f6c
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: frontend
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+          sidecar.istio.io/rewriteAppHTTPProbers: 'true'
+        creationTimestamp: null
+        labels:
+          app: frontend
+          region: us-west-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '8080'
+          - name: PRODUCT_CATALOG_SERVICE_ADDR
+            value: productcatalogservice:3550
+          - name: CURRENCY_SERVICE_ADDR
+            value: currencyservice:7000
+          - name: CART_SERVICE_ADDR
+            value: cartservice:7070
+          - name: RECOMMENDATION_SERVICE_ADDR
+            value: recommendationservice:8080
+          - name: SHIPPING_SERVICE_ADDR
+            value: shippingservice:50051
+          - name: CHECKOUT_SERVICE_ADDR
+            value: checkoutservice:5050
+          - name: AD_SERVICE_ADDR
+            value: adservice:9555
+          - name: SHOPPING_ASSISTANT_SERVICE_ADDR
+            value: shoppingassistantservice:80
+          - name: ENABLE_PROFILER
+            value: '0'
+          image: gcr.io/google-samples/microservices-demo/frontend:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              httpHeaders:
+              - name: Cookie
+                value: shop_session-id=x-liveness-probe
+              path: /_healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              httpHeaders:
+              - name: Cookie
+                value: shop_session-id=x-readiness-probe
+              path: /_healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-west-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: frontend
+        serviceAccountName: frontend
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:33Z'
+      lastUpdateTime: '2024-04-26T02:08:18Z'
+      message: ReplicaSet "frontend-us-west-1-5f58fcfcbb" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:28Z'
+      lastUpdateTime: '2024-04-26T02:12:28Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:34Z'
+    generation: 3
+    name: loadgenerator-us-central-1
+    namespace: default
+    resourceVersion: '552188'
+    uid: 9a3033cc-2cdd-4a62-aefc-358561f19f79
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: loadgenerator
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+          sidecar.istio.io/rewriteAppHTTPProbers: 'true'
+        creationTimestamp: null
+        labels:
+          app: loadgenerator
+          region: us-central-1
+      spec:
+        containers:
+        - env:
+          - name: FRONTEND_ADDR
+            value: frontend:80
+          - name: USERS
+            value: '10'
+          image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.10.0
+          imagePullPolicy: IfNotPresent
+          name: main
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 300m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        initContainers:
+        - command:
+          - /bin/sh
+          - -exc
+          - "MAX_RETRIES=12\nRETRY_INTERVAL=10\nfor i in $(seq 1 $MAX_RETRIES); do\n\
+            \  echo \"Attempt $i: Pinging frontend: ${FRONTEND_ADDR}...\"\n  STATUSCODE=$(wget\
+            \ --server-response http://${FRONTEND_ADDR} 2>&1 | awk '/^  HTTP/{print\
+            \ $2}')\n  if [ $STATUSCODE -eq 200 ]; then\n      echo \"Frontend is\
+            \ reachable.\"\n      exit 0\n  fi\n  echo \"Error: Could not reach frontend\
+            \ - Status code: ${STATUSCODE}\"\n  sleep $RETRY_INTERVAL\ndone\necho\
+            \ \"Failed to reach frontend after $MAX_RETRIES attempts.\"\nexit 1\n"
+          env:
+          - name: FRONTEND_ADDR
+            value: frontend:80
+          image: busybox:latest
+          imagePullPolicy: Always
+          name: frontend-check
+          resources: {}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        nodeSelector:
+          topology.kubernetes.io/zone: us-central-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: loadgenerator
+        serviceAccountName: loadgenerator
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:34Z'
+      lastUpdateTime: '2024-04-26T02:07:49Z'
+      message: ReplicaSet "loadgenerator-us-central-1-79766c9d84" has successfully
+        progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:22Z'
+      lastUpdateTime: '2024-04-26T02:12:22Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:34Z'
+    generation: 3
+    name: loadgenerator-us-east-1
+    namespace: default
+    resourceVersion: '552398'
+    uid: fa6ef38a-73e6-48ee-a172-205d48eafed1
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: loadgenerator
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+          sidecar.istio.io/rewriteAppHTTPProbers: 'true'
+        creationTimestamp: null
+        labels:
+          app: loadgenerator
+          region: us-east-1
+      spec:
+        containers:
+        - env:
+          - name: FRONTEND_ADDR
+            value: frontend:80
+          - name: USERS
+            value: '10'
+          image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.10.0
+          imagePullPolicy: IfNotPresent
+          name: main
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 300m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        initContainers:
+        - command:
+          - /bin/sh
+          - -exc
+          - "MAX_RETRIES=12\nRETRY_INTERVAL=10\nfor i in $(seq 1 $MAX_RETRIES); do\n\
+            \  echo \"Attempt $i: Pinging frontend: ${FRONTEND_ADDR}...\"\n  STATUSCODE=$(wget\
+            \ --server-response http://${FRONTEND_ADDR} 2>&1 | awk '/^  HTTP/{print\
+            \ $2}')\n  if [ $STATUSCODE -eq 200 ]; then\n      echo \"Frontend is\
+            \ reachable.\"\n      exit 0\n  fi\n  echo \"Error: Could not reach frontend\
+            \ - Status code: ${STATUSCODE}\"\n  sleep $RETRY_INTERVAL\ndone\necho\
+            \ \"Failed to reach frontend after $MAX_RETRIES attempts.\"\nexit 1\n"
+          env:
+          - name: FRONTEND_ADDR
+            value: frontend:80
+          image: busybox:latest
+          imagePullPolicy: Always
+          name: frontend-check
+          resources: {}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        nodeSelector:
+          topology.kubernetes.io/zone: us-east-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: loadgenerator
+        serviceAccountName: loadgenerator
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:34Z'
+      lastUpdateTime: '2024-04-26T02:07:53Z'
+      message: ReplicaSet "loadgenerator-us-east-1-56c685f696" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:25Z'
+      lastUpdateTime: '2024-04-26T02:12:25Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:34Z'
+    generation: 3
+    name: loadgenerator-us-south-1
+    namespace: default
+    resourceVersion: '552690'
+    uid: 2c12e8b8-76b7-4722-b092-17604c4ebc63
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: loadgenerator
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+          sidecar.istio.io/rewriteAppHTTPProbers: 'true'
+        creationTimestamp: null
+        labels:
+          app: loadgenerator
+          region: us-south-1
+      spec:
+        containers:
+        - env:
+          - name: FRONTEND_ADDR
+            value: frontend:80
+          - name: USERS
+            value: '10'
+          image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.10.0
+          imagePullPolicy: IfNotPresent
+          name: main
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 300m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        initContainers:
+        - command:
+          - /bin/sh
+          - -exc
+          - "MAX_RETRIES=12\nRETRY_INTERVAL=10\nfor i in $(seq 1 $MAX_RETRIES); do\n\
+            \  echo \"Attempt $i: Pinging frontend: ${FRONTEND_ADDR}...\"\n  STATUSCODE=$(wget\
+            \ --server-response http://${FRONTEND_ADDR} 2>&1 | awk '/^  HTTP/{print\
+            \ $2}')\n  if [ $STATUSCODE -eq 200 ]; then\n      echo \"Frontend is\
+            \ reachable.\"\n      exit 0\n  fi\n  echo \"Error: Could not reach frontend\
+            \ - Status code: ${STATUSCODE}\"\n  sleep $RETRY_INTERVAL\ndone\necho\
+            \ \"Failed to reach frontend after $MAX_RETRIES attempts.\"\nexit 1\n"
+          env:
+          - name: FRONTEND_ADDR
+            value: frontend:80
+          image: busybox:latest
+          imagePullPolicy: Always
+          name: frontend-check
+          resources: {}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        nodeSelector:
+          topology.kubernetes.io/zone: us-south-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: loadgenerator
+        serviceAccountName: loadgenerator
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:34Z'
+      lastUpdateTime: '2024-04-26T02:07:37Z'
+      message: ReplicaSet "loadgenerator-us-south-1-6896475c44" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:31Z'
+      lastUpdateTime: '2024-04-26T02:12:31Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:34Z'
+    generation: 3
+    name: loadgenerator-us-west-1
+    namespace: default
+    resourceVersion: '552614'
+    uid: 35d2973b-1f0c-4a3c-bcd3-aebd097f50ef
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: loadgenerator
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+          sidecar.istio.io/rewriteAppHTTPProbers: 'true'
+        creationTimestamp: null
+        labels:
+          app: loadgenerator
+          region: us-west-1
+      spec:
+        containers:
+        - env:
+          - name: FRONTEND_ADDR
+            value: frontend:80
+          - name: USERS
+            value: '10'
+          image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.10.0
+          imagePullPolicy: IfNotPresent
+          name: main
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 300m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        initContainers:
+        - command:
+          - /bin/sh
+          - -exc
+          - "MAX_RETRIES=12\nRETRY_INTERVAL=10\nfor i in $(seq 1 $MAX_RETRIES); do\n\
+            \  echo \"Attempt $i: Pinging frontend: ${FRONTEND_ADDR}...\"\n  STATUSCODE=$(wget\
+            \ --server-response http://${FRONTEND_ADDR} 2>&1 | awk '/^  HTTP/{print\
+            \ $2}')\n  if [ $STATUSCODE -eq 200 ]; then\n      echo \"Frontend is\
+            \ reachable.\"\n      exit 0\n  fi\n  echo \"Error: Could not reach frontend\
+            \ - Status code: ${STATUSCODE}\"\n  sleep $RETRY_INTERVAL\ndone\necho\
+            \ \"Failed to reach frontend after $MAX_RETRIES attempts.\"\nexit 1\n"
+          env:
+          - name: FRONTEND_ADDR
+            value: frontend:80
+          image: busybox:latest
+          imagePullPolicy: Always
+          name: frontend-check
+          resources: {}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        nodeSelector:
+          topology.kubernetes.io/zone: us-west-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: loadgenerator
+        serviceAccountName: loadgenerator
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:34Z'
+      lastUpdateTime: '2024-04-26T02:08:05Z'
+      message: ReplicaSet "loadgenerator-us-west-1-5d995787c6" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:29Z'
+      lastUpdateTime: '2024-04-26T02:12:29Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:35Z'
+    generation: 3
+    name: paymentservice-us-central-1
+    namespace: default
+    resourceVersion: '551592'
+    uid: 66451f4d-b9c1-463a-8018-94983d62c36e
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: paymentservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: paymentservice
+          region: us-central-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '50051'
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/paymentservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 50051
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 50051
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 50051
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-central-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: paymentservice
+        serviceAccountName: paymentservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:35Z'
+      lastUpdateTime: '2024-04-26T02:07:12Z'
+      message: ReplicaSet "paymentservice-us-central-1-76f95dd69b" has successfully
+        progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:13Z'
+      lastUpdateTime: '2024-04-26T02:12:13Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:35Z'
+    generation: 3
+    name: paymentservice-us-east-1
+    namespace: default
+    resourceVersion: '551967'
+    uid: 0afbfb8b-4ad6-492a-a485-82b6ff96fb82
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: paymentservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: paymentservice
+          region: us-east-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '50051'
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/paymentservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 50051
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 50051
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 50051
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-east-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: paymentservice
+        serviceAccountName: paymentservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:35Z'
+      lastUpdateTime: '2024-04-26T02:07:12Z'
+      message: ReplicaSet "paymentservice-us-east-1-5d597b48" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:19Z'
+      lastUpdateTime: '2024-04-26T02:12:19Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:36Z'
+    generation: 3
+    name: paymentservice-us-south-1
+    namespace: default
+    resourceVersion: '551933'
+    uid: 9383af2e-c30f-490b-9000-3896a3ab870c
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: paymentservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: paymentservice
+          region: us-south-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '50051'
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/paymentservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 50051
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 50051
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 50051
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-south-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: paymentservice
+        serviceAccountName: paymentservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:36Z'
+      lastUpdateTime: '2024-04-26T02:07:14Z'
+      message: ReplicaSet "paymentservice-us-south-1-89576d96" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:18Z'
+      lastUpdateTime: '2024-04-26T02:12:18Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:35Z'
+    generation: 3
+    name: paymentservice-us-west-1
+    namespace: default
+    resourceVersion: '552147'
+    uid: 15f2357c-4470-4f0a-a8be-d498416dec5d
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: paymentservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: paymentservice
+          region: us-west-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '50051'
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/paymentservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 50051
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 50051
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 50051
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-west-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: paymentservice
+        serviceAccountName: paymentservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:35Z'
+      lastUpdateTime: '2024-04-26T02:07:08Z'
+      message: ReplicaSet "paymentservice-us-west-1-6bb8845fb4" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:22Z'
+      lastUpdateTime: '2024-04-26T02:12:22Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:37Z'
+    generation: 3
+    name: productcatalogservice-us-central-1
+    namespace: default
+    resourceVersion: '551941'
+    uid: abd949e7-9096-405d-aef0-943ee3f37029
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: productcatalogservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: productcatalogservice
+          region: us-central-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '3550'
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 3550
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 3550
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 3550
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-central-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: productcatalogservice
+        serviceAccountName: productcatalogservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:37Z'
+      lastUpdateTime: '2024-04-26T02:07:11Z'
+      message: ReplicaSet "productcatalogservice-us-central-1-d49b85b8b" has successfully
+        progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:19Z'
+      lastUpdateTime: '2024-04-26T02:12:19Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:36Z'
+    generation: 3
+    name: productcatalogservice-us-east-1
+    namespace: default
+    resourceVersion: '552245'
+    uid: 170cb07b-da8f-420f-b137-401b80d05424
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: productcatalogservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: productcatalogservice
+          region: us-east-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '3550'
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 3550
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 3550
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 3550
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-east-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: productcatalogservice
+        serviceAccountName: productcatalogservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:36Z'
+      lastUpdateTime: '2024-04-26T02:07:53Z'
+      message: ReplicaSet "productcatalogservice-us-east-1-75f89f9698" has successfully
+        progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:23Z'
+      lastUpdateTime: '2024-04-26T02:12:23Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:37Z'
+    generation: 3
+    name: productcatalogservice-us-south-1
+    namespace: default
+    resourceVersion: '552201'
+    uid: 2cfb629f-2103-4f50-80b1-248fdc2c542f
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: productcatalogservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: productcatalogservice
+          region: us-south-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '3550'
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 3550
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 3550
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 3550
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-south-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: productcatalogservice
+        serviceAccountName: productcatalogservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:37Z'
+      lastUpdateTime: '2024-04-26T02:07:11Z'
+      message: ReplicaSet "productcatalogservice-us-south-1-8645d6c64b" has successfully
+        progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:23Z'
+      lastUpdateTime: '2024-04-26T02:12:23Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:36Z'
+    generation: 3
+    name: productcatalogservice-us-west-1
+    namespace: default
+    resourceVersion: '552204'
+    uid: 9a4544f3-dae0-4d9e-b4a5-e8ccbfc5c05a
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: productcatalogservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: productcatalogservice
+          region: us-west-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '3550'
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 3550
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 3550
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 3550
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-west-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: productcatalogservice
+        serviceAccountName: productcatalogservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:36Z'
+      lastUpdateTime: '2024-04-26T02:07:08Z'
+      message: ReplicaSet "productcatalogservice-us-west-1-66fb58cbf8" has successfully
+        progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:23Z'
+      lastUpdateTime: '2024-04-26T02:12:23Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:38Z'
+    generation: 3
+    name: recommendationservice-us-central-1
+    namespace: default
+    resourceVersion: '551869'
+    uid: 12b09db1-d8d9-4de2-8af8-1edf1f03a7e6
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: recommendationservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: recommendationservice
+          region: us-central-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '8080'
+          - name: PRODUCT_CATALOG_SERVICE_ADDR
+            value: productcatalogservice:3550
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 8080
+              service: ''
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 8080
+              service: ''
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 450Mi
+            requests:
+              cpu: 100m
+              memory: 220Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-central-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: recommendationservice
+        serviceAccountName: recommendationservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:38Z'
+      lastUpdateTime: '2024-04-26T02:07:12Z'
+      message: ReplicaSet "recommendationservice-us-central-1-7877f7dd76" has successfully
+        progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:17Z'
+      lastUpdateTime: '2024-04-26T02:12:17Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:38Z'
+    generation: 3
+    name: recommendationservice-us-east-1
+    namespace: default
+    resourceVersion: '551880'
+    uid: 5b41fac1-f891-473a-8657-59b3a31a7647
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: recommendationservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: recommendationservice
+          region: us-east-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '8080'
+          - name: PRODUCT_CATALOG_SERVICE_ADDR
+            value: productcatalogservice:3550
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 8080
+              service: ''
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 8080
+              service: ''
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 450Mi
+            requests:
+              cpu: 100m
+              memory: 220Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-east-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: recommendationservice
+        serviceAccountName: recommendationservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:38Z'
+      lastUpdateTime: '2024-04-26T02:07:54Z'
+      message: ReplicaSet "recommendationservice-us-east-1-cd8f94654" has successfully
+        progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:18Z'
+      lastUpdateTime: '2024-04-26T02:12:18Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:38Z'
+    generation: 3
+    name: recommendationservice-us-south-1
+    namespace: default
+    resourceVersion: '552133'
+    uid: 74df963b-b039-427d-8fd1-20255097ed64
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: recommendationservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: recommendationservice
+          region: us-south-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '8080'
+          - name: PRODUCT_CATALOG_SERVICE_ADDR
+            value: productcatalogservice:3550
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 8080
+              service: ''
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 8080
+              service: ''
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 450Mi
+            requests:
+              cpu: 100m
+              memory: 220Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-south-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: recommendationservice
+        serviceAccountName: recommendationservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:38Z'
+      lastUpdateTime: '2024-04-26T02:07:12Z'
+      message: ReplicaSet "recommendationservice-us-south-1-849c55df64" has successfully
+        progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:22Z'
+      lastUpdateTime: '2024-04-26T02:12:22Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:37Z'
+    generation: 3
+    name: recommendationservice-us-west-1
+    namespace: default
+    resourceVersion: '552258'
+    uid: aee1516b-dc6c-4069-9f74-e096c555d183
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: recommendationservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: recommendationservice
+          region: us-west-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '8080'
+          - name: PRODUCT_CATALOG_SERVICE_ADDR
+            value: productcatalogservice:3550
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 8080
+              service: ''
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 8080
+              service: ''
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 450Mi
+            requests:
+              cpu: 100m
+              memory: 220Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-west-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: recommendationservice
+        serviceAccountName: recommendationservice
+        terminationGracePeriodSeconds: 5
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:37Z'
+      lastUpdateTime: '2024-04-26T02:07:08Z'
+      message: ReplicaSet "recommendationservice-us-west-1-7f674f497d" has successfully
+        progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:23Z'
+      lastUpdateTime: '2024-04-26T02:12:23Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:39Z'
+    generation: 3
+    name: redis-cart-us-central-1
+    namespace: default
+    resourceVersion: '551889'
+    uid: eb10f8db-b28a-42bb-bb7b-1a96079898dc
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: redis-cart
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: redis-cart
+          region: us-central-1
+      spec:
+        containers:
+        - image: redis:alpine
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            periodSeconds: 5
+            successThreshold: 1
+            tcpSocket:
+              port: 6379
+            timeoutSeconds: 1
+          name: redis
+          ports:
+          - containerPort: 6379
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            periodSeconds: 5
+            successThreshold: 1
+            tcpSocket:
+              port: 6379
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 125m
+              memory: 256Mi
+            requests:
+              cpu: 70m
+              memory: 200Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /data
+            name: redis-data
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-central-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - emptyDir: {}
+          name: redis-data
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:39Z'
+      lastUpdateTime: '2024-04-26T02:07:39Z'
+      message: ReplicaSet "redis-cart-us-central-1-77d4d7b8f8" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:18Z'
+      lastUpdateTime: '2024-04-26T02:12:18Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:39Z'
+    generation: 3
+    name: redis-cart-us-east-1
+    namespace: default
+    resourceVersion: '551942'
+    uid: dfaf89dd-937e-4d60-868d-8e7e061cec47
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: redis-cart
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: redis-cart
+          region: us-east-1
+      spec:
+        containers:
+        - image: redis:alpine
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            periodSeconds: 5
+            successThreshold: 1
+            tcpSocket:
+              port: 6379
+            timeoutSeconds: 1
+          name: redis
+          ports:
+          - containerPort: 6379
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            periodSeconds: 5
+            successThreshold: 1
+            tcpSocket:
+              port: 6379
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 125m
+              memory: 256Mi
+            requests:
+              cpu: 70m
+              memory: 200Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /data
+            name: redis-data
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-east-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - emptyDir: {}
+          name: redis-data
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:39Z'
+      lastUpdateTime: '2024-04-26T02:07:12Z'
+      message: ReplicaSet "redis-cart-us-east-1-748cfcf6d4" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:19Z'
+      lastUpdateTime: '2024-04-26T02:12:19Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:39Z'
+    generation: 3
+    name: redis-cart-us-south-1
+    namespace: default
+    resourceVersion: '552278'
+    uid: b6d35494-b6f6-4674-8314-0f6d267ea1a9
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: redis-cart
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: redis-cart
+          region: us-south-1
+      spec:
+        containers:
+        - image: redis:alpine
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            periodSeconds: 5
+            successThreshold: 1
+            tcpSocket:
+              port: 6379
+            timeoutSeconds: 1
+          name: redis
+          ports:
+          - containerPort: 6379
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            periodSeconds: 5
+            successThreshold: 1
+            tcpSocket:
+              port: 6379
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 125m
+              memory: 256Mi
+            requests:
+              cpu: 70m
+              memory: 200Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /data
+            name: redis-data
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-south-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - emptyDir: {}
+          name: redis-data
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:39Z'
+      lastUpdateTime: '2024-04-26T02:07:12Z'
+      message: ReplicaSet "redis-cart-us-south-1-64ff5b4574" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:23Z'
+      lastUpdateTime: '2024-04-26T02:12:23Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:39Z'
+    generation: 3
+    name: redis-cart-us-west-1
+    namespace: default
+    resourceVersion: '552426'
+    uid: 8d146cc6-72b0-4ff9-9873-1c7abd0c73e8
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: redis-cart
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: redis-cart
+          region: us-west-1
+      spec:
+        containers:
+        - image: redis:alpine
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            periodSeconds: 5
+            successThreshold: 1
+            tcpSocket:
+              port: 6379
+            timeoutSeconds: 1
+          name: redis
+          ports:
+          - containerPort: 6379
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            periodSeconds: 5
+            successThreshold: 1
+            tcpSocket:
+              port: 6379
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 125m
+              memory: 256Mi
+            requests:
+              cpu: 70m
+              memory: 200Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /data
+            name: redis-data
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-west-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - emptyDir: {}
+          name: redis-data
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:39Z'
+      lastUpdateTime: '2024-04-26T02:08:04Z'
+      message: ReplicaSet "redis-cart-us-west-1-569fb76d76" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:25Z'
+      lastUpdateTime: '2024-04-26T02:12:25Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:40Z'
+    generation: 3
+    name: shippingservice-us-central-1
+    namespace: default
+    resourceVersion: '551913'
+    uid: 090341ae-4bf6-4781-b443-a59d1b23ddd4
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: shippingservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: shippingservice
+          region: us-central-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '50051'
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/shippingservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 50051
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 50051
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 50051
+              service: ''
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-central-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: shippingservice
+        serviceAccountName: shippingservice
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:40Z'
+      lastUpdateTime: '2024-04-26T02:07:38Z'
+      message: ReplicaSet "shippingservice-us-central-1-5c8f5f7fb4" has successfully
+        progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:18Z'
+      lastUpdateTime: '2024-04-26T02:12:18Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:40Z'
+    generation: 3
+    name: shippingservice-us-east-1
+    namespace: default
+    resourceVersion: '552155'
+    uid: 261e52f5-4709-4a59-8bf7-ca6c84fb2bdb
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: shippingservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: shippingservice
+          region: us-east-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '50051'
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/shippingservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 50051
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 50051
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 50051
+              service: ''
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-east-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: shippingservice
+        serviceAccountName: shippingservice
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:40Z'
+      lastUpdateTime: '2024-04-26T02:07:55Z'
+      message: ReplicaSet "shippingservice-us-east-1-58b96fc656" has successfully
+        progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:22Z'
+      lastUpdateTime: '2024-04-26T02:12:22Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:40Z'
+    generation: 3
+    name: shippingservice-us-south-1
+    namespace: default
+    resourceVersion: '552397'
+    uid: 8147e522-9e93-4941-8549-f77e8269fa5c
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: shippingservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: shippingservice
+          region: us-south-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '50051'
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/shippingservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 50051
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 50051
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 50051
+              service: ''
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-south-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: shippingservice
+        serviceAccountName: shippingservice
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:40Z'
+      lastUpdateTime: '2024-04-26T02:07:26Z'
+      message: ReplicaSet "shippingservice-us-south-1-5fcb748c84" has successfully
+        progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:25Z'
+      lastUpdateTime: '2024-04-26T02:12:25Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: '2'
+    creationTimestamp: '2024-04-26T02:05:40Z'
+    generation: 3
+    name: shippingservice-us-west-1
+    namespace: default
+    resourceVersion: '552362'
+    uid: 8471c8d6-3001-4407-8974-ab46ffa4cd30
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: shippingservice
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: '2024-04-25T21:06:43-05:00'
+          sidecar.istio.io/bootstrapOverride: shared-span-bootstrap-config
+          sidecar.istio.io/proxyCPU: 100m
+          sidecar.istio.io/proxyCPULimit: 4000m
+          sidecar.istio.io/proxyMemory: 128Mi
+          sidecar.istio.io/proxyMemoryLimit: 1Gi
+        creationTimestamp: null
+        labels:
+          app: shippingservice
+          region: us-west-1
+      spec:
+        containers:
+        - env:
+          - name: PORT
+            value: '50051'
+          - name: DISABLE_PROFILER
+            value: '1'
+          image: gcr.io/google-samples/microservices-demo/shippingservice:v0.10.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 50051
+              service: ''
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: server
+          ports:
+          - containerPort: 50051
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            grpc:
+              port: 50051
+              service: ''
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        nodeSelector:
+          topology.kubernetes.io/zone: us-west-1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        serviceAccount: shippingservice
+        serviceAccountName: shippingservice
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: '2024-04-26T02:05:40Z'
+      lastUpdateTime: '2024-04-26T02:07:08Z'
+      message: ReplicaSet "shippingservice-us-west-1-69c8b644fb" has successfully
+        progressed.
+      reason: NewReplicaSetAvailable
+      status: 'True'
+      type: Progressing
+    - lastTransitionTime: '2024-04-26T02:12:24Z'
+      lastUpdateTime: '2024-04-26T02:12:24Z'
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: 'True'
+      type: Available
+    observedGeneration: 3
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+kind: List
+metadata:
+  resourceVersion: ''
