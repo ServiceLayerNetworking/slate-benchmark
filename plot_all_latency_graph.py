@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import subprocess
 
+default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+
 def parse_wrk_config(wrklog_path):
     wrk_config = dict()
     lines = open(wrklog_path, 'r').readlines()
@@ -145,6 +147,7 @@ if __name__ == "__main__":
     df['tput'] = pd.to_numeric(df['tput'], errors='coerce').astype(int)
     df.sort_values(by='rps', inplace=True)
     plt.figure(figsize=(10, 6))
+    idx = 0
     for mode in df['mode'].unique():
         for routing_rule in df['routing_rule'].unique():
             # for inter_cluster_latency in df['inter_cluster_latency'].unique():
@@ -153,15 +156,23 @@ if __name__ == "__main__":
                 print("unique req_type", df['req_type'].unique())
                 for req_type in df['req_type'].unique():
                     df_filtered = df[(df['mode'] == mode) & (df['routing_rule'] == routing_rule) & (df['cluster'] == cluster) & (df['req_type'] == req_type)]
-                    df_filtered.to_csv("plot_all_latency_summary.csv")
+                    # df_filtered.to_csv("plot_all_latency_summary.csv")
                     for metric in latency_metrics:
+                        if metric == "avg":
+                            linestyle = '-'
+                        elif metric == "99%":
+                            linestyle = '--'
+                        else:
+                            linestyle = ':'
+                            
                         label = f"{cluster}-{req_type}-{metric}"
-                        plt.plot(df_filtered['rps'], df_filtered[metric], label=label, marker='o')
+                        plt.plot(df_filtered['rps'], df_filtered[metric], label=label, marker='o', color=default_colors[idx], linestyle=linestyle)
                         for i in range(len(df_filtered['rps'])):
                             print(f"{df_filtered['rps'].iloc[i]} RPS, {df_filtered['req_type'].iloc[i]}, {df_filtered['tput'].iloc[i]} TPUT, {df_filtered[metric].iloc[i]} ms")
                             # plt.plot(df_filtered['rps'], df_filtered['tput'], marker='x', linestyle='--', alpha=0.5)
-    
-    
+                    idx += 1
+
+    plt.ylim(bottom=0, top=500)
     plt.title(f'Latency', fontsize=20)
     plt.xlabel('Requests per Second (RPS)', fontsize=20)
     plt.ylabel('Latency (ms)', fontsize=20)

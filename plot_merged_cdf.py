@@ -207,8 +207,15 @@ if __name__ == "__main__":
         percentile_df['Percentile'] *= 100
         routing_rule = wrk_config["routing_rule"]
         
-        if wrk_config['routing_rule'] == "WATERFALL2" and wrk_config['capacity'] == "700":
-            continue
+        ## Skip LOCAL
+        # if wrk_config['routing_rule'] == 'LOCAL':
+        #     print("Skip LOCAL routing in this plot")
+        #     continue
+        
+        ## Skip some capacity in waterfall
+        # if wrk_config['routing_rule'] == "WATERFALL2" and wrk_config['capacity'] != "1500":
+        #     print(f"Skip WATERFALL2 capacity={wrk_config['capacity']} in this plot")
+        #     continue
 
         if 'req_type' in wrk_config:
             if wrk_config['routing_rule'] == "SLATE":
@@ -247,6 +254,10 @@ if __name__ == "__main__":
             linestyle = (5, (10, 3)) # long dash with offset
         else:
             linestyle = ':'
+        avg_latency = int(np.mean(sorted_data))
+        p99_latency = int(np.percentile(sorted_data, 99))
+        p999_latency = int(np.percentile(sorted_data, 99.9))
+        print(f"[statistics],{key},avg,{avg_latency},p99,{p99_latency},p999,{p999_latency}")
         plt.plot(sorted_data, cdf, linestyle=linestyle, label=key, linewidth=1.2)
         # plt.plot(sorted_data, cdf, linestyle=linestyle, label=key, color=req_type_color_dict[key.split("-")[1]])
     # plt.title('Hotel reservation', fontsize=18)
@@ -255,10 +266,11 @@ if __name__ == "__main__":
     plt.xticks(fontsize=14)
     plt.yticks(fontsize=14)
     plt.grid(True)
-    plt.legend(fontsize=10)
+    plt.legend(fontsize=6, loc='lower right')
     plt.tight_layout()
     plt.ylim(0, 1)
     plt.xlim(left=0)
+    # plt.xlim(right=1000)
     plt.savefig(f'{base_directory}/merged_cdf.pdf')
     print(f"output pdf: {base_directory}/merged_cdf.pdf")
     plt.show()
