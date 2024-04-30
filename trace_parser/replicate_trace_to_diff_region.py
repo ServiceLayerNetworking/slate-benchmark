@@ -111,7 +111,6 @@ def fit_mm1_model(data, y_col_name, svc_name, ep_str, cid, directory):
 
 
 def fit_polynomial_regression(data, y_col_name, svc_name, ep_str, cid, directory, degree):
-    # degree_list = [1,2,3,4]
     degree_list = [degree]
     plt.figure()
     df = pd.DataFrame(data)
@@ -120,25 +119,14 @@ def fit_polynomial_regression(data, y_col_name, svc_name, ep_str, cid, directory
     y = df[y_col_name]
     plt.scatter(X, y, color='red', alpha=0.1, label='Data')
     for degree in degree_list:
-        
         X_transformed = np.hstack((X**degree, np.ones(X.shape)))
-        # X_transformed = np.hstack((X**degree, 1))
-        # X_transformed = np.hstack((X**degree))
-        
-        model = LinearRegression(fit_intercept=False)  # Intercept is manually included in X_transformed
+        model = LinearRegression(fit_intercept=False)
         model.fit(X_transformed, y)
-        # print(f'x_colnames: {x_colnames}')
         feature_names = x_colnames.copy() + ['intercept']
         print(f"svc_name,{svc_name}, model.coef_, {model.coef_}")
         coefficients = pd.Series(model.coef_, index=feature_names)
-
-        '''plot'''
         X_plot = np.linspace(X.min(), X.max(), 100).reshape(-1, 1)
-        
         X_plot_transformed = np.hstack((X_plot**degree, np.ones(X_plot.shape)))
-        # X_plot_transformed = np.hstack((X_plot**degree, 1))
-        # X_plot_transformed = np.hstack((X_plot**degree))
-        
         y_plot = model.predict(X_plot_transformed)
         label = f'${model.coef_[0]} \cdot x^{degree} + {model.coef_[1]}$'
         plt.plot(X_plot, y_plot, linewidth=1, label=label)
@@ -169,12 +157,15 @@ def train_latency_function_with_trace(model, traces, directory, degree):
             if svc_name not in coef_dict:
                 coef_dict[svc_name] = dict()
             for ep_str in cid_svc_df["endpoint_str"].unique():
+                if "checkoutcart" in directory:
+                    if "hipstershop.CurrencyService/Convert" in ep_str or "/hipstershop.ProductCatalogService/GetProduct" in ep_str:
+                        print(row)
+                        assert False
                 ep_df = cid_svc_df[cid_svc_df["endpoint_str"]==ep_str]
                 # Data preparation: load(X) and latency(y) 
                 data = dict()
                 for index, row in ep_df.iterrows():
                     flag = False
-                    # print(f"row: {row}")
                     for key, val in row[x_feature].items(): # x_feature: rps_dict
                         # key: ep_str, val: rps
                         if key not in data:
@@ -184,22 +175,24 @@ def train_latency_function_with_trace(model, traces, directory, degree):
                     if flag == True:
                         if "latency" not in data:
                             data["latency"] = list()
+                            
                         if len(row[x_feature]) == 1:
                             data["latency"].append(row[target_y])
                         else:
-                            print(f"ERROR: len(row[x_feature]) != 1: {len(row[x_feature])}")
-                
+                            print(f"ERROR: len(row[{x_feature}]) != 1: {len(row[x_feature])}")
+                            print(f"row[{x_feature}]: {row[x_feature]}")
+                            print(f"{row['svc_name'], row['endpoint_str'], row['trace_id'], row['span_id']}")
+                            assert False
                 data = {key: value for key, value in data.items() if isinstance(value, list)}  # Ensure all values are lists
-                lengths = {key: len(value) for key, value in data.items()}
-                print(lengths)  # This will show you the length of the array for each column
                 try:
                     df = pd.DataFrame(data)
                 except ValueError as e:
+                    lengths = {key: len(value) for key, value in data.items()}
+                    print(f"data: {data}")
+                    print(f"lengths: {lengths}")  # This will show you the length of the array for each column
                     print("Data length mismatch:", e)
                     # Optional: Log the lengths for debugging
-                    print(lengths)
-                    print("exit...")
-                    exit()
+                    assert False
                 if model == "poly":
                     coef_dict[svc_name][ep_str] = fit_polynomial_regression(data, "latency", svc_name, ep_str, cid, directory, degree)
                 elif model == "mm1":
@@ -210,7 +203,7 @@ def train_latency_function_with_trace(model, traces, directory, degree):
     return coef_dict
 
 
-def trace_string_file_to_trace_data_structure(trace_string_file_path, required_num_svc, num_replica):
+def trace_string_file_to_trace_data_structure(trace_string_file_path, required_num_endpoint, num_replica):
     col = ["cluster_id","svc_name","method","path","trace_id","span_id","parent_span_id","st","et","rt","xt","ct","call_size","inflight_dict","rps_dict"]
     df = pd.read_csv(trace_string_file_path, names=col, header=None)
     print(f"len(df): {len(df)}")
@@ -254,13 +247,13 @@ def trace_string_file_to_trace_data_structure(trace_string_file_path, required_n
         if span.trace_id not in all_traces[span.cluster_id]:
             all_traces[span.cluster_id][span.trace_id] = list()
         all_traces[span.cluster_id][span.trace_id].append(span)
-    print(f"required_num_svc in {cid}: {required_num_svc}")
+    print(f"required_num_endpoint in {cid}: {required_num_endpoint}")
     complete_traces = dict()
     for cid in all_traces:
         if cid not in complete_traces:
             complete_traces[cid] = dict()
         for tid in all_traces[cid]:
-            if len(all_traces[cid][tid]) == required_num_svc:
+            if len(all_traces[cid][tid]) == required_num_endpoint:
                 complete_traces[cid][tid] = all_traces[cid][tid]
     for cid in all_traces:
         print(f"len(all_traces[{cid}]): {len(all_traces[cid])}")
@@ -268,7 +261,7 @@ def trace_string_file_to_trace_data_structure(trace_string_file_path, required_n
         print(f"len(complete_traces[{cid}]): {len(complete_traces[cid])}")
     return complete_traces
 
-def trace_string_file_to_trace_data_structure_with_df(df, required_num_svc, num_replica):
+def trace_string_file_to_trace_data_structure_with_df(df, required_num_endpoint, num_replica):
     print(f"len(df): {len(df)}")
     df = df.loc[df['rt'] > 0]
     print(f"after negative rt filter, len(df): {len(df)}")
@@ -277,6 +270,12 @@ def trace_string_file_to_trace_data_structure_with_df(df, required_num_svc, num_
     for index, row in df.iterrows():
         if row["cluster_id"] == "SLATE_UNKNOWN_REGION" or row["svc_name"] == "consul":
             continue
+        if "ListProducts" in row["path"]:
+            print(f"asdf asdf {row}")
+        if "checkoutcart" in directory:
+            if "/hipstershop.CurrencyService/Convert" in row["path"] or "/hipstershop.ProductCatalogService/GetProduct" in row["path"]:
+                print(f"Skip this span, {row['svc_name']}, {row['method']}, {row['path']} row")
+                continue
         num_inflight_dict = dict()
         rps_dict = dict()
         inflight_list = row["inflight_dict"].split("|")[:-1]
@@ -284,6 +283,10 @@ def trace_string_file_to_trace_data_structure_with_df(df, required_num_svc, num_
             temp = ep_inflight.split(":")
             assert len(temp) == 2
             ep = temp[0]
+            if "checkoutcart" in directory:
+                if "hipstershop.CurrencyService/Convert" in ep or "/hipstershop.ProductCatalogService/GetProduct" in ep:
+                    print(f"Skip inflight_dict, {ep} endpoint, {row['svc_name']}, {row['method']}, {row['path']} row")
+                    continue
             inflight = int(temp[1])
             num_inflight_dict[ep] = inflight
         rps_list = row["rps_dict"].split("|")[:-1] # sd03b@POST@/heavy:335|
@@ -291,18 +294,23 @@ def trace_string_file_to_trace_data_structure_with_df(df, required_num_svc, num_
             temp = ep_rps.split(":") # ["sd03b@POST@/heavy", "335"]
             assert len(temp) == 2
             ep = temp[0] # "sd03b@POST@/heavy"
+            if "checkoutcart" in directory:
+                if "hipstershop.CurrencyService/Convert" in ep or "/hipstershop.ProductCatalogService/GetProduct" in ep:
+                    print(f"Skip rps_dict, {ep} endpoint, {row['svc_name']}, {row['method']}, {row['path']} row")
+                    continue
             rps = int(temp[1]) * num_replica # 335 * 3
             ''' NOTE: HARDCODED, RPS FILTER'''
-            # if rps > 1000:
-            #     continue
+            if rps > 6000:
+                print(f"Skip {ep} endpoint, rps: {rps}")
+                continue
             rps_dict[ep] = rps
+        # ''' NOTE: HARDCODED, RPS FILTER'''
+        if rps > 6000:
+            num_filter_rps_datapoint += 1
+            continue
         if len(rps_dict) == 0:
             print(row)
             assert False
-        ''' NOTE: HARDCODED, RPS FILTER'''
-        if rps > 1200:
-            num_filter_rps_datapoint += 1
-            continue
         span = sp.Span(row["method"], row["path"], row["svc_name"], row["cluster_id"], row["trace_id"], row["span_id"], row["parent_span_id"], st=float(row["st"]), et=float(row["et"]), callsize=int(row["call_size"]), rps_dict=rps_dict, num_inflight_dict=num_inflight_dict)
         list_of_span.append(span)
     print(f"-- num_filter_rps_datapoint: {num_filter_rps_datapoint}")  
@@ -313,13 +321,13 @@ def trace_string_file_to_trace_data_structure_with_df(df, required_num_svc, num_
         if span.trace_id not in all_traces[span.cluster_id]:
             all_traces[span.cluster_id][span.trace_id] = list()
         all_traces[span.cluster_id][span.trace_id].append(span)
-    print(f"required_num_svc: {required_num_svc}")
+    print(f"required_num_endpoint: {required_num_endpoint}")
     complete_traces = dict()
     for cid in all_traces:
         if cid not in complete_traces:
             complete_traces[cid] = dict()
         for tid in all_traces[cid]:
-            if len(all_traces[cid][tid]) == required_num_svc:
+            if len(all_traces[cid][tid]) == required_num_endpoint:
                 complete_traces[cid][tid] = all_traces[cid][tid]
     return complete_traces
 
@@ -335,16 +343,18 @@ def merge_files(directory, postfix ,columns):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print("Usage: python3 replicate.py <directory> <required_num_svc> <num_replica>")
+    if len(sys.argv) < 4:
+        print("Usage: python3 replicate.py <directory> <required_num_endpoint> <num_replica> <sample_ratio>")
         sys.exit(1)
     directory = sys.argv[1]
     subdir = directory.split('/')[-1]
     if subdir == "":
         subdir = directory.split('/')[-2]
     print(f"subdir: {subdir}")
-    required_num_svc = int(sys.argv[2])
+    required_num_endpoint = int(sys.argv[2])
     num_replica = int(sys.argv[3])
+    sample_ratio = float(sys.argv[4])
+    
     columns = ["cluster_id","svc_name","method","path","trace_id","span_id","parent_span_id","st","et","rt","xt","ct","call_size","inflight_dict","rps_dict"]
     
     merged_trace_file_name = merge_files(directory, "trace.slatelog", columns)
@@ -353,56 +363,72 @@ if __name__ == "__main__":
     
     ts = time.time()
     # line_index_to_remove = 797046
-    line_index_to_remove = 229902
-    with open(merged_trace_file_name, 'r') as file:
-        lines = file.readlines()  # Read all lines into a list
-        if len(lines) > line_index_to_remove:
-            if 0 <= line_index_to_remove < len(lines):
-                removed_line = lines.pop(line_index_to_remove)
-                print(f"Removed line {line_index_to_remove}")
-            with open(merged_trace_file_name, 'w') as file:
-                file.writelines(lines)  # Write the updated list of lines
-                print(f"Output, removed line {removed_line}")
+    # line_index_to_remove = 229902
+    # with open(merged_trace_file_name, 'r') as file:
+    #     lines = file.readlines()  # Read all lines into a list
+    #     if len(lines) > line_index_to_remove:
+    #         if 0 <= line_index_to_remove < len(lines):
+    #             removed_line = lines.pop(line_index_to_remove)
+    #             print(f"Removed line {line_index_to_remove}")
+    #         with open(merged_trace_file_name, 'w') as file:
+    #             file.writelines(lines)  # Write the updated list of lines
+    #             print(f"Output, removed line {removed_line}")
         
     df = pd.read_csv(merged_trace_file_name, header=None, names=columns)
-    #print(f"orig df: {df}")
+    df['endpoint'] = df['svc_name'] + "@" + df['method'] + "@" + df['path']
+    # if "checkoutcart" in subdir:
+    #     df = df[df["path"] != "/hipstershop.CurrencyService/Convert"]
+    ss = df["svc_name"].unique()
+    pp = df["endpoint"].unique()
+    print(f"svc len(service): {len(ss)}, {ss}")
+    print(f"endpoint len(endpoint): {len(pp)}, {pp}")
+    
     trace_span_counts = df.groupby('trace_id').size()
-    trace_ids_with_four_spans = trace_span_counts[trace_span_counts == required_num_svc].index
+    # print(f"trace_span_counts: {trace_span_counts}")
+    print(f"max(trace_span_counts): {max(trace_span_counts)}")
+    trace_ids_with_four_spans = trace_span_counts[trace_span_counts == required_num_endpoint].index
     
     filtered_df = df[df['trace_id'].isin(trace_ids_with_four_spans)]
-    filtered_df.to_csv("filtered_df.csv")
-    print("Output filtered_df.csv")
+    # print(filtered_df[filtered_df['trace_id'] == "03fb07ee7606435911b54fa7f64d6894"])
+    print(f"len(filtered_df): {len(filtered_df)}")
+    
+    # filtered_df.to_csv("filtered_df.csv")
+    # print("Output filtered_df.csv")
     
     trace_id = filtered_df['trace_id'].unique().tolist()
-    sample_ratio = 1.0
     sample_size = int(len(trace_id) * sample_ratio)
     sampled_trace_id = sample(trace_id, sample_size)
-    double_filtered_df = filtered_df[filtered_df['trace_id'].isin(sampled_trace_id)]
-    double_filtered_df.to_csv("double_filtered_df.csv")
-    print("Output double_filtered_df.csv")
     
-    # training_phase(merged_trace_file_name, directory, required_num_svc)
-    service_list = df['svc_name'].unique().tolist()
+    double_filtered_df = filtered_df[filtered_df['trace_id'].isin(sampled_trace_id)]
+    # double_filtered_df.to_csv("double_filtered_df.csv")
+    # print("Output double_filtered_df.csv")
+    
+    service_list = double_filtered_df['svc_name'].unique().tolist()
+    endpoint_list = double_filtered_df['endpoint'].unique().tolist()
     print(f"service_list: {service_list}")
-    complete_traces = trace_string_file_to_trace_data_structure_with_df(double_filtered_df, required_num_svc, num_replica)
+    print(f"len(service_list): {len(service_list)}")
+    print(f"endpoint_list: {endpoint_list}")
+    print(f"len(endpoint_list): {len(endpoint_list)}")
+    complete_traces = trace_string_file_to_trace_data_structure_with_df(double_filtered_df, required_num_endpoint, num_replica)
     for cid in complete_traces:
         print(f"len(complete_traces[{cid}]): {len(complete_traces[cid])}")
         
-    complete_traces_df = tst.trace_to_df(complete_traces)
-    complete_traces_df.to_csv("complete_traces_df.csv")
-    print("Output complete_traces_df.csv")
+    # complete_traces_df = tst.trace_to_df(complete_traces)
+    # complete_traces_df.to_csv("complete_traces_df.csv")
+    # print("Output complete_traces_df.csv")
     
     stitched_traces = tst.stitch_time(complete_traces)
     for cid in stitched_traces:
         print(f"len(stitched_traces[{cid}]): {len(stitched_traces[cid])}")
     
     stitched_df = tst.trace_to_df(stitched_traces)
-    stitched_df.to_csv("stitched_df.csv")
-    print("Output stitched_df.csv")
+    stitched_df.to_csv(f"stitched_df-{subdir}.csv")
+    print(f"Output stitched_df-{subdir}.csv")
+    exit()
     degree = 2 # NOTE
     poly_coef_dict = train_latency_function_with_trace("poly", stitched_traces, directory, degree)
     print("-"*80)
-    multiplied_by_one_fn = f"coef_multiplied_by_one-{subdir}.csv"
+    multiplied_by_one_fn = f"{directory}/coef_multiplied_by_one-{subdir}.csv"
     with open(multiplied_by_one_fn, "w") as f:
         for svc_name in poly_coef_dict:
             for ep_str in poly_coef_dict[svc_name]:
