@@ -515,34 +515,35 @@ def main():
     '''
     
     # capacity_list = [700, 1000, 1500] # assuming workload is mix of different request types
-    waterfall_capacity_set = {700, 1500} # assuming workload is mix of different request types
+    # waterfall_capacity_set = {700, 1500} # assuming workload is mix of different request types
+    waterfall_capacity_set = {700, 1000, 1500} # assuming workload is mix of different request types
     degree = 2
     
-    # mode = "profile"
-    # routing_rule_list = ["LOCAL"] # profile
+    mode = "profile"
+    routing_rule_list = ["LOCAL"] # profile
     
-    mode = "runtime"
+    # mode = "runtime"
     # routing_rule_list = ["WATERFALL2"]
     # routing_rule_list = ["LOCAL"]
     # routing_rule_list = ["SLATE"]
-    routing_rule_list = ["SLATE", "WATERFALL2", "LOCAL"]
+    # routing_rule_list = ["SLATE", "WATERFALL2", "LOCAL"]
     
     ## for experiment
     all_RPS_list = {
     ## profile
     
-    # "checkoutcart-w100": {"west": {"checkoutcart": 100}}, \
-    # "checkoutcart-w200": {"west": {"checkoutcart": 200}}, \
-    # "checkoutcart-w300": {"west": {"checkoutcart": 300}}, \
-    # "checkoutcart-w400": {"west": {"checkoutcart": 400}}, \
-    # "checkoutcart-w500": {"west": {"checkoutcart": 500}}, \
-    # "checkoutcart-w600": {"west": {"checkoutcart": 600}}, \
-    # "checkoutcart-w700": {"west": {"checkoutcart": 700}}, \
-    # "checkoutcart-w800": {"west": {"checkoutcart": 800}}, \
-    # "checkoutcart-w900": {"west": {"checkoutcart": 900}}, \
-    # "checkoutcart-w1000": {"west": {"checkoutcart": 1000}}, \
-    # "checkoutcart-w1100": {"west": {"checkoutcart": 1100}}, \
-    # "checkoutcart-w1200": {"west": {"checkoutcart": 1200}}, \
+        # "checkoutcart-w100": {"west": {"checkoutcart": 100}}, \
+        # "checkoutcart-w200": {"west": {"checkoutcart": 200}}, \
+        # "checkoutcart-w300": {"west": {"checkoutcart": 300}}, \
+        # "checkoutcart-w400": {"west": {"checkoutcart": 400}}, \
+        # "checkoutcart-w500": {"west": {"checkoutcart": 500}}, \
+        # "checkoutcart-w600": {"west": {"checkoutcart": 600}}, \
+        # "checkoutcart-w700": {"west": {"checkoutcart": 700}}, \
+        # "checkoutcart-w800": {"west": {"checkoutcart": 800}}, \
+        # "checkoutcart-w900": {"west": {"checkoutcart": 900}}, \
+        # "checkoutcart-w1000": {"west": {"checkoutcart": 1000}}, \
+        # "checkoutcart-w1100": {"west": {"checkoutcart": 1100}}, \
+        # "checkoutcart-w1200": {"west": {"checkoutcart": 1200}}, \
     # "checkoutcart-w1300": {"west": {"checkoutcart": 1300}}, \
     # "checkoutcart-w1400": {"west": {"checkoutcart": 1400}}, \
     # "checkoutcart-w1500": {"west": {"checkoutcart": 1500}}, \
@@ -563,42 +564,52 @@ def main():
     # "checkoutcart-w3000": {"west": {"checkoutcart": 3000}}, \
         
         
-    # "emptycart-w100": {"west": {"emptycart": 100}}, \
+    "emptycart-w100": {"west": {"emptycart": 100}}, \
     # "emptycart-w200": {"west": {"emptycart": 200}}, \
     # "emptycart-w300": {"west": {"emptycart": 300}}, \
     # "emptycart-w400": {"west": {"emptycart": 400}}, \
-    # "emptycart-w500": {"west": {"emptycart": 500}}, \
+    "emptycart-w500": {"west": {"emptycart": 500}}, \
     # "emptycart-w600": {"west": {"emptycart": 600}}, \
     # "emptycart-w700": {"west": {"emptycart": 700}}, \
     # "emptycart-w800": {"west": {"emptycart": 800}}, \
-    # "emptycart-w900": {"west": {"emptycart": 900}}, \
+    "emptycart-w900": {"west": {"emptycart": 900}}, \
     # "emptycart-w1000": {"west": {"emptycart": 1000}}, \
     # "emptycart-w1100": {"west": {"emptycart": 1100}}, \
     # "emptycart-w1200": {"west": {"emptycart": 1200}}, \
-    # "emptycart-w1300": {"west": {"emptycart": 1300}}, \
+    "emptycart-w1300": {"west": {"emptycart": 1300}}, \
     # "emptycart-w1400": {"west": {"emptycart": 1400}}, \
     # "emptycart-w1500": {"west": {"emptycart": 1500}}, \
     # "emptycart-w1600": {"west": {"emptycart": 1600}}, \
-    # "emptycart-w1700": {"west": {"emptycart": 1700}}, \
+    "emptycart-w1700": {"west": {"emptycart": 1700}}, \
     # "emptycart-w1800": {"west": {"emptycart": 1800}}, \
     # "emptycart-w1900": {"west": {"emptycart": 1900}}, \
-    # "emptycart-w2000": {"west": {"emptycart": 2000}}, \
+    "emptycart-w2000": {"west": {"emptycart": 2000}}, \
     # "emptycart-w2100": {"west": {"emptycart": 2100}}, \
     # "emptycart-w2200": {"west": {"emptycart": 2200}}, \
     # "emptycart-w2300": {"west": {"emptycart": 2300}}, \
     # "emptycart-w2400": {"west": {"emptycart": 2400}}, \
-    # "emptycart-w2500": {"west": {"emptycart": 2500}}, \
+    "emptycart-w2500": {"west": {"emptycart": 2500}}, \
     # "emptycart-w2600": {"west": {"emptycart": 2600}}, \
     # "emptycart-w2700": {"west": {"emptycart": 2700}}, \
     # "emptycart-w2800": {"west": {"emptycart": 2800}}, \
     # "emptycart-w2900": {"west": {"emptycart": 2900}}, \
-    # "emptycart-w3000": {"west": {"emptycart": 3000}}, \
+    "emptycart-w3000": {"west": {"emptycart": 3000}}, \
     # "emptycart-w3100": {"west": {"emptycart": 3100}}, \
     # "emptycart-w3200": {"west": {"emptycart": 3200}}, \
     # "emptycart-w3300": {"west": {"emptycart": 3300}}, \
-    # "emptycart-w3400": {"west": {"emptycart": 3400}}, \
+    "emptycart-w3400": {"west": {"emptycart": 3400}}, \
     # "emptycart-w3500": {"west": {"emptycart": 3500}}, \
     # "emptycart-w3600": {"west": {"emptycart": 3600}}, \
+    "emptycart-w3700": {"west": {"emptycart": 3700}}, \
+    "emptycart-w3800": {"west": {"emptycart": 3800}}, \
+    "emptycart-w3900": {"west": {"emptycart": 3900}}, \
+    "emptycart-w4000": {"west": {"emptycart": 4000}}, \
+    "emptycart-w4100": {"west": {"emptycart": 4100}}, \
+    "emptycart-w4200": {"west": {"emptycart": 4200}}, \
+    "emptycart-w4300": {"west": {"emptycart": 4300}}, \
+    "emptycart-w4400": {"west": {"emptycart": 4400}}, \
+    # "emptycart-w4500": {"west": {"emptycart": 4500}}, \
+
 
 
     # "addtocart-w100": {"west": {"addtocart": 100}}, \
@@ -729,10 +740,20 @@ def main():
     #                                     "central": {"checkoutcart": 100, "addtocart":100, "emptycart":100, "setcurrency":100}, \
     #                                     "south":   {"checkoutcart": 100, "addtocart":100, "emptycart":100, "setcurrency":100}}, \
 
-    "Wc300a1000e200s200-E100-C100-S100": {"west":    {"checkoutcart": 300, "addtocart":1000, "emptycart":200, "setcurrency":200}, \
-                                        "east":    {"checkoutcart": 100, "addtocart":500, "emptycart":100, "setcurrency":100}, \
-                                        "central": {"checkoutcart": 100, "addtocart":500, "emptycart":100, "setcurrency":100}, \
-                                        "south":   {"checkoutcart": 100, "addtocart":500, "emptycart":100, "setcurrency":100}}, \
+    # "Wc300a1000e200s200-E100-C100-S100-2": {"west":    {"checkoutcart": 300, "addtocart":1000, "emptycart":200, "setcurrency":200}, \
+    #                                     "east":    {"checkoutcart": 100, "addtocart":500, "emptycart":100, "setcurrency":100}, \
+    #                                     "central": {"checkoutcart": 100, "addtocart":500, "emptycart":100, "setcurrency":100}, \
+    #                                     "south":   {"checkoutcart": 100, "addtocart":500, "emptycart":100, "setcurrency":100}}, \
+                                            
+    # "Wc300a2000e200s200-E100-C100-S100": {"west":    {"checkoutcart": 300, "addtocart":2000, "emptycart":200, "setcurrency":200}, \
+    #                                     "east":    {"checkoutcart": 100, "addtocart":500, "emptycart":100, "setcurrency":100}, \
+    #                                     "central": {"checkoutcart": 100, "addtocart":500, "emptycart":100, "setcurrency":100}, \
+    #                                     "south":   {"checkoutcart": 100, "addtocart":500, "emptycart":100, "setcurrency":100}}, \
+    
+    # "Wc1000a500e200s200-E100-C100-S100": {"west":    {"checkoutcart": 1000, "addtocart":500, "emptycart":200, "setcurrency":200}, \
+    #                                     "east":    {"checkoutcart": 100, "addtocart":500, "emptycart":100, "setcurrency":100}, \
+    #                                     "central": {"checkoutcart": 100, "addtocart":500, "emptycart":100, "setcurrency":100}, \
+    #                                     "south":   {"checkoutcart": 100, "addtocart":500, "emptycart":100, "setcurrency":100}}, \
     }
     
         
