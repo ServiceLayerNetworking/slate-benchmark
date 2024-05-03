@@ -58,7 +58,7 @@ def parse_latency_stat_in_wrklog_file(wrklog_path, wrk_config, latency_metrics, 
         match = re.search(pattern, wrklog_file_read)
         if match:
             tput = float(match.group(1))
-            print(f"{wrk_config['routing_rule']}, {wrk_config['cluster']}, {wrk_config['req_type']}, {wrk_config['RPS']}, Actual tput: {tput}, Gap: {int(float(wrk_config['RPS']) - tput)}")
+            print(f"{wrk_config['routing_rule']}, cap{wrk_config['capacity']}, {wrk_config['cluster']}, {wrk_config['req_type']}, {wrk_config['RPS']}, Actual tput: {tput}, Gap: {int(float(wrk_config['RPS']) - tput)}")
         else:
             print("Pattern not found")
             print(wrklog_path)

@@ -179,7 +179,8 @@ if __name__ == "__main__":
         percentile_df = pd.DataFrame(wrk_config["percentile_data"], columns=['Value', 'Percentile', 'TotalCount'])
         percentile_df['Percentile'] *= 100
         if "WATERFALL" in wrk_config['routing_rule']:
-            key = f"WF({wrk_config['capacity']})"
+            # key = f"WF({wrk_config['capacity']})"
+            key = "WATERFALL"
         else:
             key = wrk_config['routing_rule']
         
@@ -189,12 +190,13 @@ if __name__ == "__main__":
         #     print("Skip LOCAL routing in this plot")
         #     continue
         
-        ## Skip some capacity in waterfall
-        # if wrk_config['routing_rule'] == "WATERFALL2" and wrk_config['capacity'] != "1500":
-        #     print(f"Skip WATERFALL2 capacity={wrk_config['capacity']} in this plot")
-        #     print(f"Skip WATERFALL2 capacity={wrk_config['capacity']} in this plot")
-        #     print(f"Skip WATERFALL2 capacity={wrk_config['capacity']} in this plot")
-        #     continue
+        # Skip some capacity in waterfall
+        if wrk_config['routing_rule'] == "WATERFALL2" and wrk_config['capacity'] != "700":
+        # if wrk_config['routing_rule'] == "WATERFALL2" and wrk_config['capacity'] != "1000":
+            print(f"Skip WATERFALL2 capacity={wrk_config['capacity']} in this plot")
+            print(f"Skip WATERFALL2 capacity={wrk_config['capacity']} in this plot")
+            print(f"Skip WATERFALL2 capacity={wrk_config['capacity']} in this plot")
+            continue
         
         if "WATERFALL" in wrk_config['routing_rule']:
             xlim_right = max(xlim_right, percentile_df['Value'].max())
@@ -214,15 +216,17 @@ if __name__ == "__main__":
         sorted_data = np.sort(weighted_latencies)
         cdf = np.arange(1, len(sorted_data) + 1) / len(sorted_data)
         if "SLATE" in key:
-            linestyle = '-'
-            color = default_colors[0]
+            # linestyle = '-'
+            # color = default_colors[0]
+            color = "blue"
         elif "WATERFALL" in key or "WF" in key:
             # linestyle = 'dashed'
-            linestyle = (5, (10, 3)) # long dash with offset
-            color = default_colors[1]
+            # linestyle = (5, (10, 3)) # long dash with offset
+            # color = default_colors[1]
+            color = 'red'
         elif "LOCAL" in key:
-            linestyle = ':'
-            color = default_colors[2]
+            # linestyle = ':'
+            color = 'green'
         else:
             print(f"Unknown routing_rule: {key}")
             assert False
@@ -230,15 +234,20 @@ if __name__ == "__main__":
         p99_latency = int(np.percentile(sorted_data, 99))
         p999_latency = int(np.percentile(sorted_data, 99.9))
         print(f"[statistics],{key},avg,{avg_latency},p99,{p99_latency},p999,{p999_latency}")
-        # plt.plot(sorted_data, cdf, label=key, linewidth=1.2, linestyle=linestyle, color=color)
-        plt.plot(sorted_data, cdf, label=key, linewidth=1.2, linestyle=linestyle)
+        plt.plot(sorted_data, cdf, label=key, linewidth=1.2, color=color)
+        # plt.plot(sorted_data, cdf, label=key, linewidth=1.2, linestyle=linestyle)
 
     plt.xlabel('Latency (ms)', fontsize=18)
     plt.xticks(fontsize=14, rotation=-45)
     plt.yticks(fontsize=14)
     plt.grid(True)
-    # plt.legend(title='Routing rule', fontsize=12, title_fontsize=12, loc='lower right')
-    plt.legend(fontsize=12, loc='lower right')
+
+    handles, labels = plt.gca().get_legend_handles_labels()
+    order = [1,2,0]
+    plt.legend([handles[idx] for idx in order],[labels[idx] for idx in order], fontsize=12, loc='lower right')
+    
+    # plt.legend(fontsize=12, loc='lower right')
+    
     plt.ylim(0, 1)
     assert xlim_right > 0
     if xlim_right > 1000:
