@@ -82,13 +82,13 @@ def fit_mm1_model(data, y_col_name, svc_name, ep_str, cid, directory):
     def mm1_model(u, a, b):
         amplified_a = a * 1
         return (amplified_a) / (1*constant - u)+b
-        # return (amplified_a) / (u.max()*constant - u)+b
-
     popt, pcov = curve_fit(mm1_model, u_, y_, maxfev=10000)
     print(f"popt = {popt}")
+    # u_plot = np.linspace(min(u_), max(u_)*constant * 0.99, 100)  # Avoid division by zero at u=1
     u_plot = np.linspace(min(u_), max(u_)*constant, 100)  # Avoid division by zero at u=1
     y_plot = mm1_model(u_plot, *popt)
-    
+    print(f"u_plot: {u_plot}")
+    print(f"y_plot: {y_plot}")
     norm_u_plot = u_plot*max_rps
     #plt.plot(norm_u_plot, y_plot, 'r-', label=f'MM1 Fit: $\\frac{{a}}{{c-u}}+b$,a={popt[0]}, c={u_.max()*constant}, b={popt[1]}')
     plt.plot(norm_u_plot, y_plot, 'r-', label=f'MM1 Fit: $\\frac{{a}}{{c-u}}+b$\n$a={popt[0]:.2f}, c={(u_.max()*constant):.2f}, b={popt[1]:.2f}$')
@@ -406,10 +406,15 @@ if __name__ == "__main__":
     service_list = double_filtered_df['svc_name'].unique().tolist()
     endpoint_list = double_filtered_df['endpoint'].unique().tolist()
     print(f"service_list: {service_list}")
+<<<<<<< HEAD
     print(f"len(service_list): {len(service_list)}")
     print(f"endpoint_list: {endpoint_list}")
     print(f"len(endpoint_list): {len(endpoint_list)}")
     complete_traces = trace_string_file_to_trace_data_structure_with_df(double_filtered_df, required_num_endpoint, num_replica)
+=======
+    complete_traces = trace_string_file_to_trace_data_structure_with_df(double_filtered_df, required_num_svc)
+    # print(f"printing complete_traces: {complete_traces}")
+>>>>>>> 24dd8b3 (Fix MM1 bug)
     for cid in complete_traces:
         print(f"len(complete_traces[{cid}]): {len(complete_traces[cid])}")
         
