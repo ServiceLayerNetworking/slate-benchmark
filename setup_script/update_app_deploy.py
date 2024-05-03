@@ -7,6 +7,8 @@ def get_hotel_deployment_list():
     cluster_list = ["us-west-1", "us-east-1", "us-south-1", "us-central-1"]
     service_list = ['slateingress', 'frontend', 'recommendation', 'profile', 'rate', 'geo', 'search', 'reservation', 'user', "memcached-profile", "memcached-rate", "memcached-reserve"]
     deploy_list = list()
+    # get all deploy
+
     for svc in service_list:
         for cluster in cluster_list:
             deploy_list.append(f"{svc}-{cluster}")
@@ -19,13 +21,21 @@ def set_replicas_for_all_deployments(replica_count):
     # print(f"deploy_list: {deploy_list}")
     deployments = apps_v1_api.list_namespaced_deployment(namespace="default")
     for deployment in deployments.items:
-        # if deployment.metadata.name != "slate-controller":
-        if "sslateingress" in deployment.metadata.name:
-            deployment.spec.replicas = replica_count
-            apps_v1_api.patch_namespaced_deployment(name=deployment.metadata.name, namespace="default", body=deployment)
-            print(f"Updating deployment: {deployment.metadata.name}, replicas: {replica_count}")
-        else:
-            print(f"Skipping deployment: {deployment.metadata.name}")
+        
+        ## in case sslateingress is bottleneck.
+        # if "sslateingress" in deployment.metadata.name:
+        #     deployment.spec.replicas = replica_count
+        #     apps_v1_api.patch_namespaced_deployment(name=deployment.metadata.name, namespace="default", body=deployment)
+        #     print(f"Updating deployment: {deployment.metadata.name}, replicas: {replica_count}")
+        # else:
+        #     print(f"Skipping deployment: {deployment.metadata.name}")
+            
+        if "slate-controller" == deployment.metadata.name:
+            continue
+        
+        deployment.spec.replicas = replica_count
+        apps_v1_api.patch_namespaced_deployment(name=deployment.metadata.name, namespace="default", body=deployment)
+        print(f"Updating deployment: {deployment.metadata.name}, replicas: {replica_count}")
 
 if len(sys.argv) != 2:
     print("Usage: python update_app_deploy.py <replica_count>")
