@@ -20,4 +20,4 @@ def update_image_pull_policy(namespace='default', new_pull_policy='IfNotPresent'
             print(f"Failed to update deployment {deployment.metadata.name}: {e}")
 
 if __name__ == "__main__":
-    update_image_pull_policy(new_pull_policy='IfNotPresent', exclude=["slate-controller"])  # You can specify a different namespace if needed
+    update_image_pull_policy(new_pull_policy='Always', exclude=["slate-controller"])  # You can specify a different namespace if needed

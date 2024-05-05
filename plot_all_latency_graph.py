@@ -78,6 +78,7 @@ def parse_latency_stat_in_wrklog_file(wrklog_path, wrk_config, latency_metrics, 
     latency_patterns = regex_pattern(latency_metrics)
     with open(wrklog_path, 'r') as file:
         wrklog_file_read = file.read()
+        print("ADI: ", wrklog_path)
         
         rps_value = int(wrk_config["RPS"])
         if rps_value <= rps_thr:
@@ -99,6 +100,7 @@ def parse_latency_stat_in_wrklog_file(wrklog_path, wrk_config, latency_metrics, 
                 latency_dict["routing_rule"] = []
                 latency_dict["tput"] = []
                 latency_dict["req_type"] = []
+                latency_dict["dp"] = []
                 # latency_dict["inter_cluster_latency"] = []
             latency_dict["rps"].append(int(rps_value))
             latency_dict["mode"].append(wrk_config["mode"])
@@ -106,6 +108,12 @@ def parse_latency_stat_in_wrklog_file(wrklog_path, wrk_config, latency_metrics, 
             latency_dict["cluster"].append(wrk_config["cluster"])
             latency_dict["tput"].append(int(tput))
             latency_dict["req_type"].append(wrk_config["req_type"])
+            if "no-dp" in wrklog_path:
+                latency_dict["dp"].append("no-dp")
+            elif "profile-dp" in wrklog_path:
+                latency_dict["dp"].append("profile-dp")
+            else:
+                latency_dict["dp"].append("runtime-dp")
             for key, pattern in latency_patterns.items():
                 latency_value = find_latency_value(pattern, wrklog_file_read)
                 print(f"{wrk_config['RPS']}, {wrk_config['req_type']}, key: {key}, latency_value: {latency_value}")
@@ -124,8 +132,8 @@ if __name__ == "__main__":
         sys.exit(1)
     # latency_metrics = ['avg', '50%', '99%', '99.9%']
     # latency_metrics = ['avg', '50%']
-    latency_metrics = ['avg', '99%']
-    # latency_metrics = ['avg']
+    # latency_metrics = ['avg', '99%']
+    latency_metrics = ['avg']
     base_directory = sys.argv[1]
     rps_threshold = int(sys.argv[2])
     wrklog_files = find_and_process_wrklog_files(base_directory)
@@ -155,24 +163,31 @@ if __name__ == "__main__":
                 # df_filtered = df[(df['mode'] == mode) & (df['routing_rule'] == routing_rule) & (df['inter_cluster_latency'] == inter_cluster_latency) & (df['cluster'] == cluster)]
                 print("unique req_type", df['req_type'].unique())
                 for req_type in df['req_type'].unique():
-                    df_filtered = df[(df['mode'] == mode) & (df['routing_rule'] == routing_rule) & (df['cluster'] == cluster) & (df['req_type'] == req_type)]
-                    # df_filtered.to_csv("plot_all_latency_summary.csv")
-                    for metric in latency_metrics:
-                        if metric == "avg":
-                            linestyle = '-'
-                        elif metric == "99%":
-                            linestyle = '--'
-                        else:
-                            linestyle = ':'
-                            
-                        label = f"{cluster}-{req_type}-{metric}"
-                        plt.plot(df_filtered['rps'], df_filtered[metric], label=label, marker='o', color=default_colors[idx], linestyle=linestyle)
-                        for i in range(len(df_filtered['rps'])):
-                            print(f"{df_filtered['rps'].iloc[i]} RPS, {df_filtered['req_type'].iloc[i]}, {df_filtered['tput'].iloc[i]} TPUT, {df_filtered[metric].iloc[i]} ms")
-                            # plt.plot(df_filtered['rps'], df_filtered['tput'], marker='x', linestyle='--', alpha=0.5)
-                    idx += 1
+                    for dp in ['no-dp', 'runtime-dp']:
+                        df_filtered = df[(df['mode'] == mode) & (df['routing_rule'] == routing_rule) & (df['cluster'] == cluster) & (df['req_type'] == req_type) & (df['dp'] == dp)]
+                        # df_filtered.to_csv("plot_all_latency_summary.csv")
+                        for metric in latency_metrics:
+                            if metric == "avg":
+                                linestyle = '-'
+                            elif metric == "99%":
+                                linestyle = '--'
+                            else:
+                                linestyle = ':'
+                                
+                            if dp == 'no-dp':
+                                label = "Without SLATE"
+                            else:
+                                label = "With SLATE"
+                            # label = f"{cluster}-{req_type}-{metric}-{dp}"
+                            print(label)
+                            plt.plot(df_filtered['rps'], df_filtered[metric], label=label, marker='o', color=default_colors[idx], linestyle=linestyle)
+                            for i in range(len(df_filtered['rps'])):
+                                print(f"{df_filtered['rps'].iloc[i]} RPS, {df_filtered['req_type'].iloc[i]}, {df_filtered['tput'].iloc[i]} TPUT, {df_filtered[metric].iloc[i]} ms")
+                                # plt.plot(df_filtered['rps'], df_filtered['tput'], marker='x', linestyle='--', alpha=0.5)
+                        idx += 1
 
-    plt.ylim(bottom=0, top=500)
+    plt.ylim(bottom=0)
+    # plt.ylim(bottom=0, top=1000)
     plt.title(f'Latency', fontsize=20)
     plt.xlabel('Requests per Second (RPS)', fontsize=20)
     plt.ylabel('Latency (ms)', fontsize=20)

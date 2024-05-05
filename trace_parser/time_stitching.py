@@ -675,6 +675,8 @@ def stitch_trace(trace):
     # print(f"tot_num_node_in_topology: {tot_num_node_in_topology}")
     root_ep_str = opt_func.find_root_node(ep_str_cg)
     if root_ep_str == False:
+        print(trace[0])
+        assert False
         return False
     # print(f"root_ep: {root_ep_str}")
     # pprint(f"ep_str_cg: {ep_str_cg}")
