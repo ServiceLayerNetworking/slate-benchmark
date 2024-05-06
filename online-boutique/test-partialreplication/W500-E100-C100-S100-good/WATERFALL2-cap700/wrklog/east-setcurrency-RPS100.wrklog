@@ -1,0 +1,155 @@
+-- start of config --
+distribution,exp
+thread,100
+connection,100
+duration,30
+background_noise,0
+traffic_segmentation,1
+mode,runtime
+inter_cluster_latency,us-west-1,us-west-1,0
+inter_cluster_latency,us-west-1,us-east-1,33
+inter_cluster_latency,us-east-1,us-west-1,33
+inter_cluster_latency,us-west-1,us-central-1,15
+inter_cluster_latency,us-central-1,us-west-1,15
+inter_cluster_latency,us-west-1,us-south-1,20
+inter_cluster_latency,us-south-1,us-west-1,20
+inter_cluster_latency,us-east-1,us-east-1,0
+inter_cluster_latency,us-east-1,us-central-1,20
+inter_cluster_latency,us-central-1,us-east-1,20
+inter_cluster_latency,us-east-1,us-south-1,15
+inter_cluster_latency,us-south-1,us-east-1,15
+inter_cluster_latency,us-central-1,us-central-1,0
+inter_cluster_latency,us-central-1,us-south-1,10
+inter_cluster_latency,us-south-1,us-central-1,10
+inter_cluster_latency,us-south-1,us-south-1,0
+benchmark_name,onlineboutique
+total_num_services,2
+degree,2
+load_coef_flag,1
+routing_rule,WATERFALL2
+west_checkoutcart_RPS,500
+west_addtocart_RPS,500
+west_emptycart_RPS,500
+west_setcurrency_RPS,500
+east_checkoutcart_RPS,100
+east_addtocart_RPS,100
+east_emptycart_RPS,100
+east_setcurrency_RPS,100
+central_checkoutcart_RPS,100
+central_addtocart_RPS,100
+central_emptycart_RPS,100
+central_setcurrency_RPS,100
+south_checkoutcart_RPS,100
+south_addtocart_RPS,100
+south_emptycart_RPS,100
+south_setcurrency_RPS,100
+capacity,700
+req_type,setcurrency
+cluster,east
+RPS,100
+-- end of config --
+
+Running 30s test @ http://node0.gangmuk-203881.istio-pg0.clemson.cloudlab.us:31701
+  100 threads and 100 connections
+
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+reconnect_socket
+
+-----------------------------------------------------------------------
+Test Results @ http://node0.gangmuk-203881.istio-pg0.clemson.cloudlab.us:31701 
+  Thread Stats   Avg      Stdev     99%   +/- Stdev
+    Latency     4.71ms    2.63ms  12.95ms   95.35%
+    Req/Sec     1.01      7.83    50.00     98.17%
+  Latency Distribution (HdrHistogram - Recorded Latency)
+ 50.000%    4.14ms
+ 75.000%    4.90ms
+ 90.000%    5.86ms
+ 99.000%   12.95ms
+ 99.900%   46.14ms
+ 99.990%   51.74ms
+ 99.999%   51.74ms
+100.000%   51.74ms
+
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+       2.887     0.000000            1         1.00
+       3.487     0.100000          196         1.11
+       3.659     0.200000          392         1.25
+       3.815     0.300000          590         1.43
+       3.963     0.400000          783         1.67
+       4.143     0.500000          982         2.00
+       4.243     0.550000         1077         2.22
+       4.371     0.600000         1175         2.50
+       4.503     0.650000         1273         2.86
+       4.671     0.700000         1372         3.33
+       4.899     0.750000         1468         4.00
+       4.995     0.775000         1519         4.44
+       5.119     0.800000         1567         5.00
+       5.263     0.825000         1616         5.71
+       5.403     0.850000         1665         6.67
+       5.587     0.875000         1713         8.00
+       5.719     0.887500         1738         8.89
+       5.859     0.900000         1762        10.00
+       5.959     0.912500         1786        11.43
+       6.175     0.925000         1811        13.33
+       6.487     0.937500         1836        16.00
+       6.819     0.943750         1847        17.78
+       7.183     0.950000         1860        20.00
+       7.723     0.956250         1872        22.86
+       8.695     0.962500         1884        26.67
+       9.991     0.968750         1896        32.00
+      10.239     0.971875         1902        35.56
+      10.399     0.975000         1909        40.00
+      10.655     0.978125         1915        45.71
+      11.071     0.981250         1921        53.33
+      11.591     0.984375         1927        64.00
+      12.095     0.985938         1931        71.11
+      12.271     0.987500         1933        80.00
+      12.719     0.989062         1936        91.43
+      13.039     0.990625         1939       106.67
+      13.351     0.992188         1942       128.00
+      13.951     0.992969         1944       142.22
+      15.695     0.993750         1945       160.00
+      15.967     0.994531         1947       182.86
+      17.679     0.995313         1948       213.33
+      26.175     0.996094         1950       256.00
+      26.591     0.996484         1951       284.44
+      26.591     0.996875         1951       320.00
+      27.407     0.997266         1952       365.71
+      28.367     0.997656         1953       426.67
+      34.271     0.998047         1954       512.00
+      34.271     0.998242         1954       568.89
+      34.271     0.998437         1954       640.00
+      46.143     0.998633         1955       731.43
+      46.143     0.998828         1955       853.33
+      47.455     0.999023         1956      1024.00
+      47.455     0.999121         1956      1137.78
+      47.455     0.999219         1956      1280.00
+      47.455     0.999316         1956      1462.86
+      47.455     0.999414         1956      1706.67
+      51.743     0.999512         1957      2048.00
+      51.743     1.000000         1957          inf
+#[Mean    =        4.706, StdDeviation   =        2.626]
+#[Max     =       51.712, Total count    =         1957]
+#[Buckets =           27, SubBuckets     =         2048]
+-----------------------------------------------------------------------
+  3000 requests in 30.01s, 498.54KB read
+  Socket errors: connect 0, read 0, write 0, timeout 196
+Requests/sec:     99.98  
+Transfer/sec:     16.61KB

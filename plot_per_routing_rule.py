@@ -184,21 +184,17 @@ if __name__ == "__main__":
         else:
             key = wrk_config['routing_rule']
         
-        # if wrk_config['routing_rule'] == 'LOCAL':
-        #     print("Skip LOCAL routing in this plot")
-        #     print("Skip LOCAL routing in this plot")
-        #     print("Skip LOCAL routing in this plot")
-        #     continue
+        if wrk_config['routing_rule'] == 'LOCAL':
+            print("Skip LOCAL routing in this plot")
+            continue
         
         # Skip some capacity in waterfall
         if wrk_config['routing_rule'] == "WATERFALL2" and wrk_config['capacity'] != "700":
         # if wrk_config['routing_rule'] == "WATERFALL2" and wrk_config['capacity'] != "1000":
             print(f"Skip WATERFALL2 capacity={wrk_config['capacity']} in this plot")
-            print(f"Skip WATERFALL2 capacity={wrk_config['capacity']} in this plot")
-            print(f"Skip WATERFALL2 capacity={wrk_config['capacity']} in this plot")
             continue
         
-        if "WATERFALL" in wrk_config['routing_rule']:
+        if "LOCAL" in wrk_config['routing_rule']:
             xlim_right = max(xlim_right, percentile_df['Value'].max())
 
         ## Aggregate data across all request types
@@ -242,17 +238,19 @@ if __name__ == "__main__":
     plt.yticks(fontsize=14)
     plt.grid(True)
 
-    handles, labels = plt.gca().get_legend_handles_labels()
-    order = [1,2,0]
-    plt.legend([handles[idx] for idx in order],[labels[idx] for idx in order], fontsize=12, loc='lower right')
-    
-    # plt.legend(fontsize=12, loc='lower right')
+    try:
+        handles, labels = plt.gca().get_legend_handles_labels()
+        order = [1,2,0]
+        plt.legend([handles[idx] for idx in order],[labels[idx] for idx in order], fontsize=12, loc='lower right')
+    except:
+        print("less than three routing rules. default legend")
+        plt.legend(fontsize=12, loc='lower right')
     
     plt.ylim(0, 1)
-    assert xlim_right > 0
+    plt.xlim(left=0)
     if xlim_right > 1000:
         xlim_right = 1000
-    plt.xlim(left=0, right=xlim_right)
+        plt.xlim(right=xlim_right)
     plt.tight_layout()
     plt.savefig(f'{base_directory}/routing_rules_cdf.pdf')
     print(f"Output PDF saved to: {base_directory}/routing_rules_cdf.pdf")
