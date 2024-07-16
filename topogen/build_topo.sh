@@ -1,1 +1,4 @@
-./topogen -topology="topologies/usecase2-bottleneck-c.yaml" -experiment="bottleneck-c" -registry="ghcr.io/gangmuk" -build=true
+
+go build -o topogen main.go
+
+./topogen -topology="topologies/bufferbloater.yaml" -experiment="bufferbloater" -registry="ghcr.io/gangmuk" -build=true

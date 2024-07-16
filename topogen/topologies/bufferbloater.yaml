@@ -1,0 +1,30 @@
+services:
+  - name: a
+    methods:
+      - method: POST
+        path: /sleep
+        computeAmount: 100
+        computeDuration: 30
+        writeFileSize: 0
+        calls:
+          - name: b
+            method: POST
+            path: /sleep
+  - name: b
+    methods:
+      - method: POST
+        path: /sleep
+        computeAmount: 100
+        computeDuration: 20
+        writeFileSize: 0
+        calls:
+          - name: c
+            method: POST
+            path: /sleep
+  - name: c
+    methods:
+      - method: POST
+        path: /sleep
+        computeAmount: 100
+        computeDuration: 10
+        writeFileSize: 0

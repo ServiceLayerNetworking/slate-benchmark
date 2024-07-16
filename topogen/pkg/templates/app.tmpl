@@ -15,6 +15,9 @@ import (
 var propogate = []string{"X-Request-Id", "X-B3-Traceid", "X-B3-Spanid", "X-B3-ParentSpanid", "X-B3-Sampled"}
 
 func WriteToFile(filename string, fileSize int) {
+	if fileSize == 0 {
+		return
+	}
 	file, err := os.Create(filename)
 	if err != nil {
 		file, err = os.Open(filename)
@@ -83,6 +86,7 @@ func main() {
 func {{ printf "%s%s" .Method (replace .Path "/" "") }}(c *gin.Context) {
     var data []byte
     RunCPULoad({{ .ComputeAmount }}, {{ .ComputeDuration }})
+	
 	WriteToFile("/dev/null", {{ .WriteFileSize }})
 	fmt.Printf("Done running CPU Load. Now making HTTP calls\n")
     {{ if .Calls }}

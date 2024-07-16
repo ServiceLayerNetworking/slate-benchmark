@@ -2,9 +2,10 @@ package pkg
 
 import (
 	// "fmt"
-	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"os"
+
+	"gopkg.in/yaml.v3"
 )
 
 type Topology struct {
@@ -14,17 +15,17 @@ type Topology struct {
 type Service struct {
 	Name    string   `yaml:"name"`
 	Methods []Method `yaml:"methods"`
-	Image string
+	Image   string
 }
 
 type Method struct {
-	Method     string `yaml:"method"`
-	Path       string `yaml:"path"`
+	Method          string `yaml:"method"`
+	Path            string `yaml:"path"`
 	ComputeAmount   int    `yaml:"computeAmount"`
 	ComputeDuration int    `yaml:"computeDuration"`
-	WriteFileSize  int    `yaml:"writeFileSize"`
-	Calls      []Call `yaml:"calls"`
-	ReturnSize int    `yaml:"returnSize"`
+	WriteFileSize   int    `yaml:"writeFileSize"`
+	Calls           []Call `yaml:"calls"`
+	ReturnSize      int    `yaml:"returnSize"`
 }
 
 type Call struct {
@@ -33,7 +34,6 @@ type Call struct {
 	Path   string `yaml:"path"`
 	Size   int    `yaml:"size"`
 }
-
 
 func ParseTopology(filename string) (Topology, error) {
 	file, err := os.Open(filename)

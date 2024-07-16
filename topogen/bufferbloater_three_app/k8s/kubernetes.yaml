@@ -1,0 +1,126 @@
+
+apiVersion: v1                              
+kind: Service                                  
+metadata:                                         
+  name: a
+  labels:                                                   
+    app: a
+    service: a
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: a
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: a
+  template:
+    metadata:
+      labels:
+        app: a
+    spec:
+      containers:
+      - image: ghcr.io/gangmuk/bufferbloater-a:latest
+        imagePullPolicy: Always
+        name: a
+        ports:
+        - containerPort: 8080
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+---
+
+
+apiVersion: v1                              
+kind: Service                                  
+metadata:                                         
+  name: b
+  labels:                                                   
+    app: b
+    service: b
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: b
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: b
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: b
+  template:
+    metadata:
+      labels:
+        app: b
+    spec:
+      containers:
+      - image: ghcr.io/gangmuk/bufferbloater-b:latest
+        imagePullPolicy: Always
+        name: b
+        ports:
+        - containerPort: 8080
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+---
+
+
+apiVersion: v1                              
+kind: Service                                  
+metadata:                                         
+  name: c
+  labels:                                                   
+    app: c
+    service: c
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: c
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: c
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: c
+  template:
+    metadata:
+      labels:
+        app: c
+    spec:
+      containers:
+      - image: ghcr.io/gangmuk/bufferbloater-c:latest
+        imagePullPolicy: Always
+        name: c
+        ports:
+        - containerPort: 8080
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+---
+
