@@ -1,0 +1,93 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: adaptive-concurrency
+  namespace: default
+spec:
+  workloadSelector:
+    labels:
+      # app: a  # The label of your deployment
+      app: bufferbloater-server
+      #region: us-west-1
+  configPatches:
+    - applyTo: HTTP_FILTER
+      match:
+        context: SIDECAR_INBOUND
+        listener:
+          # portNumber: 8080
+          filterChain:
+            filter:
+              name: "envoy.filters.network.http_connection_manager"
+      patch:
+        operation: INSERT_BEFORE
+        value: 
+          name: envoy.filters.http.adaptive_concurrency
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.adaptive_concurrency.v3.AdaptiveConcurrency
+            gradient_controller_config:
+              sample_aggregate_percentile:
+                value: 90
+              concurrency_limit_params:
+                concurrency_update_interval: 0.1s
+              min_rtt_calc_params:
+                jitter:
+                  value: 10
+                interval: 10s
+                request_count: 50
+            enabled:
+              default_value: true
+              runtime_key: "adaptive_concurrency.enabled"
+            queue:
+              enabled:
+                default_value: true
+                runtime_key: "adaptive_concurrency.queue.enabled"
+              queue_params:
+                max_pending_requests: 1000
+                timeout: 30s
+#### Rejecting requests
+# http_filters:
+# - name: envoy.filters.http.adaptive_concurrency
+#   typed_config:
+#     "@type": type.googleapis.com/envoy.extensions.filters.http.adaptive_concurrency.v3.AdaptiveConcurrency
+#     concurrency_limit_filter:
+#       enabled:
+#         default_value: true
+#         runtime_key: adaptive_concurrency.enabled
+#       concurrency_limit_params:
+#         max_concurrency: 100
+#         min_rtt_calc_params:
+#           interval: 60s
+#           request_count: 100
+#         max_gradient: 1.0
+#         jitter: 0.15
+#         sample_aggregate_percentile: 50
+#     reject_requests:
+#       enabled:
+#         default_value: true
+#         runtime_key: adaptive_concurrency.reject_requests.enabled
+
+
+#### Queue requests
+# http_filters:
+# - name: envoy.filters.http.adaptive_concurrency
+#   typed_config:
+#     "@type": type.googleapis.com/envoy.extensions.filters.http.adaptive_concurrency.v3.AdaptiveConcurrency
+#     concurrency_limit_filter:
+#       enabled:
+#         default_value: true
+#         runtime_key: adaptive_concurrency.enabled
+#       concurrency_limit_params:
+#         max_concurrency: 100
+#         min_rtt_calc_params:
+#           interval: 60s
+#           request_count: 100
+#         max_gradient: 1.0
+#         jitter: 0.15
+#         sample_aggregate_percentile: 50
+#     queue:
+#       enabled:
+#         default_value: true
+#         runtime_key: adaptive_concurrency.queue.enabled
+#       queue_params:
+#         max_pending_requests: 1000
+#         timeout: 30s
