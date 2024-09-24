@@ -1,4 +1,4 @@
-    import subprocess
+import subprocess
 import yaml
 
 def get_deployments(namespace):

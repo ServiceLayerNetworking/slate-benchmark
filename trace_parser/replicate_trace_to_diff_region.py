@@ -87,8 +87,8 @@ def fit_mm1_model(data, y_col_name, svc_name, ep_str, cid, directory):
     # u_plot = np.linspace(min(u_), max(u_)*constant * 0.99, 100)  # Avoid division by zero at u=1
     u_plot = np.linspace(min(u_), max(u_)*constant, 100)  # Avoid division by zero at u=1
     y_plot = mm1_model(u_plot, *popt)
-    print(f"u_plot: {u_plot}")
-    print(f"y_plot: {y_plot}")
+    # print(f"u_plot: {u_plot}")
+    # print(f"y_plot: {y_plot}")
     norm_u_plot = u_plot*max_rps
     #plt.plot(norm_u_plot, y_plot, 'r-', label=f'MM1 Fit: $\\frac{{a}}{{c-u}}+b$,a={popt[0]}, c={u_.max()*constant}, b={popt[1]}')
     plt.plot(norm_u_plot, y_plot, 'r-', label=f'MM1 Fit: $\\frac{{a}}{{c-u}}+b$\n$a={popt[0]:.2f}, c={(u_.max()*constant):.2f}, b={popt[1]:.2f}$')
@@ -334,11 +334,14 @@ def trace_string_file_to_trace_data_structure_with_df(df, required_num_endpoint,
 
 def merge_files(directory, postfix ,columns):
     slatelog_files = glob.glob(os.path.join(directory, '**', f'*{postfix}'), recursive=True)
+    for slate_log_file in slatelog_files:
+        print(f"slate_log_file: {slate_log_file}")
     output_filename = f"merged{postfix}"
     with open(output_filename, 'w') as outfile:
         for fname in slatelog_files:
             with open(fname) as infile:
                 outfile.write(infile.read())
+                print(f"Write {fname} to {output_filename}")
     return output_filename
 
 
@@ -358,9 +361,8 @@ if __name__ == "__main__":
     columns = ["cluster_id","svc_name","method","path","trace_id","span_id","parent_span_id","st","et","rt","xt","ct","call_size","inflight_dict","rps_dict"]
     
     merged_trace_file_name = merge_files(directory, "trace.slatelog", columns)
-    print(f"Output, merged_trace_file_name: {merged_trace_file_name}")
+    print(f"* Output, merged_trace_file_name: {merged_trace_file_name}")
     # merged_trace_file_name = "mergedtrace.slatelog"
-    
     ts = time.time()
     # line_index_to_remove = 797046
     # line_index_to_remove = 229902
@@ -399,22 +401,18 @@ if __name__ == "__main__":
     sample_size = int(len(trace_id) * sample_ratio)
     sampled_trace_id = sample(trace_id, sample_size)
     
-    double_filtered_df = filtered_df[filtered_df['trace_id'].isin(sampled_trace_id)]
-    # double_filtered_df.to_csv("double_filtered_df.csv")
-    # print("Output double_filtered_df.csv")
+    sampled_filtered_df = filtered_df[filtered_df['trace_id'].isin(sampled_trace_id)]
+    # sampled_filtered_df.to_csv("sampled_filtered_df.csv")
+    # print("Output sampled_filtered_df.csv")
     
-    service_list = double_filtered_df['svc_name'].unique().tolist()
-    endpoint_list = double_filtered_df['endpoint'].unique().tolist()
+    service_list = sampled_filtered_df['svc_name'].unique().tolist()
+    endpoint_list = sampled_filtered_df['endpoint'].unique().tolist()
     print(f"service_list: {service_list}")
-<<<<<<< HEAD
     print(f"len(service_list): {len(service_list)}")
     print(f"endpoint_list: {endpoint_list}")
     print(f"len(endpoint_list): {len(endpoint_list)}")
-    complete_traces = trace_string_file_to_trace_data_structure_with_df(double_filtered_df, required_num_endpoint, num_replica)
-=======
-    complete_traces = trace_string_file_to_trace_data_structure_with_df(double_filtered_df, required_num_svc)
-    # print(f"printing complete_traces: {complete_traces}")
->>>>>>> 24dd8b3 (Fix MM1 bug)
+    complete_traces = trace_string_file_to_trace_data_structure_with_df(sampled_filtered_df, required_num_endpoint, num_replica)
+
     for cid in complete_traces:
         print(f"len(complete_traces[{cid}]): {len(complete_traces[cid])}")
         
@@ -429,11 +427,11 @@ if __name__ == "__main__":
     stitched_df = tst.trace_to_df(stitched_traces)
     stitched_df.to_csv(f"stitched_df-{subdir}.csv")
     print(f"Output stitched_df-{subdir}.csv")
-    exit()
+
     degree = 2 # NOTE
     poly_coef_dict = train_latency_function_with_trace("poly", stitched_traces, directory, degree)
     print("-"*80)
-    multiplied_by_one_fn = f"{directory}/coef_multiplied_by_one-{subdir}.csv"
+    multiplied_by_one_fn = f"{directory}/poly-coef_multiplied_by_one-{subdir}.csv"
     with open(multiplied_by_one_fn, "w") as f:
         for svc_name in poly_coef_dict:
             for ep_str in poly_coef_dict[svc_name]:
@@ -443,33 +441,46 @@ if __name__ == "__main__":
     print("-"*80)
     print(f"Output: {multiplied_by_one_fn}")
     
-    # mm1_coef_dict = train_latency_function_with_trace("mm1", stitched_traces, directory, degree=None)
+    mm1_coef_dict = train_latency_function_with_trace("mm1", stitched_traces, directory, degree=None)
+    print("-"*80)
+    multiplied_by_one_fn = f"{directory}/mm1-coef_multiplied_by_one-{subdir}.csv"
+    with open(multiplied_by_one_fn, "w") as f:
+        for svc_name in mm1_coef_dict:
+            for ep_str in mm1_coef_dict[svc_name]:
+                for feature in mm1_coef_dict[svc_name][ep_str]:
+                    print(f'mm1_coef_dict,{svc_name},{ep_str},{feature},{mm1_coef_dict[svc_name][ep_str][feature]}')
+                    f.write(f'{svc_name},{ep_str},{feature},{mm1_coef_dict[svc_name][ep_str][feature]}\n')
+    print("-"*80)
+    print(f"Output: {multiplied_by_one_fn}")
     
     print("num all trace ", len(df['trace_id'].unique()))
     print("num complete trace", len(filtered_df['trace_id'].unique()))
-    print("num sampled trace", len(double_filtered_df['trace_id'].unique()))
+    print("num sampled trace", len(sampled_filtered_df['trace_id'].unique()))
+    
+    
     ''' Define how you want to replicate '''
     new_cluster_dict = dict()
     # replicated_cluster_list = ["us-east-1", "us-central-1", "us-south-1"]
-    replicated_cluster_list = []
+    replicated_cluster_list = ["us-east-1"]
     for cluster in replicated_cluster_list:
         new_cluster_dict[cluster] = service_list
     new_df_dict = dict()
     for nc in new_cluster_dict:
-        copy_df = double_filtered_df.copy() # copy orignal trace log df
+        copy_df = sampled_filtered_df.copy() # copy orignal trace log df
         copy_df['cluster_id'] = nc # set 'cluster_id' column to a new cluster name
         copy_df = copy_df[copy_df['svc_name'].isin(new_cluster_dict[nc])] # filter out services that you don't want to replicate
         new_df_dict[nc] = copy_df.copy()
         print(f"Replicated {nc}")
-    df_all = double_filtered_df.copy()
+    df_all = sampled_filtered_df.copy()
     for cluster_id, new_df in new_df_dict.items():
         df_all = pd.concat([df_all, new_df])
     df_all.sort_values(by=['cluster_id', 'trace_id'], inplace=True)
-    # output_fn = "replicated-"
-    # for nc in new_cluster_dict:
-    #     cluster_id_first_ch = nc.split('-')[1][0]
-    #     output_fn += f"{cluster_id_first_ch}-"
-    # output_fn += "trace.csv"
-    # output_path = directory + output_fn
-    # df_all.to_csv(output_path, index=False, header=False)
-    # print("Output file written: ", output_path)
+    
+    output_fn = "replicated-"
+    for nc in new_cluster_dict:
+        cluster_id_first_ch = nc.split('-')[1][0]
+        output_fn += f"{cluster_id_first_ch}-"
+    output_fn += "trace.csv"
+    output_path = directory + output_fn
+    df_all.to_csv(output_path, index=False, header=False)
+    print("Output file written: ", output_path)

@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import subprocess
 import itertools
+import time
 
 default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
 req_type = ""
@@ -65,8 +66,6 @@ def parse_latency_stat_in_wrklog_file(wrklog_path, wrk_config, latency_metrics, 
             print(wrklog_path)
             assert False
         #########################################
-        
-        cluster = wrk_config["cluster"]
         # print(wrk_config)
         # rps_value = int(wrk_config[f"{cluster}_RPS"])
         rps_value = int(wrk_config[f"RPS"])
@@ -74,6 +73,7 @@ def parse_latency_stat_in_wrklog_file(wrklog_path, wrk_config, latency_metrics, 
             latency_dict["rps"].append(rps_value)
             latency_dict["mode"].append(wrk_config["mode"])
             latency_dict["routing_rule"].append(wrk_config["routing_rule"])
+            latency_dict["jumping"].append(wrk_config["jumping"])
             latency_dict["cluster"].append(wrk_config["cluster"])
             latency_dict["tput"].append(tput)
             
@@ -157,7 +157,9 @@ def find_and_process_wrklog_files(base_directory):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python script.py <base_directory>")
+        print("Usage: python plot_per_routing_rule.py <base_directory>")
+        print("Example 1: python plot_per_routing_rule.py online-boutique/partial-C_cart/W400-E100-C100-S100")
+        print("Example 2: python plot_per_routing_rule.py online-boutique/test-bg20")
         sys.exit(1)
 
     base_directory = sys.argv[1]
@@ -166,6 +168,7 @@ if __name__ == "__main__":
     # Collect configurations
     wrk_config_list = []
     for wrklog_path in wrklog_files:
+        print(f"Processing {wrklog_path}")
         wrk_config = parse_wrk_config(wrklog_path)
         wrk_config['percentile_data'] = extract_cdf_data(wrklog_path)
         wrk_config_list.append(wrk_config)
@@ -175,35 +178,74 @@ if __name__ == "__main__":
     latency = {}
     count = {}
     xlim_right = 0
+    '''
+    one wrk_config represents one wrklog file
+    '''
     for wrk_config in wrk_config_list:
         percentile_df = pd.DataFrame(wrk_config["percentile_data"], columns=['Value', 'Percentile', 'TotalCount'])
         percentile_df['Percentile'] *= 100
+        
+        '''
+        To plot multiple waterfall algorithm, you should use WF(capacity) as the key.
+        WATERFALL key will overwrite the previous WATERFALL key.
+        Eventually, there must be one WATERFALL in the plot.
+        '''
         if "WATERFALL" in wrk_config['routing_rule']:
-            # key = f"WF({wrk_config['capacity']})"
-            key = "WATERFALL"
+            key = f"WF({wrk_config['capacity']})"
+            # key = "WATERFALL"
         else:
             key = wrk_config['routing_rule']
         
-        if wrk_config['routing_rule'] == 'LOCAL':
-            print("Skip LOCAL routing in this plot")
-            continue
         
-        # Skip some capacity in waterfall
-        if wrk_config['routing_rule'] == "WATERFALL2" and wrk_config['capacity'] != "700":
-        # if wrk_config['routing_rule'] == "WATERFALL2" and wrk_config['capacity'] != "1000":
+        '''
+        Skip some capacity in waterfall
+        If you don't want to skip any, comment out the following block
+        '''
+        skip_local_routing_plot = False
+        if skip_local_routing_plot:
+            if wrk_config['routing_rule'] == 'LOCAL':
+                print("Skip LOCAL routing in this plot")
+                continue
+        
+        '''
+        Skip some capacity in waterfall
+        If you don't want to skip any, comment out the following block
+        '''
+        skip_waterfall_capacity = []
+        # skip_waterfall_capacity = [700, 1000]
+        if wrk_config['routing_rule'] == "WATERFALL2" and wrk_config['capacity'] in skip_waterfall_capacity:
             print(f"Skip WATERFALL2 capacity={wrk_config['capacity']} in this plot")
             continue
+        
+        '''Add jumpingn to the routing rule key'''
+        if "jumping" in wrk_config:
+            if wrk_config['jumping'] == 1 or wrk_config['jumping'] == "1":
+                key += "-with-jumping"
+            else:
+                key += "-without-jumping"
+        
+        ''' Use it when you want to plot per cluster as well'''
+        if "cluster" in wrk_config:
+            key += f"-{wrk_config['cluster']}"
+            
         
         if "LOCAL" in wrk_config['routing_rule']:
             xlim_right = max(xlim_right, percentile_df['Value'].max())
 
         ## Aggregate data across all request types
+        previous_total_count = 0
         for index, row in percentile_df.iterrows():
             if key not in latency:
                 latency[key] = []
                 count[key] = []
+            
+            absolute_count = row['TotalCount'] - previous_total_count
+            previous_total_count = row['TotalCount']    
+            
             latency[key].append(row['Value'])
-            count[key].append(int(row['TotalCount']))
+            # count[key].append(int(row['TotalCount']))
+            count[key].append(absolute_count)
+            
 
     # Plotting
     plt.figure(figsize=(4.5, 4))
@@ -211,42 +253,66 @@ if __name__ == "__main__":
         weighted_latencies = np.repeat(latency[key], count[key])
         sorted_data = np.sort(weighted_latencies)
         cdf = np.arange(1, len(sorted_data) + 1) / len(sorted_data)
-        if "SLATE" in key:
-            # linestyle = '-'
-            # color = default_colors[0]
-            color = "blue"
-        elif "WATERFALL" in key or "WF" in key:
-            # linestyle = 'dashed'
-            # linestyle = (5, (10, 3)) # long dash with offset
-            # color = default_colors[1]
-            color = 'red'
-        elif "LOCAL" in key:
-            # linestyle = ':'
-            color = 'green'
-        else:
-            print(f"Unknown routing_rule: {key}")
-            assert False
+        
+        ######################################
+        ## plot coloring
+        # if "SLATE" in key:
+        #     # linestyle = '-'
+        #     # color = default_colors[0]
+        #     color = "blue"
+        # # elif "WATERFALL" in key or "WF" in key:
+        # #     # linestyle = 'dashed'
+        # #     # linestyle = (5, (10, 3)) # long dash with offset
+        # #     # color = default_colors[1]
+        # #     color = 'red'
+        # elif "LOCAL" in key:
+        #     # linestyle = ':'
+        #     color = 'green'
+        # else:
+        #     print(f"Unknown routing_rule: {key}")
+        #     # assert False
+        ######################################
+        
         avg_latency = int(np.mean(sorted_data))
         p99_latency = int(np.percentile(sorted_data, 99))
         p999_latency = int(np.percentile(sorted_data, 99.9))
+        # print(key)
         print(f"[statistics],{key},avg,{avg_latency},p99,{p99_latency},p999,{p999_latency}")
-        plt.plot(sorted_data, cdf, label=key, linewidth=1.2, color=color)
-        # plt.plot(sorted_data, cdf, label=key, linewidth=1.2, linestyle=linestyle)
+        
+        ## No Color
+        plt.plot(sorted_data, cdf, label=key, linewidth=1.2)
+        # plt.plot(sorted_data, cdf, label=key, linewidth=1.2, color=color)
 
     plt.xlabel('Latency (ms)', fontsize=18)
     plt.xticks(fontsize=14, rotation=-45)
     plt.yticks(fontsize=14)
     plt.grid(True)
 
+    legend_fontsize = 8
     try:
-        handles, labels = plt.gca().get_legend_handles_labels()
-        order = [1,2,0]
-        plt.legend([handles[idx] for idx in order],[labels[idx] for idx in order], fontsize=12, loc='lower right')
+        order_legend = "by_string" # "by_index", "by_string", False
+        if order_legend == "by_index":
+            # Order: LOCAL, WATERFALL, SLATE
+            handles, labels = plt.gca().get_legend_handles_labels()
+            order = [1,2,0]
+            print(f"WARNING: It will only plot the first three routing rules")
+            print(f"WARNING: It will only plot the first three routing rules")
+            print(f"WARNING: It will only plot the first three routing rules")
+            time.sleep(3)
+            plt.legend([handles[idx] for idx in order],[labels[idx] for idx in order], fontsize=12, loc='lower right')
+        elif order_legend == "by_string":
+            # Order by string: LOCAL, SLATE, WF(1000), WF(1500), WF(700)
+            handles, labels = plt.gca().get_legend_handles_labels()
+            sorted_pairs = sorted(zip(handles, labels), key=lambda x: x[1])
+            sorted_handles, sorted_labels = zip(*sorted_pairs)
+            plt.legend(sorted_handles, sorted_labels, fontsize=legend_fontsize, loc='lower right')
+        else:
+            plt.legend(fontsize=legend_fontsize, loc='lower right')
     except:
         print("less than three routing rules. default legend")
-        plt.legend(fontsize=12, loc='lower right')
+        plt.legend(fontsize=legend_fontsize, loc='lower right')
     
-    plt.ylim(0, 1)
+    plt.ylim(0, 1.01)
     plt.xlim(left=0)
     if xlim_right > 1000:
         xlim_right = 1000
@@ -255,133 +321,3 @@ if __name__ == "__main__":
     plt.savefig(f'{base_directory}/routing_rules_cdf.pdf')
     print(f"Output PDF saved to: {base_directory}/routing_rules_cdf.pdf")
     plt.show()
-
-
-
-
-# if __name__ == "__main__":
-#     if len(sys.argv) < 2:
-#         print("Usage: python script.py <base_directory> ")
-#         sys.exit(1)
-#     wrk_config_list = list()
-#     base_directory = sys.argv[1]
-#     wrklog_files = find_and_process_wrklog_files(base_directory)
-#     for wrklog_path in wrklog_files:
-#         wrk_config = parse_wrk_config(wrklog_path)
-#         wrk_config["percentile_data"] = extract_cdf_data(wrklog_path)
-#         wrk_config_list.append(wrk_config)
-#     stat_dict = dict()
-#     # latency_metrics = ['avg', '50%', '99%', '99.9%', '99.99%']
-#     latency_metrics = ['avg', '50%', '99%']
-#     latency_dict = dict()
-#     latency_dict["mode"] = []
-#     latency_dict["cluster"] = []
-#     latency_dict["rps"] = []
-#     latency_dict["routing_rule"] = []
-#     latency_dict["tput"] = []
-#     for wrklog_path in wrklog_files:
-#         wrk_config = parse_wrk_config(wrklog_path)
-#         # print(wrk_config)
-#         parse_latency_stat_in_wrklog_file(wrklog_path, wrk_config, latency_metrics, latency_dict, stat_dict)
-#     # print("latency_dict")
-#     # for key, value in latency_dict.items():
-#     #     print(f"{key}: {value}")
-#     # print("stat_dict")
-#     # for key, value in stat_dict.items():
-#     #     print(f"{key}: {value}")
-    
-#     color_dict = {"SLATE": "blue", "WATERFALL": "red", "WATERFALL2": "red", "REMOTE": "green", "LOCAL": "orange"}
-#     cluster_map = {"west":0, "central":1, "south":2, "east":3}
-#     # cluster_map = {"west":0, "east":1}
-#     print("cluster_map", cluster_map)
-#     for wrk_config in wrk_config_list:
-#         wrk_config['cluster_id'] = cluster_map[wrk_config['cluster']]
-#     # sorted_wrk_config_list = sorted(wrk_config_list, key=lambda d: d['cluster'])
-#     sorted_wrk_config_list = sorted(wrk_config_list, key=lambda d: d['cluster_id'])
-#     # for wrk_config in sorted_wrk_config_list:
-#     #     print(f"sorted_wrk_config_list: {wrk_config['cluster']}, {wrk_config['cluster_id']}")
-    
-#     # #1f77b4, #ff7f0e, #2ca02c, #d62728, #9467bd, #8c564b, #e377c2, #7f7f7f, #bcbd22, #17becf.
-    
-#     # req_type_color_dict = {"user": "#1f77b4", "recommend": "#ff7f0e", "search": "#2ca02c", "reserve": "#d62728"}
-    
-#     latency = dict()
-#     count = dict()
-#     for wrk_config in sorted_wrk_config_list:
-#         percentile_df = pd.DataFrame(wrk_config["percentile_data"], columns=['Value', 'Percentile', 'TotalCount'])
-#         percentile_df['Percentile'] *= 100
-#         routing_rule = wrk_config["routing_rule"]
-        
-#         if wrk_config['routing_rule'] != "WATERFALL2":
-#             continue
-#         # if wrk_config['routing_rule'] == "WATERFALL2" and wrk_config['capacity'] == "700":
-#         #     continue
-
-#         if 'req_type' in wrk_config:
-#             if wrk_config['routing_rule'] == "SLATE":
-#                 key = f"{wrk_config['routing_rule']}-{wrk_config['req_type']}"
-#             elif wrk_config['routing_rule'] == "WATERFALL2":
-#                 key = f"WF({wrk_config['capacity']})-{wrk_config['req_type']}"
-#             elif wrk_config['routing_rule'] == "LOCAL":
-#                 key = f"LOCAL-{wrk_config['req_type']}"
-#             else:
-#                 print(f"Unknown routing_rule: {wrk_config['routing_rule']}")
-#                 assert False
-#             # else:
-#             #     key = f"{wrk_config['routing_rule']}-{wrk_config['req_type']}-cap{wrk_config['capacity']})"
-#         else:
-#             assert False
-#         for index, row in percentile_df.iterrows():
-#             if key not in latency:
-#                 latency[key] = []
-#                 count[key] = []
-#             latency[key].append(row['Value'])
-#             count[key].append(int(row['TotalCount']))
-            
-#     plt.figure(figsize=(5, 4))
-#     latency = dict(sorted(latency.items()))
-#     for key in latency.keys():
-#         # print(f"key: {key}")
-#         weighted_latencies = np.repeat(latency[key], count[key])
-#         sorted_data = np.sort(weighted_latencies)
-#         cdf = np.arange(1, len(sorted_data)+1) / len(sorted_data)
-#         # plt.step(sorted_data, cdf, where="post", color=color_dict[key], label=key)
-#         # plt.plot(sorted_data, cdf, color=color_dict[key], label=key)
-#         if "SLATE" in key:
-#             linestyle = '-'
-#         elif "WATERFALL" in key or "WF" in key:
-#             # linestyle = 'dashed'
-#             linestyle = (5, (10, 3)) # long dash with offset
-#         else:
-#             linestyle = ':'
-#         plt.plot(sorted_data, cdf, linestyle=linestyle, label=key, linewidth=1.2)
-#         # plt.plot(sorted_data, cdf, linestyle=linestyle, label=key, color=req_type_color_dict[key.split("-")[1]])
-#     # plt.title('Hotel reservation', fontsize=18)
-#     plt.xlabel('Latency (ms)', fontsize=18)
-#     # plt.ylabel('CDF', fontsize=18)
-#     plt.xticks(fontsize=14)
-#     plt.yticks(fontsize=14)
-#     plt.grid(True)
-#     plt.legend(fontsize=6, loc='lower right')
-#     plt.tight_layout()
-#     plt.ylim(0, 1)
-#     plt.xlim(left=0)
-#     # plt.xlim(right=1000)
-#     plt.savefig(f'{base_directory}/merged_cdf.pdf')
-#     print(f"output pdf: {base_directory}/merged_cdf.pdf")
-#     plt.show()
-            
-            
-#     # merged_latency = list(itertools.chain.from_iterable(merged_latency))
-#     # merged_latency.sort()
-#     # cdf = np.arange(1, len(merged_latency)+1) / len(merged_latency)
-#     # plt.figure(figsize=(8, 4))
-#     # plt.step(merged_latency, cdf, where="post", label="CDF", color='blue')
-#     # plt.title('Cumulative Distribution Function')
-#     # plt.xlabel('Value')
-#     # plt.ylabel('CDF')
-#     # plt.grid(True)
-#     # plt.legend()
-#     # plt.savefig('cdf.pdf')
-#     # plt.show()
-    

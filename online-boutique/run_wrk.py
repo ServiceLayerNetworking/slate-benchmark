@@ -16,9 +16,9 @@ import atexit
 import signal
 import traceback
 
-CLOUDLAB_CONFIG_XML="/users/gangmuk/projects/slate-benchmark/online-boutique/config.xml"
+CLOUDLAB_CONFIG_XML="/users/gangmuk/projects/slate-benchmark/config.xml"
 
-def run_command(command, required=True, print_error=True, nonblock=False):
+def run_command(command, required=True, print_error=True, nonblock=False,):
     """Run shell command and return its output"""
     try:
         ''' Popen is asynchronous and non-blocking, while check_output is synchronous and blocking.'''
@@ -111,6 +111,40 @@ def handle_exception(exc_type, exc_value, exc_traceback):
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
         return
     
+
+def savelogs(parentdir, services=[]):
+    # Directory to store the logs
+
+    logs_directory = f"{parentdir}/proxy-logs"
+
+    # Create the directory if it doesn't exist
+    if not os.path.exists(logs_directory):
+        os.makedirs(logs_directory)
+
+    # Get the list of all pods in the default namespace
+    try:
+        pod_list_output = subprocess.check_output(['kubectl', 'get', 'pods', '-n', 'default', '-o', 'jsonpath={.items[*].metadata.name}'])
+        pod_list = pod_list_output.decode('utf-8').split()
+        
+        # Loop through each pod
+        for pod_name in pod_list:
+            # if pod_name STARTS WITH any of the     services, then save the logs
+            if not any(pod_name.startswith(service) for service in services):
+                continue
+            # Retrieve logs of the istio-proxy container from the pod
+            try:
+                log_output = subprocess.check_output(['kubectl', 'logs', pod_name, '-c', 'istio-proxy', '-n', 'default'])
+                
+                # Save the logs to a file in the proxy-logs directory
+                with open(f"{logs_directory}/{pod_name}.txt", "w") as log_file:
+                    log_file.write(log_output.decode('utf-8'))
+                print(f"Logs for {pod_name} saved successfully.")
+            
+            except subprocess.CalledProcessError as e:
+                print(f"Error retrieving logs for {pod_name}: {e}")
+                
+    except subprocess.CalledProcessError as e:
+        print(f"Error fetching pod list: {e}")
     
 # register this function to be called upon normal termination or unhandled exceptions. But it will not handle termination signals like SIGKILL or SIGTERM.
 atexit.register(cleanup_on_crash)
@@ -161,10 +195,40 @@ def kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host, required=T
 
 def kubectl_cp_from_host_to_slate_controller_pod(src_in_host, dst_in_pod):
     success, slate_controller_pod = run_command("kubectl get pods -l app=slate-controller -o custom-columns=:metadata.name")
+    print(f"slate_controller_pod: {slate_controller_pod}")
+    # if slate_controller_pod has more than one entry, get the start time of each pod and pick the newest one.
+    if len(slate_controller_pod.split("\n")) > 1:
+        config.load_kube_config()
+        v1 = client.CoreV1Api()
+        slate_controller_pod = slate_controller_pod.split("\n")
+        print(f"More than one slate_controller_pod ({slate_controller_pod}), picking the newest one...")
+        newest = ""
+        newest_time = -math.inf
+        for pod in slate_controller_pod:
+            try:
+                pod_start_time = v1.read_namespaced_pod(pod, "default").status.start_time.timestamp()
+                print(f"pod: {pod}, start_time: {pod_start_time}")
+                if pod_start_time > newest_time:
+                    newest = pod
+                    newest_time = pod_start_time
+            except client.exceptions.ApiException as e:
+                # pod does not exist
+                continue
+        slate_controller_pod = newest
+        print(f"Newest slate_controller_pod: {slate_controller_pod}")
+
     # print(f"Try kubectl_cp_from_host_to_slate_controller_pod")
     print(f"- src_in_host: {src_in_host}")
     print(f"- dst_in_pod: {slate_controller_pod}:{dst_in_pod}")
-    run_command(f"kubectl cp {src_in_host} {slate_controller_pod}:{dst_in_pod}")
+    tries = 0
+    while tries < 3:
+        success, ret = run_command(f"kubectl cp {src_in_host} {slate_controller_pod}:{dst_in_pod}", required=False)
+        if success:
+            return
+        tries += 1
+        print(f"Error: {ret}. Retrying...(try {tries})")
+    print(f"Error: {ret}. Exiting...")
+    assert False
     # print(f"finish scp from {src_in_host} to {slate_controller_pod}:{dst_in_pod}")
     
 
@@ -321,6 +385,7 @@ def run_wrk(copy_config, target_cluster, req_type, target_cluster_rps, wrk_log_p
     print("overwrite connection and thread")
     copy_config["connection"] = target_cluster_rps
     copy_config["req_type"] = req_type
+    # copy_config["thread"] = target_cluster_rps + 200
     copy_config["thread"] = copy_config["connection"]
     if copy_config["thread"] > copy_config["connection"]:
         copy_config["thread"] = min(copy_config["thread"], copy_config["connection"])
@@ -353,7 +418,7 @@ def run_wrk(copy_config, target_cluster, req_type, target_cluster_rps, wrk_log_p
     print(f"lua_file: {lua_file}")
     print(f"wrk_log_path: {wrk_log_path}")
     wrk_command = f'./wrk -D {copy_config["distribution"]} -t{copy_config["thread"]} -c{copy_config["connection"]} -d{copy_config["duration"]} -L -S -s {lua_file} {server_ip} -R{target_cluster_rps} | grep -v "Thread calibration" >> {wrk_log_path}'
-    
+    # ./wrk -D exp -t 100 -c 200 -d 5m -L -S -s wrk2/scripts/online-boutique/west_addtocart.lua node0.slate1.istio-pg0.clemson.cloudlab.us:31371 -R 200 
     
     run_command(wrk_command)
     
@@ -458,6 +523,11 @@ def add_latency_rules(src_host, interface, dst_node_ip, delay):
 
 def start_background_noise(node_dict, cpu_noise=30):
     for node in node_dict:
+        # if node != "node1" or node != "node2":
+        #     print(f"No CPU Background for node{node} !!")
+        #     print(f"No CPU Background for node{node} !!")
+        #     print(f"No CPU Background for node{node} !!")
+        #     continue
         if node == "node0" or node == "node5":
             print("skip start_background_noise in node0. node0 is control plane node")
             continue
@@ -488,13 +558,15 @@ def main():
         'distribution': 'exp',
         'thread': 100, # min(thread, connection, rps-50)
         'connection': 200, # min(connection, rps-50)
-        # 'duration': 30,
-        'duration': 60,
+        'duration': 60 * 3,
+        # 'duration': 60 * 10,
+        # 'duration': 60 * 15,
         'background_noise': bg,
         'traffic_segmentation': 1, # endpoint level call graph
+        # 'jumping': 0, # 0: no jumping, 1: jumping
     }
     benchmark_name="onlineboutique" # a,b, 1MB and c 2MB file write
-    total_num_services=2
+    total_num_services=4
     
     '''
     # Three replicas
@@ -526,15 +598,17 @@ def main():
     # routing_rule_list = ["LOCAL"] # profile
     # routing_rule_list = ["WATERFALL2"]
     # routing_rule_list = ["LOCAL"]
-    # routing_rule_list = ["SLATE"]
-    routing_rule_list = ["SLATE", "WATERFALL2", "LOCAL"]
+    # routing_rule_list = ["SLATE", "HILLCLIMB"] # HILLCLIMB = SLATE + jumping
+    routing_rule_list = ["SLATE"]
     
     ## for experiment
     all_RPS_list = {
     ## profile
-    
+    # "checkoutcart-w50": {"west": {"checkoutcart": 50}}, \
     # "checkoutcart-w100": {"west": {"checkoutcart": 100}}, \
+    # "checkoutcart-w150": {"west": {"checkoutcart": 150}}, \
     # "checkoutcart-w200": {"west": {"checkoutcart": 200}}, \
+    # "checkoutcart-w250": {"west": {"checkoutcart": 250}}, \
     # "checkoutcart-w300": {"west": {"checkoutcart": 300}}, \
     # "checkoutcart-w400": {"west": {"checkoutcart": 400}}, \
     # "checkoutcart-w500": {"west": {"checkoutcart": 500}}, \
@@ -566,17 +640,17 @@ def main():
         
         
     # "emptycart-w100": {"west": {"emptycart": 100}}, \
-    # # "emptycart-w200": {"west": {"emptycart": 200}}, \
-    # # "emptycart-w300": {"west": {"emptycart": 300}}, \
-    # # "emptycart-w400": {"west": {"emptycart": 400}}, \
+    # "emptycart-w200": {"west": {"emptycart": 200}}, \
+    # "emptycart-w300": {"west": {"emptycart": 300}}, \
+    # "emptycart-w400": {"west": {"emptycart": 400}}, \
     # "emptycart-w500": {"west": {"emptycart": 500}}, \
-    # # "emptycart-w600": {"west": {"emptycart": 600}}, \
-    # # "emptycart-w700": {"west": {"emptycart": 700}}, \
-    # # "emptycart-w800": {"west": {"emptycart": 800}}, \
+    # "emptycart-w600": {"west": {"emptycart": 600}}, \
+    # "emptycart-w700": {"west": {"emptycart": 700}}, \
+    # "emptycart-w800": {"west": {"emptycart": 800}}, \
     # "emptycart-w900": {"west": {"emptycart": 900}}, \
-    # # "emptycart-w1000": {"west": {"emptycart": 1000}}, \
-    # # "emptycart-w1100": {"west": {"emptycart": 1100}}, \
-    # # "emptycart-w1200": {"west": {"emptycart": 1200}}, \
+    # "emptycart-w1000": {"west": {"emptycart": 1000}}, \
+    # "emptycart-w1100": {"west": {"emptycart": 1100}}, \
+    # "emptycart-w1200": {"west": {"emptycart": 1200}}, \
     # "emptycart-w1300": {"west": {"emptycart": 1300}}, \
     # # "emptycart-w1400": {"west": {"emptycart": 1400}}, \
     # # "emptycart-w1500": {"west": {"emptycart": 1500}}, \
@@ -611,23 +685,33 @@ def main():
     # "emptycart-w4400": {"west": {"emptycart": 4400}}, \
     # "emptycart-w4500": {"west": {"emptycart": 4500}}, \
 
-
-
+    # "addtocart-w25": {"west": {"addtocart": 25}}, \
+    # "addtocart-w50": {"west": {"addtocart": 50}}, \
+    # "addtocart-w75": {"west": {"addtocart": 75}}, \
     # "addtocart-w100": {"west": {"addtocart": 100}}, \
+    # "addtocart-w125": {"west": {"addtocart": 125}}, \
+    # "addtocart-w150": {"west": {"addtocart": 150}}, \
+    # "addtocart-w175": {"west": {"addtocart": 175}}, \
     # "addtocart-w200": {"west": {"addtocart": 200}}, \
-    # # "addtocart-w300": {"west": {"addtocart": 300}}, \
+    # "addtocart-w225": {"west": {"addtocart": 225}}, \
+    # "addtocart-w275": {"west": {"addtocart": 275}}, \
+    # "addtocart-w300": {"west": {"addtocart": 300}}, \
+    # "addtocart-w325": {"west": {"addtocart": 325}}, \
+    # "addtocart-w350": {"west": {"addtocart": 350}}, \
     # "addtocart-w400": {"west": {"addtocart": 400}}, \
-    # # "addtocart-w500": {"west": {"addtocart": 500}}, \
+    # "addtocart-w450": {"west": {"addtocart": 450}}, \
+    # "addtocart-w500": {"west": {"addtocart": 500}}, \
+    # "addtocart-w550": {"west": {"addtocart": 550}}, \
     # "addtocart-w600": {"west": {"addtocart": 600}}, \
-    # # "addtocart-w700": {"west": {"addtocart": 700}}, \
+    # "addtocart-w650": {"west": {"addtocart": 650}}, \
     # "addtocart-w800": {"west": {"addtocart": 800}}, \
-    # # "addtocart-w900": {"west": {"addtocart": 900}}, \
+    # "addtocart-w900": {"west": {"addtocart": 900}}, \
     # "addtocart-w1000": {"west": {"addtocart": 1000}}, \
-    # # "addtocart-w1100": {"west": {"addtocart": 1100}}, \
+    # "addtocart-w1100": {"west": {"addtocart": 1100}}, \
     # "addtocart-w1200": {"west": {"addtocart": 1200}}, \
-    # # "addtocart-w1300": {"west": {"addtocart": 1300}}, \
-    # "addtocart-w1400": {"west": {"addtocart": 1400}}, \
-    # # "addtocart-w1500": {"west": {"addtocart": 1500}}, \
+    # "addtocart-w1300": {"west": {"addtocart": 1300}}, \
+    # # "addtocart-w1400": {"west": {"addtocart": 1400}}, \
+    # "addtocart-w1500": {"west": {"addtocart": 1500}}, \
     # "addtocart-w1600": {"west": {"addtocart": 1600}}, \
     # "addtocart-w1700": {"west": {"addtocart": 1700}}, \
     # "addtocart-w1800": {"west": {"addtocart": 1800}}, \
@@ -646,10 +730,10 @@ def main():
 
 
     # "setcurrency-w100": {"west": {"setcurrency": 100}}, \
-    # "setcurrency-w200": {"west": {"setcurrency": 200}},
+    # "setcurrency-w200": {"west": {"setcurrency": 200}}, \
     # "setcurrency-w300": {"west": {"setcurrency": 300}}, \
     # "setcurrency-w400": {"west": {"setcurrency": 400}}, \
-    # "setcurrency-w500": {"west": {"setcurrency": 500}}, \ \
+    # "setcurrency-w500": {"west": {"setcurrency": 500}}, \
     # "setcurrency-w600": {"west": {"setcurrency": 600}}, \
     # "setcurrency-w700": {"west": {"setcurrency": 700}}, \
     # "setcurrency-w800": {"west": {"setcurrency": 800}}, \
@@ -686,7 +770,13 @@ def main():
 
 
     
+    # "W200-E50": {"west":    {"addtocart":200}, \
+    #              "east":    {"addtocart":50}
+    # }, \
 
+    "W500-E100": {"west":    {"addtocart":500}, \
+                 "east":    {"addtocart":100}
+    }, \
         
     ## runtime
     # # Three replicas
@@ -719,20 +809,20 @@ def main():
     #                         "central": {"checkoutcart": 100, "addtocart":100, "emptycart":100, "setcurrency":100}, \
     #                         "south":   {"checkoutcart": 100, "addtocart":100, "emptycart":100, "setcurrency":100}}, \
         
-    "W400-E100-C100-S100": {"west":    {"checkoutcart": 400, "addtocart":400, "emptycart":400, "setcurrency":400}, \
-                            "east":    {"checkoutcart": 100, "addtocart":100, "emptycart":100, "setcurrency":100}, \
-                            "central": {"checkoutcart": 100, "addtocart":100, "emptycart":100, "setcurrency":100}, \
-                            "south":   {"checkoutcart": 100, "addtocart":100, "emptycart":100, "setcurrency":100}}, \
+    # "W400-E100-C100-S100": {"west":    {"checkoutcart": 400, "addtocart":400, "emptycart":400, "setcurrency":400}, \
+    #                         "east":    {"checkoutcart": 100, "addtocart":100, "emptycart":100, "setcurrency":100}, \
+    #                         "central": {"checkoutcart": 100, "addtocart":100, "emptycart":100, "setcurrency":100}, \
+    #                         "south":   {"checkoutcart": 100, "addtocart":100, "emptycart":100, "setcurrency":100}}, \
                                 
-    "W450-E100-C100-S100": {"west":    {"checkoutcart": 450, "addtocart":450, "emptycart":450, "setcurrency":450}, \
-                            "east":    {"checkoutcart": 100, "addtocart":100, "emptycart":100, "setcurrency":100}, \
-                            "central": {"checkoutcart": 100, "addtocart":100, "emptycart":100, "setcurrency":100}, \
-                            "south":   {"checkoutcart": 100, "addtocart":100, "emptycart":100, "setcurrency":100}}, \
+    # "W450-E100-C100-S100": {"west":    {"checkoutcart": 450, "addtocart":450, "emptycart":450, "setcurrency":450}, \
+    #                         "east":    {"checkoutcart": 100, "addtocart":100, "emptycart":100, "setcurrency":100}, \
+    #                         "central": {"checkoutcart": 100, "addtocart":100, "emptycart":100, "setcurrency":100}, \
+    #                         "south":   {"checkoutcart": 100, "addtocart":100, "emptycart":100, "setcurrency":100}}, \
     
-    "W500-E100-C100-S100": {"west":    {"checkoutcart": 500, "addtocart":500, "emptycart":500, "setcurrency":500}, \
-                            "east":    {"checkoutcart": 100, "addtocart":100, "emptycart":100, "setcurrency":100}, \
-                            "central": {"checkoutcart": 100, "addtocart":100, "emptycart":100, "setcurrency":100}, \
-                            "south":   {"checkoutcart": 100, "addtocart":100, "emptycart":100, "setcurrency":100}}, \
+    # "W500-E100-C100-S100": {"west":    {"checkoutcart": 500, "addtocart":500, "emptycart":500, "setcurrency":500}, \
+    #                         "east":    {"checkoutcart": 100, "addtocart":100, "emptycart":100, "setcurrency":100}, \
+    #                         "central": {"checkoutcart": 100, "addtocart":100, "emptycart":100, "setcurrency":100}, \
+    #                         "south":   {"checkoutcart": 100, "addtocart":100, "emptycart":100, "setcurrency":100}}, \
                                 
     # "W600-E100-C100-S100": {"west":    {"checkoutcart": 600, "addtocart":600, "emptycart":600, "setcurrency":600}, \
     #                         "east":    {"checkoutcart": 100, "addtocart":100, "emptycart":100, "setcurrency":100}, \
@@ -765,30 +855,35 @@ def main():
     #                                     "south":   {"checkoutcart": 100, "addtocart":500, "emptycart":100, "setcurrency":100}}, \
     }
     
-        
+    def check_rps(rps_list):
+        # FORMAT:  {"checkoutcart-w900": {"west": {"checkoutcart": 900}}, }
+        min_rps = 50 # wrk2 support minimum 50 RPS
+        for experiment_name in rps_list:
+            for cluster in rps_list[experiment_name]:
+                for request_type in rps_list[experiment_name][cluster]:
+                    if rps_list[experiment_name][cluster][request_type] < min_rps:
+                        print(f"ERROR: invalid RPS value: {rps_list[experiment_name][cluster][request_type]} for {experiment_name}. Minimum RPS is {min_rps}\n"*5)
+                        return False
+        print("All RPS values are valid")
+        return True
+    
+    assert check_rps(all_RPS_list)
+    
     # node_to_region = {"node1":"us-west-1", "node2":"us-east-1", "node3":"us-central-1",
     #                   }
     
     region_to_node = {
         "us-west-1": ["node1"],
         "us-east-1": ["node2"],
-        "us-central-1": ["node3"],
-        "us-south-1": ["node4"]
+        # "us-central-1": ["node3"],
+        # "us-south-1": ["node4"]
     }
     region_latencies = {
         "us-west-1": {
             "us-east-1": 33,
-            "us-central-1": 15,
-            "us-south-1": 20,
-        },
-        "us-east-1": {
-            "us-central-1": 20,
-            "us-south-1": 15,
-        },
-        "us-central-1": {
-            "us-south-1": 10,
         }
     }
+    node_to_region = {"node1": "us-west-1", "node2": "us-east-1"}
     # node_to_region = {"node1": "us-west-1", "node2": "us-west-1", "node3": "us-west-1",
     #                   "node4": "us-east-1", "node5": "us-east-1", "node6": "us-east-1",
     #                   "node7": "us-central-1", "node8": "us-central-1", "node9": "us-central-1",
@@ -909,14 +1004,15 @@ def main():
                 CONFIG["routing_rule"] = routing_rule
                 for cluster in rps_dict:
                     for req_type in rps_dict[cluster]:
-                        CONFIG[f"{cluster}_{req_type}_RPS"] = rps_dict[cluster][req_type]
+                        # CONFIG[f"{cluster}_{req_type}_RPS"] = rps_dict[cluster][req_type]
+                        CONFIG[f"RPS,{cluster},{req_type}"] = rps_dict[cluster][req_type]
                 CONFIG["capacity"] = recalculated_capacity
                 with open("env.txt", "w") as file:
                     for key, value in CONFIG.items():
                         file.write(f"{key},{value}\n") 
                 kubectl_cp_from_host_to_slate_controller_pod("env.txt", "/app/env.txt")
                 if mode == "runtime":
-                    kubectl_cp_from_host_to_slate_controller_pod("coef.csv", "/app/coef.csv")
+                    kubectl_cp_from_host_to_slate_controller_pod("poly-coef_multiplied_by_one-9-11-bg50-200mc-profile-curve.csv", "/app/coef.csv")
                     slatelog = f"{benchmark_name}-trace.csv"
                     kubectl_cp_from_host_to_slate_controller_pod(slatelog, "/app/trace.csv")
                     t=5
@@ -964,10 +1060,14 @@ def main():
                     ''' Join all threads '''
                     for future in concurrent.futures.as_completed(future_list):
                         print(future.result())
+
+                
                         
                 print("Both wrk2 have completed.")
                 
-                flist = ["/app/env.txt", "/app/endpoint_rps_history.csv", "/app/error.log"]
+                savelogs(output_dir, services=["sslateingress", "frontend", "recommendationservice", "productcatalogservice", "cartservice", "checkoutservice", "shippingservice", "paymentservice", "emailservice", "currencyservice"])
+
+                flist = ["/app/env.txt", "/app/endpoint_rps_history.csv", "/app/error.log", "/app/hillclimbing_distribution_history.csv"]
                 for src_in_pod in flist:
                     dst_in_host = f'{output_dir}/{routing_rule}-{src_in_pod.split("/")[-1]}'
                     kubectl_cp_from_slate_controller_to_host(src_in_pod, dst_in_host)
@@ -988,7 +1088,13 @@ def main():
                     assert False
                 '''end of one set of experiment'''
                 if mode == "runtime":
+                    
                     restart_deploy(exclude=[])
+                    
+                    # print("*"*50)
+                    # print("NOTE")
+                    # print("*"*50)
+                    
                 else:                
                     run_command("kubectl rollout restart deploy slate-controller")
                     run_command("kubectl rollout restart deploy -l=region=us-west-1", required=True)

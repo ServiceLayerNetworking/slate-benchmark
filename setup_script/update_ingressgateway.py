@@ -81,8 +81,8 @@ def remove_resource_limits(namespace, deployment_name):
 if __name__ == "__main__":
     namespace = 'istio-system'  # Change this to the namespace of your HPA
     hpa_name = 'istio-ingressgateway'
-    min_replicas = 10
-    max_replicas = 100
+    min_replicas = 5
+    max_replicas = 10
     update_hpa(namespace, hpa_name, min_replicas, max_replicas)
     schedule_to_control_plane("istio-ingressgateway", "istio-system")
     schedule_to_control_plane("istiod", "istio-system")

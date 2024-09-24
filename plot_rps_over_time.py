@@ -34,11 +34,11 @@ def plot_rps(csv_file_path, services_to_plot):
         # label=f'{region} - {service}'
         label=f'{region}'
         plt.plot(group['counter'], group['rps'], label=label, linestyle=linestyle_map[service], color=color_dict[region], linewidth=1)
+        plt.xticks(range(int(group['counter'].min())+1, int(group['counter'].max()) + 1, 2), rotation=90, fontsize=12)
     # plt.title('RPS over time')
     plt.xlim(left=0)
     plt.ylim(bottom=0)
     # plt.xticks(fontsize=18)
-    plt.xticks(range(int(group['counter'].min())+1, int(group['counter'].max()) + 1, 2), rotation=90, fontsize=12)
     plt.yticks(fontsize=14)
     plt.xlabel('Time (seconds)', fontsize=18)
     plt.ylabel('Load', fontsize=18)
@@ -59,7 +59,7 @@ def plot_rps(csv_file_path, services_to_plot):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python script_name.py <path_to_csv_file>")
+        print("Usage: python plot_rps_over_time.py.py <path_to_csv_file>")
         sys.exit(1)
     csv_file_path = sys.argv[1]
     # metrics

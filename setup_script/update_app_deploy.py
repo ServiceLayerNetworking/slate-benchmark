@@ -1,19 +1,6 @@
 from kubernetes import client, config
 import sys
 
-def get_hotel_deployment_list():
-    config.load_kube_config()
-    apps_v1_api = client.AppsV1Api()
-    cluster_list = ["us-west-1", "us-east-1", "us-south-1", "us-central-1"]
-    service_list = ['slateingress', 'frontend', 'recommendation', 'profile', 'rate', 'geo', 'search', 'reservation', 'user', "memcached-profile", "memcached-rate", "memcached-reserve"]
-    deploy_list = list()
-    # get all deploy
-
-    for svc in service_list:
-        for cluster in cluster_list:
-            deploy_list.append(f"{svc}-{cluster}")
-    return deploy_list
-
 def set_replicas_for_all_deployments(replica_count):
     config.load_kube_config()
     apps_v1_api = client.AppsV1Api()
