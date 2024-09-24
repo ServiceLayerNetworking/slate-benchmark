@@ -1,0 +1,163 @@
+#########################################################################
+###
+# Gateway/VirtualService for HotelReservation frontend
+###
+#########################################################################
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: boutique-gateway
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+#########################################################################
+###
+# This config creates subsets based on clusters for the frontend,
+# and does header-based route matching to the correct subset
+# based on the x-slate-destination header
+###
+#########################################################################
+
+# DestinationRule for frontend, subsetting by label.
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: sslateingress-dr
+  namespace: default
+spec:
+  host: sslateingress
+  subsets:
+  - name: west
+    labels:
+      region: us-west-1
+  - name: east
+    labels:
+      region: us-east-1
+  - name: central
+    labels:
+      region: us-central-1
+  - name: south
+    labels:
+      region: us-south-1
+---
+# Subset routing: if x-slate-destination is east, route to us-east, if west, route to west, if not set, random.
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: sslateingress-gw-vs
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - boutique-gateway
+  http:
+  - match:
+    - headers:
+        x-slate-destination:
+          exact: east
+    route:
+    - destination:
+        host: sslateingress
+        subset: east
+        port:
+          number: 8000
+  - match:
+    - headers:
+        x-slate-destination:
+          exact: west
+    route:
+    - destination:
+        host: sslateingress
+        subset: west
+        port:
+          number: 8000
+  - match:
+    - headers:
+        x-slate-destination:
+          exact: central
+    route:
+    - destination:
+        host: sslateingress
+        subset: central
+        port:
+          number: 8000
+  - match:
+    - headers:
+        x-slate-destination:
+          exact: south
+    route:
+    - destination:
+        host: sslateingress
+        subset: south
+        port:
+          number: 8000
+---
+#########################################################################
+###
+# PROXYCONFIG for setting environment variables on proxies in different
+# nodes.
+###
+#########################################################################
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shared-span-bootstrap-config
+  namespace: default
+data:
+  custom_bootstrap.json: |
+    {
+      "tracing": {
+        "http": {
+          "name": "envoy.tracers.zipkin",
+          "typed_config": {
+            "@type": "type.googleapis.com/envoy.config.trace.v3.ZipkinConfig",
+            "collector_cluster": "zipkin",
+            "collector_endpoint": "/api/v1/spans/custom",
+            "collector_endpoint_version": "HTTP_JSON",
+            "trace_id_128bit": true,
+            "shared_span_context": true
+          }
+        }
+      },
+      "bootstrap_extensions": [
+        {
+          "name": "envoy.bootstrap.wasm",
+          "typed_config": {
+            "@type": "type.googleapis.com/envoy.extensions.wasm.v3.WasmService",
+            "singleton": true,
+            "config": {
+              "name": "slate-wasm-service",
+              "vm_config": {
+                "code": {
+                  "remote": {
+                    "http_uri": {
+                      "uri": "https://raw.githubusercontent.com/ServiceLayerNetworking/slate-wasm-bootstrap/main/slate_service.wasm",
+                      "cluster": "slate_service_cluster",
+                      "timeout": "5s"
+                    },
+                    "sha256": "0066065a16225df65df55f9d6c4d950ff5b1681d337897763b8de349e6add5fc"
+                  }
+                },
+                "environment_variables": {
+                  "host_env_keys": [
+                    "HOSTNAME",
+                    "ISTIO_META_WORKLOAD_NAME",
+                    "ISTIO_META_REGION"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+
+
