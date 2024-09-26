@@ -27,7 +27,7 @@ repo_dir="/users/gangmuk/projects/slate-benchmark"
 
 nodes_with_labels=$(kubectl get nodes --show-labels)
 node1=$(echo "$nodes_with_labels" | grep 'node1' | awk '{print $1}')
-node2=$(echo "$nodes_with_labels" | grep 'node2' | awk '{print $1}')
+node2=$(echo "$nodes_with_labels" | grep 'node5' | awk '{print $1}')
 kubectl label node $node1 topology.kubernetes.io/zone=us-west-1 --overwrite
 kubectl label node $node2 topology.kubernetes.io/zone=us-east-1 --overwrite
 echo "kubectl label node $node1 topology.kubernetes.io/zone=us-west-1 --overwrite"
@@ -45,8 +45,8 @@ if [ $num_regions -ge 4 ]; then
 fi
 
 
-# helm upgrade onlineboutique oci://us-docker.pkg.dev/online-boutique-ci/charts/onlineboutique \
-#     --install
+helm upgrade onlineboutique oci://us-docker.pkg.dev/online-boutique-ci/charts/onlineboutique \
+    --install
 
 dupe_exclude=""
 /users/gangmuk/projects/SLATE/kube-scripts/dupe-deploys/dupedeploy -deployments=${dupe_exclude} -exclude -regions=${regions}
@@ -58,7 +58,7 @@ if [ $inp == 'y' ]; then
 fi
 
 kubectl apply -f gw_vs_dr.yaml
-
+kubectl apply -f sslateingress.yaml
 kubectl apply -f ${repo_dir}/proxy_config.yaml
 
 kubectl apply -f ${repo_dir}/wasmplugins.yaml
@@ -66,11 +66,12 @@ kubectl apply -f ${repo_dir}/wasmplugins.yaml
 kubectl apply -f ${repo_dir}/slate-controller.yaml
 
 bash ${repo_dir}/install_metric_server.sh
-
+# /users/gangmuk/projects/SLATE/wasm-plugins/slate-plugin/slate_service_envoyfilter.yaml needs to be done too
+kubectl apply -f /users/gangmuk/projects/SLATE/wasm-plugins/slate-plugin/slate_service_envoyfilter.yaml
 
 # exclude the frontend service. In this app, fake-ingress
-vs_match_services="sslateingress"
-/users/gangmuk/projects/SLATE/kube-scripts/virtualservice-headermatch/vs-headermatch -services=${vs_match_services} -regions=${regions} &&
+vs_match_services="sslateingress,slate-controller"
+/users/gangmuk/projects/SLATE/kube-scripts/virtualservice-headermatch/vs-headermatch -services=${vs_match_services} -exclude -regions=${regions} &&
 echo "vs-headermatch -exclude -services=${vs_match_services} -regions=${regions}"
 
 update_grace_period

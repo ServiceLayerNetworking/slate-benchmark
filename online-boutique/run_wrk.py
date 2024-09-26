@@ -121,30 +121,31 @@ def savelogs(parentdir, services=[]):
     if not os.path.exists(logs_directory):
         os.makedirs(logs_directory)
 
+    ## proxy logs
     # Get the list of all pods in the default namespace
-    try:
-        pod_list_output = subprocess.check_output(['kubectl', 'get', 'pods', '-n', 'default', '-o', 'jsonpath={.items[*].metadata.name}'])
-        pod_list = pod_list_output.decode('utf-8').split()
+    # try:
+    #     pod_list_output = subprocess.check_output(['kubectl', 'get', 'pods', '-n', 'default', '-o', 'jsonpath={.items[*].metadata.name}'])
+    #     pod_list = pod_list_output.decode('utf-8').split()
         
-        # Loop through each pod
-        for pod_name in pod_list:
-            # if pod_name STARTS WITH any of the     services, then save the logs
-            if not any(pod_name.startswith(service) for service in services):
-                continue
-            # Retrieve logs of the istio-proxy container from the pod
-            try:
-                log_output = subprocess.check_output(['kubectl', 'logs', pod_name, '-c', 'istio-proxy', '-n', 'default'])
+    #     # Loop through each pod
+    #     for pod_name in pod_list:
+    #         # if pod_name STARTS WITH any of the     services, then save the logs
+    #         if not any(pod_name.startswith(service) for service in services):
+    #             continue
+    #         # Retrieve logs of the istio-proxy container from the pod
+    #         try:
+    #             log_output = subprocess.check_output(['kubectl', 'logs', pod_name, '-c', 'istio-proxy', '-n', 'default'])
                 
-                # Save the logs to a file in the proxy-logs directory
-                with open(f"{logs_directory}/{pod_name}.txt", "w") as log_file:
-                    log_file.write(log_output.decode('utf-8'))
-                print(f"Logs for {pod_name} saved successfully.")
+    #             # Save the logs to a file in the proxy-logs directory
+    #             with open(f"{logs_directory}/{pod_name}.txt", "w") as log_file:
+    #                 log_file.write(log_output.decode('utf-8'))
+    #             print(f"Logs for {pod_name} saved successfully.")
             
-            except subprocess.CalledProcessError as e:
-                print(f"Error retrieving logs for {pod_name}: {e}")
+    #         except subprocess.CalledProcessError as e:
+    #             print(f"Error retrieving logs for {pod_name}: {e}")
                 
-    except subprocess.CalledProcessError as e:
-        print(f"Error fetching pod list: {e}")
+    # except subprocess.CalledProcessError as e:
+    #     print(f"Error fetching pod list: {e}")
     
 # register this function to be called upon normal termination or unhandled exceptions. But it will not handle termination signals like SIGKILL or SIGTERM.
 atexit.register(cleanup_on_crash)
@@ -378,7 +379,7 @@ def run_wrk(copy_config, target_cluster, req_type, target_cluster_rps, wrk_log_p
         msg = f"{target_cluster} {req_type} {target_cluster_rps} RPS is skipped"
         print(msg)
         return msg
-    success, nodename = run_command("kubectl get nodes | grep 'node0' | awk '{print $1}'")
+    success, nodename = run_command("kubectl get nodes | grep 'node7' | awk '{print $1}'")
     success, ingressgw_http2_nodeport = run_command("kubectl get svc istio-ingressgateway -n istio-system -o=json | jq '.spec.ports[] | select(.name==\"http2\") | .nodePort'")
     server_ip = f"http://{nodename}:{ingressgw_http2_nodeport}"
     print(f"ingressgateway ip: {server_ip}")
@@ -558,7 +559,7 @@ def main():
         'distribution': 'exp',
         'thread': 100, # min(thread, connection, rps-50)
         'connection': 200, # min(connection, rps-50)
-        'duration': 60 * 3,
+        'duration': 60 * 2,
         # 'duration': 60 * 10,
         # 'duration': 60 * 15,
         'background_noise': bg,
@@ -593,13 +594,13 @@ def main():
     # waterfall_capacity_set = {700, 1000}
     degree = 2
     
-    # mode = "profile"
-    mode = "runtime"
-    # routing_rule_list = ["LOCAL"] # profile
+    mode = "profile"
+    # mode = "runtime"
+    routing_rule_list = ["LOCAL"] # profile
     # routing_rule_list = ["WATERFALL2"]
     # routing_rule_list = ["LOCAL"]
     # routing_rule_list = ["SLATE", "HILLCLIMB"] # HILLCLIMB = SLATE + jumping
-    routing_rule_list = ["SLATE"]
+    # routing_rule_list = ["SLATE"]
     
     ## for experiment
     all_RPS_list = {
@@ -698,7 +699,7 @@ def main():
     # "addtocart-w300": {"west": {"addtocart": 300}}, \
     # "addtocart-w325": {"west": {"addtocart": 325}}, \
     # "addtocart-w350": {"west": {"addtocart": 350}}, \
-    # "addtocart-w400": {"west": {"addtocart": 400}}, \
+    "addtocart-w400": {"west": {"addtocart": 400}}, \
     # "addtocart-w450": {"west": {"addtocart": 450}}, \
     # "addtocart-w500": {"west": {"addtocart": 500}}, \
     # "addtocart-w550": {"west": {"addtocart": 550}}, \
@@ -774,9 +775,9 @@ def main():
     #              "east":    {"addtocart":50}
     # }, \
 
-    "W500-E100": {"west":    {"addtocart":500}, \
-                 "east":    {"addtocart":100}
-    }, \
+    # "W500-E100": {"west":    {"addtocart":500}, \
+    #              "east":    {"addtocart":100}
+    # }, \
         
     ## runtime
     # # Three replicas
@@ -874,7 +875,7 @@ def main():
     
     region_to_node = {
         "us-west-1": ["node1"],
-        "us-east-1": ["node2"],
+        "us-east-1": ["node5"],
         # "us-central-1": ["node3"],
         # "us-south-1": ["node4"]
     }
@@ -883,7 +884,7 @@ def main():
             "us-east-1": 33,
         }
     }
-    node_to_region = {"node1": "us-west-1", "node2": "us-east-1"}
+    node_to_region = {"node1": "us-west-1", "node5": "us-east-1"}
     # node_to_region = {"node1": "us-west-1", "node2": "us-west-1", "node3": "us-west-1",
     #                   "node4": "us-east-1", "node5": "us-east-1", "node6": "us-east-1",
     #                   "node7": "us-central-1", "node8": "us-central-1", "node9": "us-central-1",
@@ -1088,13 +1089,10 @@ def main():
                     assert False
                 '''end of one set of experiment'''
                 if mode == "runtime":
-                    
-                    restart_deploy(exclude=[])
-                    
                     # print("*"*50)
                     # print("NOTE")
                     # print("*"*50)
-                    
+                    restart_deploy(exclude=[])
                 else:                
                     run_command("kubectl rollout restart deploy slate-controller")
                     run_command("kubectl rollout restart deploy -l=region=us-west-1", required=True)
