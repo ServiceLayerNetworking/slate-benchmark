@@ -27,7 +27,7 @@ repo_dir="/users/gangmuk/projects/slate-benchmark"
 
 nodes_with_labels=$(kubectl get nodes --show-labels)
 node1=$(echo "$nodes_with_labels" | grep 'node1' | awk '{print $1}')
-node2=$(echo "$nodes_with_labels" | grep 'node5' | awk '{print $1}')
+node2=$(echo "$nodes_with_labels" | grep 'node2' | awk '{print $1}')
 kubectl label node $node1 topology.kubernetes.io/zone=us-west-1 --overwrite
 kubectl label node $node2 topology.kubernetes.io/zone=us-east-1 --overwrite
 echo "kubectl label node $node1 topology.kubernetes.io/zone=us-west-1 --overwrite"
@@ -44,6 +44,16 @@ if [ $num_regions -ge 4 ]; then
     echo "kubectl label node $node4 topology.kubernetes.io/zone=us-south-1 --overwrite"
 fi
 
+# igw node: node5, slate-controller node: node6
+node5=$(echo "$nodes_with_labels" | grep 'node5' | awk '{print $1}')
+node6=$(echo "$nodes_with_labels" | grep 'node6' | awk '{print $1}')
+
+
+bash ${repo_dir}/install_istio.sh
+
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.23/samples/addons/jaeger.yaml
+
+kubectl delete deploy load-generator adservice
 
 helm upgrade onlineboutique oci://us-docker.pkg.dev/online-boutique-ci/charts/onlineboutique \
     --install
@@ -51,14 +61,10 @@ helm upgrade onlineboutique oci://us-docker.pkg.dev/online-boutique-ci/charts/on
 dupe_exclude=""
 /users/gangmuk/projects/SLATE/kube-scripts/dupe-deploys/dupedeploy -deployments=${dupe_exclude} -exclude -regions=${regions}
 
-read -p "Do you want to install istio? Enter 'y', if yes: " inp
-if [ $inp == 'y' ]; then
-    bash ${repo_dir}/install_istio.sh &&
-    echo "bash ${repo_dir}/install_istio.sh"
-fi
-
 kubectl apply -f gw_vs_dr.yaml
+
 kubectl apply -f sslateingress.yaml
+
 kubectl apply -f ${repo_dir}/proxy_config.yaml
 
 kubectl apply -f ${repo_dir}/wasmplugins.yaml
@@ -72,8 +78,16 @@ kubectl apply -f /users/gangmuk/projects/SLATE/wasm-plugins/slate-plugin/slate_s
 # exclude the frontend service. In this app, fake-ingress
 vs_match_services="sslateingress,slate-controller"
 /users/gangmuk/projects/SLATE/kube-scripts/virtualservice-headermatch/vs-headermatch -services=${vs_match_services} -exclude -regions=${regions} &&
-echo "vs-headermatch -exclude -services=${vs_match_services} -regions=${regions}"
 
 update_grace_period
 echo "update_grace_period"
 
+python /users/gangmuk/projects/slate-benchmark/online-boutique/py-install-scripts/scale-replicas.py 4
+python /users/gangmuk/projects/slate-benchmark/online-boutique/py-install-scripts/scale-igw.py
+python /users/gangmuk/projects/slate-benchmark/online-boutique/py-install-scripts/update-nodeselector.py istio-ingressgateway istio-system $node5
+python /users/gangmuk/projects/slate-benchmark/online-boutique/py-install-scripts/update-nodeselector.py slate-controller default $node6
+
+
+# change ingress gateway nodeselector, slate controller nodeselector
+# scale up replicas of everything except slate-controller
+# set filesystem limits on every node

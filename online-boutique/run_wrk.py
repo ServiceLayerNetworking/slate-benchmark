@@ -559,7 +559,7 @@ def main():
         'distribution': 'exp',
         'thread': 100, # min(thread, connection, rps-50)
         'connection': 200, # min(connection, rps-50)
-        'duration': 60 * 2,
+        'duration': 60 * 1,
         # 'duration': 60 * 10,
         # 'duration': 60 * 15,
         'background_noise': bg,
@@ -1095,7 +1095,7 @@ def main():
                     restart_deploy(exclude=[])
                 else:                
                     run_command("kubectl rollout restart deploy slate-controller")
-                    run_command("kubectl rollout restart deploy -l=region=us-west-1", required=True)
+                    # run_command("kubectl rollout restart deploy -l=region=us-west-1", required=True)
                 # run_command("kubectl rollout restart deploy slateingress-us-west-1")
                 # run_command("kubectl rollout restart deploy slateingress-us-east-1")
                 # run_command("kubectl rollout restart deploy slateingress-us-central-1")
