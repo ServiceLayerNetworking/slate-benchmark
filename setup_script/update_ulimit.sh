@@ -2,10 +2,9 @@
 set -x
 
 echo "NEEDS TO BE EXECUTED FROM NODE0";
-
+sudo sed -i "2i * hard nofile 800000" /etc/security/limits.conf
 for i in $(seq 1 7)
 do
-    echo $i
-    ssh gangmuk@node$i 'echo "sudo ulimit -n 1048576" >> ~/.bashrc'
-    # echo "ssh gangmuk@node$i echo "ulimit -n 1048576" >> ~/.bashrc    
+    echo "Processing node$i"
+    ssh gangmuk@node$i 'sudo sed -i "2i * hard nofile 800000" /etc/security/limits.conf'
 done
