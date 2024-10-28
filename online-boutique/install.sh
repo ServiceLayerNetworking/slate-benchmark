@@ -86,7 +86,7 @@ python /users/gangmuk/projects/slate-benchmark/online-boutique/py-install-script
 python /users/gangmuk/projects/slate-benchmark/online-boutique/py-install-scripts/scale-igw.py
 python /users/gangmuk/projects/slate-benchmark/online-boutique/py-install-scripts/update-nodeselector.py istio-ingressgateway istio-system $node5
 python /users/gangmuk/projects/slate-benchmark/online-boutique/py-install-scripts/update-nodeselector.py slate-controller default $node6
-
+sh /users/gangmuk/projects/slate-benchmark/setup_script/update_ulimit.sh
 
 # change ingress gateway nodeselector, slate controller nodeselector
 # scale up replicas of everything except slate-controller
