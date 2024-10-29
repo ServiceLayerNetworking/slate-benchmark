@@ -1,7 +1,6 @@
-python update_ingressgateway.py
-python update_app_deploy.py
+python place_igw_to_node0_and_hpa_and_resourcelimit.py
+python place_slatecontroller_to_node5.py
 python give_more_resources_to_proxy.py
-python update_slate-controller.py
 update_grace_period
 remove_cpu_limit
 remove_mem_limit

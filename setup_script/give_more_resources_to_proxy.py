@@ -23,8 +23,8 @@ def update_annotations(deployments, annotations):
 annotations = {
     'sidecar.istio.io/proxyCPU': '500m',
     'sidecar.istio.io/proxyMemory': '1Gi',
-    'sidecar.istio.io/proxyCPULimit': '5000m',
-    'sidecar.istio.io/proxyMemoryLimit': '2Gi'
+    'sidecar.istio.io/proxyCPULimit': '10000m',
+    'sidecar.istio.io/proxyMemoryLimit': '5Gi'
 }
 
 # Main script execution
