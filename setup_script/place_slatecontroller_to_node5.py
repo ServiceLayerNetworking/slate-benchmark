@@ -54,7 +54,7 @@ if __name__ == "__main__":
     node_label_key = 'kubernetes.io/hostname'
     
     # Get the hostname dynamically based on partial hostname 'node5'
-    partial_hostname = 'node5'
+    partial_hostname = 'node3'
     node_label_value = get_node_name_by_partial_hostname(partial_hostname)
     
     if node_label_value:
