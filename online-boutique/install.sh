@@ -51,7 +51,7 @@ kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.23/samp
 helm upgrade onlineboutique oci://us-docker.pkg.dev/online-boutique-ci/charts/onlineboutique \
     --install
 
-kubectl delete deploy load-generator adservice
+kubectl delete deploy loadgenerator adservice
 
 kubectl apply -f gw_vs_dr.yaml
 
@@ -79,17 +79,17 @@ kubectl apply -f /users/gangmuk/projects/SLATE/wasm-plugins/slate-plugin/slate_s
 
 update_grace_period
 
-python scale-replicas.py 4
+python /users/gangmuk/projects/slate-benchmark/setup_script/scale-replicas.py 4
 
-python scale-igw.py
+python /users/gangmuk/projects/slate-benchmark/setup_script/scale-igw.py
 
-python update_rolling_update.py
+python /users/gangmuk/projects/slate-benchmark/setup_script/update_rolling_update.py
 
 if [ $num_regions -ge 4 ]; then
     node5=$(echo "$nodes_with_labels" | grep 'node5' | awk '{print $1}')
     node6=$(echo "$nodes_with_labels" | grep 'node6' | awk '{print $1}')
-    python update-nodeselector.py istio-ingressgateway istio-system $node5
-    python update-nodeselector.py slate-controller default $node6
+    python /users/gangmuk/projects/slate-benchmark/setup_script/update-nodeselector.py istio-ingressgateway istio-system $node5
+    python /users/gangmuk/projects/slate-benchmark/setup_script/update-nodeselector.py slate-controller default $node6
 fi
 
 bash update_ulimit.sh
